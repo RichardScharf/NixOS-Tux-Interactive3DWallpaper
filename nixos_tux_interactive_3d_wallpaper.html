@@ -1,0 +1,3467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>NixOS + Tux — Interactive 3D Wallpaper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #030102;
+            font-family: 'Inter', sans-serif;
+            color: #d4d4d8;
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: #030102;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud-pill {
+            background: rgba(10, 10, 12, 0.72);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .mode-btn {
+            padding: 3px 9px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #9ca3af;
+            transition: all 0.18s ease;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .mode-btn:hover {
+            color: #f3f4f6;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .mode-btn.active {
+            color: #fca5a5;
+            background: rgba(185, 28, 28, 0.28);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.25);
+        }
+
+        body.theme-blue .mode-btn.active {
+            color: #bae6fd;
+            background: rgba(82, 119, 195, 0.32);
+            border: 1px solid rgba(126, 186, 228, 0.55);
+            box-shadow: 0 0 12px rgba(82, 119, 195, 0.35);
+        }
+
+        .hud-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            outline: none;
+        }
+
+        .hud-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #f87171;
+            cursor: pointer;
+            border: 1px solid rgba(0, 0, 0, 0.5);
+            transition: background 0.18s ease, transform 0.12s ease;
+        }
+
+        .hud-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        body.theme-blue .hud-slider::-webkit-slider-thumb {
+            background: #7ebae4;
+        }
+
+        /* Ensure KDE Plasma WallpaperInputBridge elementFromPoint() always hits the button directly */
+        button * {
+            pointer-events: none;
+        }
+
+        .hud-dropdown {
+            background: rgba(10, 10, 14, 0.86);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .pin-btn {
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            color: #6b7280;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .pin-btn:hover {
+            color: #e5e7eb;
+            background: rgba(255, 255, 255, 0.10);
+        }
+
+        .pin-btn.pinned {
+            color: #fca5a5;
+            background: rgba(185, 28, 28, 0.28);
+            border-color: rgba(239, 68, 68, 0.45);
+        }
+
+        body.theme-blue .pin-btn.pinned {
+            color: #bae6fd;
+            background: rgba(82, 119, 195, 0.32);
+            border-color: rgba(126, 186, 228, 0.55);
+        }
+
+        .wheel-check-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 5px;
+            border-radius: 6px;
+            font-size: 10px;
+            color: #6b7280;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .wheel-check-label:hover {
+            color: #e5e7eb;
+            background: rgba(255, 255, 255, 0.10);
+        }
+
+        .wheel-check-label.checked {
+            color: #fca5a5;
+            background: rgba(185, 28, 28, 0.28);
+            border-color: rgba(239, 68, 68, 0.45);
+        }
+
+        body.theme-blue .wheel-check-label.checked {
+            color: #bae6fd;
+            background: rgba(82, 119, 195, 0.32);
+            border-color: rgba(126, 186, 228, 0.55);
+        }
+
+        .wheel-checkbox {
+            accent-color: #ef4444;
+            width: 11px;
+            height: 11px;
+            cursor: pointer;
+        }
+
+        body.theme-blue .wheel-checkbox {
+            accent-color: #7ebae4;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Unobtrusive Compact Top-Right HUD Bar (Pinned Controls + Dropdown Toggle) -->
+    <div class="fixed top-3 right-3 z-20 flex flex-col items-end gap-2 pointer-events-auto max-w-[98vw]">
+        <div class="hud-pill rounded-full px-3 py-1.5 flex flex-wrap items-center gap-2 text-[11px] text-neutral-400">
+            <!-- Dynamically populated pinned controls container -->
+            <div id="pinned-bar-container" class="flex flex-wrap items-center gap-2"></div>
+
+            <!-- Settings Dropdown Toggle Button -->
+            <button
+                id="toggle-settings-menu-btn"
+                class="mode-btn flex items-center gap-1 text-neutral-200 font-medium"
+                title="Open all wallpaper settings and pin/unpin controls to this bar"
+            >
+                <span>⚙ Settings</span>
+                <span id="settings-chevron" class="text-[9px] opacity-80">▾</span>
+            </button>
+        </div>
+
+        <!-- Categorized Settings Dropdown Menu (All controls + Pin toggles) -->
+        <div
+            id="settings-dropdown"
+            class="hud-dropdown rounded-2xl p-3.5 w-[350px] sm:w-[390px] max-h-[82vh] overflow-y-auto text-[11px] text-neutral-300 hidden flex-col gap-3"
+        >
+            <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                <span class="font-semibold text-white tracking-wide uppercase text-[10px]">Wallpaper Controls & Pins</span>
+                <span class="text-[10px] text-neutral-400">🖱️ = Wheel | 📌 = Pin</span>
+            </div>
+
+            <!-- SECTION 1: SCENE & THEME -->
+            <div class="flex flex-col gap-2">
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Scene & Theme</div>
+
+                <!-- Color Theme -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Color Theme</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="menu-theme-btn" class="mode-btn text-red-400 font-medium">Color: Red</button>
+                        <button data-pin="theme" class="pin-btn" title="Pin/Unpin Color Theme">📌</button>
+                    </div>
+                </div>
+
+                <!-- Tightness / Radial Distance -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Lambda Tightness</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="distance-slider" type="range" min="0.68" max="1.35" step="0.01" value="1" class="hud-slider w-16 cursor-pointer" />
+                        <span id="distance-readout" class="mono text-red-400 font-medium w-8 text-right">1.00</span>
+                        <label class="wheel-check-label" title="Control Lambda Tightness with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="tightness" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="tightness" class="pin-btn" title="Pin/Unpin Tightness Slider">📌</button>
+                    </div>
+                </div>
+
+                <!-- Hover Wireframe Radius -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Wireframe Radius</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="radius-slider" type="range" min="0.30" max="5.50" step="0.05" value="2.35" class="hud-slider w-16 cursor-pointer" />
+                        <span id="radius-readout" class="mono text-red-400 font-medium w-8 text-right">2.35</span>
+                        <label class="wheel-check-label" title="Control Wireframe Radius with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="radius" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="radius" class="pin-btn" title="Pin/Unpin Wireframe Radius">📌</button>
+                    </div>
+                </div>
+
+                <!-- Background Glow Intensity -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Background Glow</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="bg-glow-slider" type="range" min="0.00" max="2.00" step="0.05" value="1.00" class="hud-slider w-16 cursor-pointer" />
+                        <span id="bg-glow-readout" class="mono text-red-400 font-medium w-8 text-right">1.00</span>
+                        <label class="wheel-check-label" title="Control Background Glow with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="bgGlow" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="bgGlow" class="pin-btn" title="Pin/Unpin Background Glow">📌</button>
+                    </div>
+                </div>
+
+                <!-- Camera View Modes -->
+                <div class="flex flex-col gap-1.5 bg-white/[0.03] rounded-lg px-2.5 py-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-neutral-300">Camera View Mode</span>
+                        <button data-pin="viewMode" class="pin-btn" title="Pin/Unpin View Modes">📌</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1 pt-0.5" role="group" aria-label="View Modes">
+                        <button data-mode="nuanced" class="mode-btn active">Nuanced Side</button>
+                        <button data-mode="optical" class="mode-btn">Optical Lock</button>
+                        <button data-mode="legacy" class="mode-btn">Legacy</button>
+                        <button data-mode="blender" class="mode-btn">Blender 3D</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: WINTER LAMBDA SNOW -->
+            <div class="flex flex-col gap-2 border-t border-white/10 pt-2.5">
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-sky-300">❄ Winter Lambda Snow</div>
+
+                <!-- Snow Master Toggle -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Snowfall Effect</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-snow-btn" class="mode-btn text-sky-300 font-medium">❄ Snow: ON</button>
+                        <button data-pin="snowToggle" class="pin-btn" title="Pin/Unpin Snow Toggle">📌</button>
+                    </div>
+                </div>
+
+                <!-- Snow Intensity Slider -->
+                <div id="snow-slider-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Snow Intensity</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="snow-intensity-slider" type="range" min="0.10" max="2.00" step="0.05" value="0.85" class="hud-slider w-16 cursor-pointer" />
+                        <span id="snow-intensity-readout" class="mono text-sky-300 font-medium w-8 text-right">0.85</span>
+                        <label class="wheel-check-label" title="Control Snow Intensity with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="snowIntensity" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="snowIntensity" class="pin-btn" title="Pin/Unpin Snow Intensity">📌</button>
+                    </div>
+                </div>
+
+                <!-- Snow Forcefield Radius / Strength Slider -->
+                <div id="snow-forcefield-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Forcefield Radius</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="snow-forcefield-slider" type="range" min="0.00" max="6.00" step="0.10" value="2.45" class="hud-slider w-16 cursor-pointer" />
+                        <span id="snow-forcefield-readout" class="mono text-sky-300 font-medium w-8 text-right">2.45</span>
+                        <label class="wheel-check-label" title="Control Forcefield Radius with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="snowForcefield" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="snowForcefield" class="pin-btn" title="Pin/Unpin Forcefield Radius">📌</button>
+                    </div>
+                </div>
+
+                <!-- Snowflake Color Scheme (SVG Original vs Theme vs White) -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Flake Colors</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-snow-color-btn" class="mode-btn text-sky-300 font-medium">Colors: SVG Original</button>
+                        <button data-pin="snowColor" class="pin-btn" title="Pin/Unpin Snowflake Color Mode">📌</button>
+                    </div>
+                </div>
+
+                <!-- Snowflake 3D Rotation Mode (Camera-Facing vs Full 3D Tumble) -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Flake Rotation</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-snow-rot-btn" class="mode-btn text-sky-200 font-medium">Spin: Camera-Facing</button>
+                        <button data-pin="snowRotation" class="pin-btn" title="Pin/Unpin Snowflake Rotation Mode">📌</button>
+                    </div>
+                </div>
+
+                <!-- Bottom Snowbank Pile Toggle -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Bottom Accumulation</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-snow-pile-btn" class="mode-btn text-sky-200 font-medium">Pile: ON</button>
+                        <button data-pin="snowPile" class="pin-btn" title="Pin/Unpin Snow Pile Toggle">📌</button>
+                    </div>
+                </div>
+
+                <!-- Snowflake Landing / Pile Impact Behavior (Break into Lambdas / Dissolve / Mini) -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">On Pile Impact</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-snow-landing-btn" class="mode-btn text-sky-200 font-medium">Impact: Break into λs</button>
+                        <button data-pin="snowLanding" class="pin-btn" title="Pin/Unpin Landing Behavior">📌</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: TUX & GLITCH -->
+            <div class="flex flex-col gap-2 border-t border-white/10 pt-2.5">
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Linux Tux & Glitch</div>
+
+                <!-- Center Tux Visibility -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Center Linux Tux</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-tux-btn" class="mode-btn text-neutral-200 font-medium">Tux: ON</button>
+                        <button data-pin="tux" class="pin-btn" title="Pin/Unpin Tux Toggle">📌</button>
+                    </div>
+                </div>
+
+                <!-- Glitch Trigger Mode -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Glitch Trigger</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-glitch-mode-btn" class="mode-btn text-red-400 font-medium">Glitch: On Click</button>
+                        <button data-pin="glitchMode" class="pin-btn" title="Pin/Unpin Glitch Trigger">📌</button>
+                    </div>
+                </div>
+
+                <!-- Glitch Timing Mode -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Glitch Timing</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-glitch-timing-btn" class="mode-btn text-neutral-200 font-medium">Timing: Continuous</button>
+                        <button data-pin="glitchTiming" class="pin-btn" title="Pin/Unpin Glitch Timing">📌</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // ★ USER WALLPAPER DEFAULTS (EDIT THESE VALUES DIRECTLY FOR KDE PLASMA) ★
+        // ============================================================================
+        // Since KDE Plasma reloads the HTML wallpaper cleanly without persistent localStorage,
+        // you can tweak any default behavior or which controls appear pinned in the top-right
+        // bar right here.
+        const WALLPAPER_DEFAULTS = {
+            // --- Scene & Theme ---
+            colorTheme: 'blue',               // 'red' (Blender Red) | 'blue' (Official NixOS Blue)
+            viewMode: 'nuanced',             // 'nuanced' | 'optical' | 'legacy' | 'blender'
+            tightness: 1.00,                 // 0.68 (tight hex) to 1.35 (wide hex)
+            hoverWireframeRadius: 2.00,      // 0.30 to 5.50 (mouse wheel radius)
+            bgGlowIntensity: 1.00,           // 0.00 (pure black) to 2.00 (vibrant ambient glow)
+
+            // --- Linux Tux & Glitch ---
+            showTux: true,                   // true | false
+            glitchTrigger: 'click',          // 'click' (inside hexagon) | 'hover' | 'off'
+            glitchTiming: 'continuous',      // 'continuous' | 'discrete' (random intervals)
+
+            // --- Winter NixOS Lambda Snow ---
+            snowEnabled: true,               // true | false
+            snowIntensity: 0.5,             // 0.10 (light flurries) to 2.00 (blizzard)
+            snowForcefieldRadius: 2.5,      // 0.00 (off) to 6.00 (wide/strong cursor repulsion field)
+            snowColorMode: 'svg',            // 'svg' (Original NixOSnowflake.svg #5277C3 & #7EBAE4) | 'theme' | 'white'
+            snowRotationMode: 'facing',      // 'facing' (Camera-facing spin + subtle cursor tilt) | 'tumble' (Full 3D spin)
+            snowPileEnabled: true,           // true | false (accumulate snowbank at bottom)
+            snowLandingMode: 'shatter',      // 'shatter' (break into 6 font lambdas) | 'dissolve' (melt away) | 'mini' (tiny flakes)
+
+            // --- Mouse Wheel Slider Control ---
+            // Available slider IDs for mouse wheel control:
+            // 'tightness', 'radius', 'bgGlow', 'snowIntensity', 'snowForcefield'
+            wheelControlledSliders: [
+                'radius',
+                'snowForcefield'
+            ],
+
+            // --- Top-Right HUD Bar & Pinned Controls ---
+            hudMenuOpenByDefault: false,     // true | false
+            // Available pin IDs:
+            // 'theme', 'tightness', 'radius', 'bgGlow', 'viewMode',
+            // 'snowToggle', 'snowIntensity', 'snowForcefield', 'snowColor', 'snowRotation', 'snowPile', 'snowLanding',
+            // 'tux', 'glitchMode', 'glitchTiming'
+            pinnedHudControls: [
+                'theme',
+                'snowToggle',
+                'snowIntensity',
+                'snowRotation',
+                'snowColor'
+            ]
+        };
+
+        // ============================================================================
+        // 0. SAFE THREE.JS LOADER (Prevents "ReferenceError: THREE is not defined")
+        // ============================================================================
+        function ensureThreeLoaded(callback) {
+            if (typeof window.THREE !== 'undefined') {
+                callback();
+                return;
+            }
+
+            const cdnUrls = [
+                'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
+                'https://unpkg.com/three@0.128.0/build/three.min.js'
+            ];
+
+            let attempt = 0;
+            function tryLoadNext() {
+                if (typeof window.THREE !== 'undefined') {
+                    callback();
+                    return;
+                }
+                if (attempt >= cdnUrls.length) {
+                    console.error('Failed to load Three.js from all CDNs.');
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = cdnUrls[attempt++];
+                script.async = true;
+                script.onload = () => {
+                    if (typeof window.THREE !== 'undefined') {
+                        callback();
+                    } else {
+                        tryLoadNext();
+                    }
+                };
+                script.onerror = tryLoadNext;
+                document.head.appendChild(script);
+            }
+
+            const existingScript = document.querySelector('script[src*="three"]');
+            if (existingScript) {
+                existingScript.addEventListener('load', () => {
+                    if (typeof window.THREE !== 'undefined') callback();
+                    else tryLoadNext();
+                }, { once: true });
+                existingScript.addEventListener('error', tryLoadNext, { once: true });
+            } else {
+                tryLoadNext();
+            }
+        }
+
+        function initSceneApp() {
+        // ============================================================================
+        // 1. SCENE, CAMERA & RENDERER SETUP
+        // ============================================================================
+        const container = document.getElementById('canvas-container');
+        const pinnedBarContainer = document.getElementById('pinned-bar-container');
+        const toggleSettingsMenuBtn = document.getElementById('toggle-settings-menu-btn');
+        const settingsChevron = document.getElementById('settings-chevron');
+        const settingsDropdown = document.getElementById('settings-dropdown');
+
+        const radiusSlider = document.getElementById('radius-slider');
+        const radiusReadout = document.getElementById('radius-readout');
+        const distanceSlider = document.getElementById('distance-slider');
+        const distanceReadout = document.getElementById('distance-readout');
+        const bgGlowSlider = document.getElementById('bg-glow-slider');
+        const bgGlowReadout = document.getElementById('bg-glow-readout');
+        const toggleThemeBtn = document.getElementById('menu-theme-btn');
+        const toggleTuxBtn = document.getElementById('toggle-tux-btn');
+        const toggleGlitchModeBtn = document.getElementById('toggle-glitch-mode-btn');
+        const toggleGlitchTimingBtn = document.getElementById('toggle-glitch-timing-btn');
+        const toggleSnowBtn = document.getElementById('toggle-snow-btn');
+        const snowSliderWrap = document.getElementById('snow-slider-wrap');
+        const snowIntensitySlider = document.getElementById('snow-intensity-slider');
+        const snowIntensityReadout = document.getElementById('snow-intensity-readout');
+        const snowForcefieldWrap = document.getElementById('snow-forcefield-wrap');
+        const snowForcefieldSlider = document.getElementById('snow-forcefield-slider');
+        const snowForcefieldReadout = document.getElementById('snow-forcefield-readout');
+        const toggleSnowColorBtn = document.getElementById('toggle-snow-color-btn');
+        const toggleSnowRotBtn = document.getElementById('toggle-snow-rot-btn');
+        const toggleSnowPileBtn = document.getElementById('toggle-snow-pile-btn');
+        const toggleSnowLandingBtn = document.getElementById('toggle-snow-landing-btn');
+
+        const BASE_CAM_Z = 20.4;
+
+        const scene = new THREE.Scene();
+
+        // Perspective camera dynamically adjusted by active view mode
+        const camera = new THREE.PerspectiveCamera(
+            28,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            150
+        );
+        let currentCamFov = 28;
+        camera.position.set(0, 0, BASE_CAM_Z);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: 'high-performance'
+        });
+
+        // Cap internal pixelRatio at 1.0 on 4K displays (>=1800p height or >=3200p width)
+        // to avoid 6K/8K supersampling when desktop scaling is set to 150% or 200%.
+        function getOptimalPixelRatio() {
+            if (window.innerHeight >= 1800 || window.innerWidth >= 3200) {
+                return 1.0;
+            }
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            return (window.innerHeight * dpr > 2160) ? (2160 / window.innerHeight) : dpr;
+        }
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(getOptimalPixelRatio());
+        container.appendChild(renderer.domElement);
+
+        // Optional Blender Viewport Grid (hidden in Render mode, visible in Blender 3D Orbit mode)
+        const blenderGridGroup = new THREE.Group();
+        const gridHelper = new THREE.GridHelper(22, 44, 0x4d4d4d, 0x2c2c2c);
+        gridHelper.position.set(0, -3.5, 0);
+        gridHelper.rotation.x = 0;
+        blenderGridGroup.add(gridHelper);
+
+        const xAxisGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-11, -3.49, 0),
+            new THREE.Vector3(11, -3.49, 0)
+        ]);
+        const zAxisGeo = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, -3.49, -11),
+            new THREE.Vector3(0, -3.49, 11)
+        ]);
+        blenderGridGroup.add(new THREE.Line(xAxisGeo, new THREE.LineBasicMaterial({ color: 0xa83232 })));
+        blenderGridGroup.add(new THREE.Line(zAxisGeo, new THREE.LineBasicMaterial({ color: 0x388238 })));
+        blenderGridGroup.visible = false;
+        scene.add(blenderGridGroup);
+
+        // ============================================================================
+        // 2. SHARED SHADER UNIFORMS & AMBIENT BACKGROUND GLOW SHADER QUAD
+        // ============================================================================
+        const sharedUniforms = {
+            uRayOrigin: { value: new THREE.Vector3(0, 0, BASE_CAM_Z) },
+            uRayDir: { value: new THREE.Vector3(0, 0, -1) },
+            uRadius: { value: 2.35 },
+            uSquishGlow: { value: 0.0 },
+            uColorTheme: { value: 0.0 } // 0.0 = Red Blender Theme, 1.0 = NixOS Blue Two-Tone Theme
+        };
+
+        // Fullscreen clip-space background quad with anti-banding dithering,
+        // subtle central halo behind the 3D NixOS emblem, and theme-aware winter horizon glow.
+        const bgUniforms = {
+            uAspect: { value: window.innerWidth / window.innerHeight },
+            uColorTheme: sharedUniforms.uColorTheme,
+            uSquishGlow: sharedUniforms.uSquishGlow,
+            uPointerOffset: { value: new THREE.Vector2(0, 0) },
+            uBlenderMode: { value: 0.0 },
+            uSnowAmount: { value: 1.0 },
+            uBgGlowIntensity: { value: WALLPAPER_DEFAULTS.bgGlowIntensity },
+            uTime: { value: 0.0 }
+        };
+
+        const bgMaterial = new THREE.ShaderMaterial({
+            uniforms: bgUniforms,
+            depthTest: false,
+            depthWrite: false,
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position.xy, 0.9999, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uAspect;
+                uniform float uColorTheme;
+                uniform float uSquishGlow;
+                uniform vec2 uPointerOffset;
+                uniform float uBlenderMode;
+                uniform float uSnowAmount;
+                uniform float uBgGlowIntensity;
+                uniform float uTime;
+                varying vec2 vUv;
+
+                // Interleaved gradient noise for 8-bit anti-banding dithering
+                float ignDither(vec2 fragCoord) {
+                    vec3 magic = vec3(0.06711056, 0.00583715, 52.9829189);
+                    return fract(magic.z * fract(dot(fragCoord, magic.xy))) - 0.5;
+                }
+
+                void main() {
+                    // Aspect-corrected coordinates centered on the NixOS logo with subtle parallax
+                    vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
+                    vec2 center = uPointerOffset * vec2(-0.08, -0.06);
+                    float dist = length(p - center);
+                    float radial = length(vUv - 0.5);
+
+                    // Soft multi-layered radial glow behind the 3D centerpiece
+                    float coreHalo = exp(-dist * dist * 1.85);
+                    float wideNebula = exp(-dist * dist * 0.42);
+                    float hexRimGlow = exp(-pow(abs(dist - 0.36), 2.0) * 14.0) * 0.25;
+
+                    // Subtle winter horizon reflection at the bottom when snow is active
+                    float bottomFrost = smoothstep(0.32, 0.0, vUv.y) * (0.45 + 0.55 * exp(-p.x * p.x * 0.65)) * uSnowAmount;
+
+                    // 1. Red Blender Theme Background Palette (Obsidian -> Dark Ruby / Crimson Glow)
+                    vec3 redEdge     = vec3(0.010, 0.004, 0.006);
+                    vec3 redMid      = vec3(0.052, 0.010, 0.014);
+                    vec3 redCore     = vec3(0.165, 0.024, 0.026);
+                    vec3 redRim      = vec3(0.260, 0.035, 0.030);
+                    vec3 redFrost    = vec3(0.055, 0.085, 0.135);
+
+                    // 2. NixOS Blue Theme Background Palette (Abyssal Midnight -> Cobalt / Cyan Glow)
+                    vec3 blueEdge    = vec3(0.006, 0.012, 0.024);
+                    vec3 blueMid     = vec3(0.024, 0.055, 0.110);
+                    vec3 blueCore    = vec3(0.075, 0.165, 0.310);
+                    vec3 blueRim     = vec3(0.140, 0.320, 0.520);
+                    vec3 blueFrost   = vec3(0.055, 0.125, 0.220);
+
+                    vec3 colEdge  = mix(redEdge,  blueEdge,  uColorTheme);
+                    vec3 colMid   = mix(redMid,   blueMid,   uColorTheme);
+                    vec3 colCore  = mix(redCore,  blueCore,  uColorTheme);
+                    vec3 colRim   = mix(redRim,   blueRim,   uColorTheme);
+                    vec3 colFrost = mix(redFrost, blueFrost, uColorTheme);
+
+                    // Compose gradient layers scaled by uBgGlowIntensity
+                    vec3 col = mix(colEdge, colMid, wideNebula);
+                    col = mix(col, colCore, coreHalo * (0.72 + 0.28 * uSquishGlow));
+                    col += colRim * (hexRimGlow + coreHalo * uSquishGlow * 0.35);
+                    col += colFrost * bottomFrost * 0.65;
+
+                    // Subtle vignette near screen corners
+                    float vignette = smoothstep(0.95, 0.22, radial);
+                    col *= (0.65 + 0.35 * vignette) * uBgGlowIntensity;
+
+                    // 3. Blender 3D Viewport Studio Charcoal Gradient
+                    vec3 blenderBg = mix(vec3(0.12, 0.12, 0.13), vec3(0.20, 0.20, 0.22), wideNebula);
+                    col = mix(col, blenderBg, uBlenderMode);
+
+                    // Anti-banding dither (essential for dark gradients on 8-bit displays)
+                    col += ignDither(gl_FragCoord.xy) / 255.0;
+
+                    gl_FragColor = vec4(max(col, vec3(0.0)), 1.0);
+                }
+            `
+        });
+
+        const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgMaterial);
+        bgMesh.frustumCulled = false;
+        bgMesh.renderOrder = -1000;
+        scene.add(bgMesh);
+
+        // ============================================================================
+        // 3. T-BLOCK MATERIAL & 90-DEGREE ORTHOGONAL T-SHAPE GEOMETRY
+        // ============================================================================
+        function createTBlockMaterial(parity) {
+            return new THREE.ShaderMaterial({
+                uniforms: {
+                    uRayOrigin: sharedUniforms.uRayOrigin,
+                    uRayDir: sharedUniforms.uRayDir,
+                    uRadius: sharedUniforms.uRadius,
+                    uSquishGlow: sharedUniforms.uSquishGlow,
+                    uColorTheme: sharedUniforms.uColorTheme,
+                    uParity: { value: parity }
+                },
+                extensions: {
+                    derivatives: true
+                },
+                vertexShader: `
+                    attribute vec3 aBary;
+                    attribute vec3 aLocalPos;
+                    attribute vec3 aLocalNormal;
+
+                    varying vec3 vBary;
+                    varying vec3 vLocalPos;
+                    varying vec3 vLocalNormal;
+                    varying vec3 vWorldPos;
+                    varying vec3 vWorldNormal;
+
+                    void main() {
+                        vBary = aBary;
+                        vLocalPos = aLocalPos;
+                        vLocalNormal = aLocalNormal;
+
+                        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                        vWorldPos = worldPosition.xyz;
+                        vWorldNormal = normalize(mat3(modelMatrix) * normal);
+
+                        gl_Position = projectionMatrix * viewMatrix * worldPosition;
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 uRayOrigin;
+                    uniform vec3 uRayDir;
+                    uniform float uRadius;
+                    uniform float uSquishGlow;
+                    uniform float uColorTheme;
+                    uniform float uParity;
+
+                    varying vec3 vBary;
+                    varying vec3 vLocalPos;
+                    varying vec3 vLocalNormal;
+                    varying vec3 vWorldPos;
+                    varying vec3 vWorldNormal;
+
+                    float distToRay(vec3 p, vec3 ro, vec3 rd) {
+                        vec3 op = p - ro;
+                        float t = dot(op, rd);
+                        vec3 closest = ro + rd * t;
+                        return length(p - closest);
+                    }
+
+                    void main() {
+                        vec3 nLocal = normalize(vLocalNormal);
+                        vec3 nWorld = normalize(vWorldNormal);
+
+                        float gradX = clamp((vLocalPos.x + 2.1) / 4.2, 0.0, 1.0);
+                        float gradY = clamp((vLocalPos.y + 0.3) / 2.5, 0.0, 1.0);
+                        float radialLen = length(vLocalPos.xy);
+
+                        // Red Theme Palette
+                        vec3 redSlateGrey = vec3(0.46, 0.41, 0.43);
+                        vec3 redMutedMauve = vec3(0.36, 0.16, 0.17);
+                        vec3 redDeepShadow = vec3(0.08, 0.02, 0.02);
+                        vec3 redHotSide = vec3(0.84, 0.11, 0.08);
+                        vec3 redDarkSide = vec3(0.28, 0.03, 0.03);
+
+                        // Official NixOS Logo Two-Tone Blue Palette (#7EBAE4 Light Blue & #5277C3 Cobalt Blue)
+                        vec3 blueSlateLight = vec3(0.56, 0.68, 0.78);
+                        vec3 blueMidLight   = vec3(0.27, 0.46, 0.64);
+                        vec3 blueShadowLight= vec3(0.03, 0.07, 0.13);
+                        vec3 blueHotLight   = vec3(0.49, 0.76, 0.94);
+                        vec3 blueDarkLight  = vec3(0.09, 0.22, 0.38);
+
+                        vec3 blueSlateDark  = vec3(0.43, 0.50, 0.65);
+                        vec3 blueMidDark    = vec3(0.18, 0.28, 0.50);
+                        vec3 blueShadowDark = vec3(0.02, 0.04, 0.10);
+                        vec3 blueHotDark    = vec3(0.32, 0.48, 0.82);
+                        vec3 blueDarkDark   = vec3(0.05, 0.12, 0.28);
+
+                        vec3 nixSlate  = mix(blueSlateLight, blueSlateDark, uParity);
+                        vec3 nixMuted  = mix(blueMidLight, blueMidDark, uParity);
+                        vec3 nixShadow = mix(blueShadowLight, blueShadowDark, uParity);
+                        vec3 nixHot    = mix(blueHotLight, blueHotDark, uParity);
+                        vec3 nixDark   = mix(blueDarkLight, blueDarkDark, uParity);
+
+                        vec3 colSlateGrey   = mix(redSlateGrey, nixSlate, uColorTheme);
+                        vec3 colMutedMauve  = mix(redMutedMauve, nixMuted, uColorTheme);
+                        vec3 colDeepShadow  = mix(redDeepShadow, nixShadow, uColorTheme);
+                        vec3 colHotCrimson  = mix(redHotSide, nixHot, uColorTheme);
+                        vec3 colDarkCrimson = mix(redDarkSide, nixDark, uColorTheme);
+
+                        vec3 baseColor;
+                        if (abs(nLocal.z) > 0.7) {
+                            float t = clamp(gradX * 0.68 + gradY * 0.42, 0.0, 1.0);
+                            baseColor = mix(colSlateGrey, colMutedMauve, smoothstep(0.05, 0.65, t));
+                            baseColor = mix(baseColor, colDeepShadow, smoothstep(0.52, 1.0, t) * 0.78);
+                        } else if (abs(nLocal.y) > 0.7) {
+                            float tipFactor = clamp(abs(vLocalPos.x) / 1.95, 0.0, 1.0);
+                            if (nLocal.y < 0.0) {
+                                baseColor = mix(colDarkCrimson, colHotCrimson, smoothstep(0.08, 0.92, tipFactor));
+                            } else {
+                                baseColor = mix(colMutedMauve, colHotCrimson * 0.88, smoothstep(0.15, 0.95, tipFactor + gradY * 0.35));
+                            }
+                        } else {
+                            float stemFactor = clamp((radialLen - 0.25) / 1.85, 0.0, 1.0);
+                            if (nLocal.x < 0.0) {
+                                baseColor = mix(colDarkCrimson, colHotCrimson, smoothstep(0.05, 0.90, stemFactor));
+                            } else {
+                                baseColor = mix(colDeepShadow, colSlateGrey * 0.82, smoothstep(0.15, 0.95, stemFactor));
+                            }
+                        }
+
+                        vec3 lightDir1 = normalize(vec3(-0.55, 0.45, 0.70));
+                        vec3 lightDir2 = normalize(vec3(0.65, -0.50, 0.55));
+                        float diff1 = max(dot(nWorld, lightDir1), 0.0);
+                        float diff2 = max(dot(nWorld, lightDir2), 0.0);
+                        baseColor *= (0.76 + 0.28 * diff1 + 0.16 * diff2);
+
+                        float centerProx = 1.0 - smoothstep(0.6, 2.6, length(vWorldPos.xy));
+                        vec3 squishGlowCol = mix(vec3(0.55, 0.05, 0.03), vec3(0.12, 0.48, 0.88), uColorTheme);
+                        baseColor += squishGlowCol * centerProx * uSquishGlow * 0.55;
+
+                        vec3 finalColor = baseColor;
+                        float dRay = distToRay(vWorldPos, uRayOrigin, uRayDir);
+                        float hoverMask = 1.0 - smoothstep(uRadius * 0.18, uRadius, dRay);
+
+                        if (hoverMask > 0.001) {
+                            hoverMask = pow(clamp(hoverMask, 0.0, 1.0), 1.35);
+
+                            vec3 dBary = fwidth(vBary);
+                            vec3 edgeSmooth = smoothstep(vec3(0.0), dBary * 1.35, vBary);
+                            float wireLine = 1.0 - min(min(edgeSmooth.x, edgeSmooth.y), edgeSmooth.z);
+
+                            vec3 glowSmooth = smoothstep(vec3(0.0), dBary * 4.2, vBary);
+                            float wireHalo = 1.0 - min(min(glowSmooth.x, glowSmooth.y), glowSmooth.z);
+
+                            vec3 wireColor = mix(vec3(1.0, 0.14, 0.08), vec3(0.46, 0.86, 1.0), uColorTheme);
+                            vec3 haloColor = mix(vec3(0.75, 0.04, 0.02), vec3(0.10, 0.45, 0.88), uColorTheme);
+
+                            finalColor += haloColor * wireHalo * hoverMask * 0.52;
+                            finalColor = mix(finalColor, wireColor, wireLine * hoverMask * 0.95);
+                        }
+
+                        gl_FragColor = vec4(finalColor, 1.0);
+                    }
+                `
+            });
+        }
+
+        function createOrthogonalTGeometry(scale = 1.0) {
+            const positions = [];
+            const normals = [];
+            const barys = [];
+            const localPositions = [];
+            const localNormals = [];
+
+            function addQuad(A, B, C, D, normal) {
+                const tris = [
+                    [A, B, C],
+                    [A, C, D]
+                ];
+                const triBarys = [
+                    [1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                ];
+
+                for (let t = 0; t < 2; t++) {
+                    const tri = tris[t];
+                    for (let v = 0; v < 3; v++) {
+                        const pt = tri[v];
+                        positions.push(pt[0] * scale, pt[1] * scale, pt[2] * scale);
+                        normals.push(normal[0], normal[1], normal[2]);
+                        barys.push(triBarys[v][0], triBarys[v][1], triBarys[v][2]);
+                        localPositions.push(pt[0], pt[1], pt[2]);
+                        localNormals.push(normal[0], normal[1], normal[2]);
+                    }
+                }
+            }
+
+            function addBoxQuads(x0, x1, y0, y1, z0, z1, skipBottomY = false) {
+                addQuad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1]);
+                addQuad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1]);
+                addQuad([x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0]);
+                if (!skipBottomY) {
+                    addQuad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0]);
+                }
+                addQuad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0]);
+                addQuad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0]);
+            }
+
+            const halfThick = 0.215;
+            const halfDepth = 0.215;
+
+            addBoxQuads(-1.72, 1.58, -halfThick, halfThick, -halfDepth, halfDepth, false);
+            addBoxQuads(-halfThick, halfThick, halfThick, 1.92, -halfDepth, halfDepth, true);
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+            geo.setAttribute('aBary', new THREE.Float32BufferAttribute(barys, 3));
+            geo.setAttribute('aLocalPos', new THREE.Float32BufferAttribute(localPositions, 3));
+            geo.setAttribute('aLocalNormal', new THREE.Float32BufferAttribute(localNormals, 3));
+            return geo;
+        }
+
+        // ============================================================================
+        // 4. 6-FOLD SYMMETRY T-BLOCK RIG & 3D ORTHOGONAL TILT BASIS [u, v, n]
+        // ============================================================================
+        const uVec = new THREE.Vector3(Math.sqrt(2 / 3), 0, -Math.sqrt(1 / 3)).normalize();
+        const vVec = new THREE.Vector3(-1 / Math.sqrt(6), 1 / Math.sqrt(2), -1 / Math.sqrt(3)).normalize();
+        const nVec = new THREE.Vector3().crossVectors(uVec, vVec).normalize();
+
+        const basisMatrix = new THREE.Matrix4().makeBasis(uVec, vVec, nVec);
+        const baseTQuat = new THREE.Quaternion().setFromRotationMatrix(basisMatrix);
+
+        const NUM_BLOCKS = 6;
+        const BLOCK_SCALE = 1.24;
+        const BASE_SLOT_POS = new THREE.Vector3(-0.30, 1.82, 0.0);
+
+        const sharedTGeometry = createOrthogonalTGeometry(BLOCK_SCALE);
+        const tBlocks = [];
+
+        for (let i = 0; i < NUM_BLOCKS; i++) {
+            const sectorAngle = -i * (Math.PI / 3);
+            const sectorGroup = new THREE.Group();
+            sectorGroup.rotation.z = sectorAngle;
+            scene.add(sectorGroup);
+
+            const rigGroup = new THREE.Group();
+            rigGroup.position.copy(BASE_SLOT_POS);
+            sectorGroup.add(rigGroup);
+
+            const orientedTGroup = new THREE.Group();
+            orientedTGroup.quaternion.copy(baseTQuat);
+            rigGroup.add(orientedTGroup);
+
+            const mesh = new THREE.Mesh(sharedTGeometry, createTBlockMaterial(i % 2));
+            orientedTGroup.add(mesh);
+
+            const sectorQuat = new THREE.Quaternion().setFromAxisAngle(
+                new THREE.Vector3(0, 0, 1),
+                sectorAngle
+            );
+            const sectorQuatInv = sectorQuat.clone().invert();
+
+            const worldRadialDir = BASE_SLOT_POS.clone()
+                .applyQuaternion(sectorQuat)
+                .setZ(0)
+                .normalize();
+            const worldTangentDir = new THREE.Vector3(-worldRadialDir.y, worldRadialDir.x, 0).normalize();
+
+            tBlocks.push({
+                index: i,
+                sectorGroup,
+                rigGroup,
+                orientedTGroup,
+                mesh,
+                sectorQuat,
+                sectorQuatInv,
+                worldRadialDir,
+                worldTangentDir,
+                posSpring: BASE_SLOT_POS.clone(),
+                posVel: new THREE.Vector3(0, 0, 0),
+                targetPos: BASE_SLOT_POS.clone(),
+                stiffness: 68.0 + (i % 3) * 11.0,
+                damping: 11.5 + (i % 2) * 1.8,
+                phaseOffset: i * (Math.PI / 3),
+                currentQuat: baseTQuat.clone(),
+                targetQuat: baseTQuat.clone()
+            });
+        }
+
+        // ============================================================================
+        // 5. OFFICIAL LINUX TUX LOGO (SVG) + INTERACTIVE SQUISH & GLITCH SHADER
+        // ============================================================================
+        function createOfficialLinuxTuxTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+            function drawCenteredToCanvas(imgElement) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const pad = 96;
+                const availW = canvas.width - pad * 2;
+                const availH = canvas.height - pad * 2;
+                const imgW = imgElement.naturalWidth || imgElement.width || 512;
+                const imgH = imgElement.naturalHeight || imgElement.height || 596;
+                const scale = Math.min(availW / imgW, availH / imgH);
+                const drawW = imgW * scale;
+                const drawH = imgH * scale;
+                const offsetX = (canvas.width - drawW) * 0.5;
+                const offsetY = (canvas.height - drawH) * 0.5;
+                ctx.drawImage(imgElement, offsetX, offsetY, drawW, drawH);
+                tex.needsUpdate = true;
+            }
+
+            const fallbackTuxSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+                <defs>
+                    <linearGradient id="bellyGrad" x1="35%" y1="8%" x2="68%" y2="95%">
+                        <stop offset="0%" stop-color="#f7f8fa"/>
+                        <stop offset="58%" stop-color="#dedfe4"/>
+                        <stop offset="100%" stop-color="#9c9fa8"/>
+                    </linearGradient>
+                    <radialGradient id="chinShade" cx="50%" cy="22%" r="24%">
+                        <stop offset="0%" stop-color="#4e525b" stop-opacity="0.55"/>
+                        <stop offset="100%" stop-color="#4e525b" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="beakGrad" x1="25%" y1="0%" x2="75%" y2="100%">
+                        <stop offset="0%" stop-color="#ffcf33"/>
+                        <stop offset="55%" stop-color="#e39d14"/>
+                        <stop offset="100%" stop-color="#9e6605"/>
+                    </linearGradient>
+                    <linearGradient id="footGrad" x1="15%" y1="10%" x2="85%" y2="92%">
+                        <stop offset="0%" stop-color="#ffcb2e"/>
+                        <stop offset="60%" stop-color="#d99412"/>
+                        <stop offset="100%" stop-color="#8f5b05"/>
+                    </linearGradient>
+                </defs>
+                <g transform="translate(512, 535) scale(0.92)">
+                    <path d="M -4 -398 C 88 -398, 114 -316, 118 -208 C 128 -132, 226 -20, 252 102 C 268 180, 240 248, 190 268 C 125 328, -125 328, -192 268 C -242 248, -268 180, -250 102 C -222 -20, -128 -132, -118 -208 C -114 -316, -92 -398, -4 -398 Z"
+                          fill="#050507" stroke="#1d1f24" stroke-width="3.5"/>
+                    <path d="M 26 -358 C 58 -346, 76 -312, 78 -278" fill="none" stroke="#e2e5ec" stroke-width="11" stroke-linecap="round"/>
+                    <path d="M -136 -132 C -185 -48, -214 26, -226 78" fill="none" stroke="#d5d9e2" stroke-width="9.5" stroke-linecap="round"/>
+                    <path d="M 158 -85 C 198 -12, 218 45, 224 95" fill="none" stroke="#afb4c0" stroke-width="7.5" stroke-linecap="round"/>
+                    <path d="M -2 -164 C 94 -164, 158 -42, 164 106 C 168 238, 96 302, 0 302 C -96 302, -166 238, -162 106 C -156 -42, -96 -164, -2 -164 Z"
+                          fill="url(#bellyGrad)"/>
+                    <path d="M -2 -164 C 94 -164, 158 -42, 164 106 C 168 238, 96 302, 0 302 C -96 302, -166 238, -162 106 C -156 -42, -96 -164, -2 -164 Z"
+                          fill="url(#chinShade)"/>
+                    <path d="M -16 52 Q -24 142 -14 218" fill="none" stroke="#23252b" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M -78 242 Q 0 272 76 235" fill="none" stroke="#454954" stroke-width="4.2" stroke-linecap="round"/>
+                    <path d="M -182 8 Q -128 92 -140 202 Q -194 190 -224 118 Z" fill="#050507"/>
+                    <path d="M 174 2 Q 124 94 146 202 Q 198 190 220 112 Z" fill="#050507"/>
+                    <path d="M 152 40 Q 134 114 150 178" fill="none" stroke="#dce0e8" stroke-width="6.5" stroke-linecap="round"/>
+                    <ellipse cx="-38" cy="-246" rx="26" ry="37" transform="rotate(-3 -38 -246)" fill="#f0f2f7" stroke="#0d0e12" stroke-width="3"/>
+                    <ellipse cx="34" cy="-246" rx="33" ry="42" transform="rotate(3 34 -246)" fill="#f0f2f7" stroke="#0d0e12" stroke-width="3"/>
+                    <path d="M -64 -270 Q -38 -296 -12 -270" fill="none" stroke="#858a96" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M 2 -274 Q 34 -302 66 -272" fill="none" stroke="#858a96" stroke-width="4.5" stroke-linecap="round"/>
+                    <ellipse cx="-31" cy="-238" rx="13" ry="18.5" fill="#060709"/>
+                    <circle cx="-35" cy="-246" r="4.8" fill="#ffffff"/>
+                    <ellipse cx="26" cy="-238" rx="16.5" ry="21.5" fill="#060709"/>
+                    <circle cx="21" cy="-247" r="5.8" fill="#ffffff"/>
+                    <path d="M -78 -192 C -46 -226, -18 -230, 0 -230 C 18 -230, 48 -224, 84 -188 C 98 -172, 76 -140, 42 -128 C 12 -116, -18 -116, -48 -130 C -78 -144, -94 -175, -78 -192 Z"
+                          fill="url(#beakGrad)" stroke="#382203" stroke-width="4"/>
+                    <ellipse cx="-8" cy="-205" rx="29" ry="11" transform="rotate(-7 -8 -205)" fill="#fff3b8" fill-opacity="0.66"/>
+                    <path d="M -66 -175 C -24 -140, 24 -140, 70 -173" fill="none" stroke="#382203" stroke-width="4.8" stroke-linecap="round"/>
+                    <g transform="translate(-168, 236)">
+                        <path d="M -56 88 C -76 45, -80 -46, -53 -80 C -32 -96, -12 -68, -6 -52 C 8 -73, 36 -73, 46 -46 C 51 -32, 46 -15, 53 -8 C 80 -15, 100 6, 93 34 C 86 66, 36 93, -15 97 C -38 99, -48 96, -56 88 Z"
+                              fill="url(#footGrad)" stroke="#382203" stroke-width="4.5"/>
+                        <path d="M -8 -48 Q -18 10 -28 55 M 46 -10 Q 18 28 -5 65" fill="none" stroke="#5c3805" stroke-opacity="0.65" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                    <g transform="translate(168, 236) scale(-1, 1)">
+                        <path d="M -56 88 C -76 45, -80 -46, -53 -80 C -32 -96, -12 -68, -6 -52 C 8 -73, 36 -73, 46 -46 C 51 -32, 46 -15, 53 -8 C 80 -15, 100 6, 93 34 C 86 66, 36 93, -15 97 C -38 99, -48 96, -56 88 Z"
+                              fill="url(#footGrad)" stroke="#382203" stroke-width="4.5"/>
+                        <path d="M -8 -48 Q -18 10 -28 55 M 46 -10 Q 18 28 -5 65" fill="none" stroke="#5c3805" stroke-opacity="0.65" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                </g>
+            </svg>`;
+
+            const fallbackImg = new Image();
+            let officialLoaded = false;
+            fallbackImg.onload = () => {
+                if (!officialLoaded) {
+                    drawCenteredToCanvas(fallbackImg);
+                }
+            };
+            fallbackImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(fallbackTuxSvg.trim());
+
+            const officialTuxUrls = [
+                'https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg',
+                'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg'
+            ];
+
+            let urlIdx = 0;
+            function tryLoadOfficialTux() {
+                if (urlIdx >= officialTuxUrls.length) return;
+                const officialImg = new Image();
+                officialImg.crossOrigin = 'anonymous';
+                officialImg.onload = () => {
+                    officialLoaded = true;
+                    drawCenteredToCanvas(officialImg);
+                };
+                officialImg.onerror = () => {
+                    urlIdx++;
+                    tryLoadOfficialTux();
+                };
+                officialImg.src = officialTuxUrls[urlIdx];
+            }
+
+            tryLoadOfficialTux();
+            return tex;
+        }
+
+        const tuxUniforms = {
+            uMap: { value: createOfficialLinuxTuxTexture() },
+            uTime: { value: 0.0 },
+            uGlitch: { value: 0.0 },
+            uSquish: { value: 0.0 },
+            uColorTheme: sharedUniforms.uColorTheme
+        };
+
+        const tuxGlitchMaterial = new THREE.ShaderMaterial({
+            uniforms: tuxUniforms,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D uMap;
+                uniform float uTime;
+                uniform float uGlitch;
+                uniform float uSquish;
+                uniform float uColorTheme;
+                varying vec2 vUv;
+
+                float hash12(vec2 p) {
+                    vec3 p3  = fract(vec3(p.xyx) * 0.1031);
+                    p3 += dot(p3, p3.yzx + 33.33);
+                    return fract((p3.x + p3.y) * p3.z);
+                }
+
+                void main() {
+                    vec2 uv = vUv;
+                    float g = clamp(uGlitch, 0.0, 1.0);
+                    float sq = clamp(uSquish, 0.0, 1.0);
+
+                    if (sq > 0.002) {
+                        vec2 center = vec2(0.5, 0.48);
+                        vec2 d = uv - center;
+                        float r = length(d);
+                        float angle = atan(d.y, d.x);
+
+                        float hexWave = cos(angle * 6.0 - 0.52);
+                        float edgePinch = smoothstep(0.12, 0.48, r) * (0.14 + 0.055 * hexWave) * sq;
+                        float centerBulge = (1.0 - smoothstep(0.0, 0.30, r)) * 0.06 * sq;
+
+                        uv = center + d * (1.0 + edgePinch - centerBulge);
+                    }
+
+                    if (g > 0.005) {
+                        float tStep = floor(uTime * 20.0);
+
+                        float bandId = floor(uv.y * 28.0 + sin(uTime * 8.0) * 2.5);
+                        float bandNoise = hash12(vec2(bandId, tStep));
+                        float sliceTrigger = step(1.0 - g * 0.68, bandNoise);
+                        float sliceShift = (hash12(vec2(bandId * 3.1, tStep + 4.0)) - 0.5) * 0.16 * g * sliceTrigger;
+                        uv.x += sliceShift;
+
+                        vec2 blockGrid = floor(uv * mix(92.0, 24.0, g));
+                        float blockRand = hash12(blockGrid + tStep);
+                        if (blockRand < g * 0.48) {
+                            uv = (blockGrid + 0.5) / mix(92.0, 24.0, g);
+                        }
+
+                        float chromaOffset = (0.010 + 0.028 * sliceTrigger) * g;
+                        vec4 colR = texture2D(uMap, clamp(uv + vec2(chromaOffset, 0.003 * sq), 0.0, 1.0));
+                        vec4 colG = texture2D(uMap, clamp(uv, 0.0, 1.0));
+                        vec4 colB = texture2D(uMap, clamp(uv - vec2(chromaOffset, -0.005 * g), 0.0, 1.0));
+
+                        vec3 combined = vec3(colR.r, colG.g, colB.b);
+                        float alpha = max(max(colR.a, colG.a), colB.a);
+
+                        float scanline = 0.88 + 0.12 * sin(vUv.y * 195.0 + uTime * 38.0);
+                        combined *= scanline;
+                        vec3 glitchFlashCol = mix(vec3(0.62, 0.07, 0.04), vec3(0.10, 0.52, 0.92), uColorTheme);
+                        combined += glitchFlashCol * (sliceTrigger * 0.48 + sq * 0.22) * g * alpha;
+
+                        if (alpha < 0.02) discard;
+                        gl_FragColor = vec4(combined, alpha);
+                    } else {
+                        vec4 texColor = texture2D(uMap, clamp(uv, 0.0, 1.0));
+                        if (texColor.a < 0.02) discard;
+                        gl_FragColor = texColor;
+                    }
+                }
+            `
+        });
+
+        const tuxPlaneGeo = new THREE.PlaneGeometry(2.42, 2.42);
+        const tuxMesh = new THREE.Mesh(tuxPlaneGeo, tuxGlitchMaterial);
+        tuxMesh.position.set(0, -0.04, 0.0);
+        scene.add(tuxMesh);
+
+        // ============================================================================
+        // 6. NIXOS LAMBDA SNOWFLAKE SYSTEM (16 FULL SNOWFLAKES + 16 SINGLE LAMBDAS)
+        // ============================================================================
+        // Self-contained 2048x4096 (4 cols x 8 rows = 32 cells of 512x512) CanvasTexture atlas:
+        // - Rows 0..3 (cells 0..15): 16 FULL 6-fold NixOS snowflakes in exact #5277C3 & #7EBAE4
+        // - Rows 4..7 (cells 16..31): 16 INDIVIDUAL single lambda glyphs (drawn in #ffffff for two-tone shard tinting)
+        function createNixOSLambdaSnowflakeAtlas() {
+            const cols = 4;
+            const rows = 8;
+            const cellSize = 512;
+            const atlasW = cols * cellSize; // 2048
+            const atlasH = rows * cellSize; // 4096
+            const canvas = document.createElement('canvas');
+            canvas.width = atlasW;
+            canvas.height = atlasH;
+            const ctx = canvas.getContext('2d');
+
+            const tex = new THREE.CanvasTexture(canvas);
+            // CRITICAL: Disable flipY so Canvas row 0 (top) maps directly to UV v=0.0..0.125 in WebGL!
+            tex.flipY = false;
+            // Cap anisotropy at 4x to avoid expensive 16x anisotropic fetches on transparent sprites at 4K
+            tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+            tex.minFilter = THREE.LinearMipmapLinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+
+            // Exact two-tone NixOSnowflake.svg colors (#5277C3 Cobalt Blue & #7EBAE4 Sky Blue)
+            const DARK_NIX = '#5277C3';
+            const LIGHT_NIX = '#7EBAE4';
+
+            // Helper: draws a single lambda arm in local coordinates where (0,0) is the lambda apex/crotch.
+            // Uses strictly stroke() for open paths so concave space between legs is never filled!
+            function drawLambdaGlyph(gCtx, styleIdx, color) {
+                gCtx.fillStyle = color;
+                gCtx.strokeStyle = color;
+                gCtx.lineCap = 'round';
+                gCtx.lineJoin = 'round';
+
+                switch (styleIdx) {
+                    case 0: {
+                        // 1. Thin Classical Serif Lambda (Row 1 Left of NixOSnowflake.svg)
+                        gCtx.lineCap = 'butt';
+                        gCtx.lineWidth = 10;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-36, -84);
+                        gCtx.lineTo(50, 90);
+                        gCtx.moveTo(0, -6);
+                        gCtx.lineTo(-50, 90);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 7.5;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-52, -84); gCtx.lineTo(-20, -84);
+                        gCtx.moveTo(-68, 90);  gCtx.lineTo(-32, 90);
+                        gCtx.moveTo(32, 90);   gCtx.lineTo(68, 90);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 1: {
+                        // 2. Ultra-Bold Heavy Geometric Sans Lambda (Row 1 Right)
+                        gCtx.lineCap = 'butt';
+                        gCtx.lineJoin = 'bevel';
+                        gCtx.lineWidth = 34;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-34, -80);
+                        gCtx.lineTo(48, 88);
+                        gCtx.moveTo(2, -8);
+                        gCtx.lineTo(-48, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 2: {
+                        // 3. Rounded Monoline Sans Lambda (Row 2 Left)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 17;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-42, -76);
+                        gCtx.quadraticCurveTo(-24, -76, -12, -48);
+                        gCtx.lineTo(48, 86);
+                        gCtx.moveTo(-2, -6);
+                        gCtx.lineTo(-48, 86);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 3: {
+                        // 4. Italic Hooked Cursive Lambda (Row 2 Right)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 15;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-52, -68);
+                        gCtx.bezierCurveTo(-30, -92, -16, -65, 0, -20);
+                        gCtx.bezierCurveTo(18, 30, 32, 75, 48, 86);
+                        gCtx.quadraticCurveTo(60, 90, 68, 76);
+                        gCtx.stroke();
+                        gCtx.beginPath();
+                        gCtx.moveTo(-2, -12);
+                        gCtx.quadraticCurveTo(-28, 42, -50, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 4: {
+                        // 5. Classic NixOS Geometric Bar Lambda (Row 3 Left)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 19;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-38, -82);
+                        gCtx.lineTo(50, 88);
+                        gCtx.moveTo(-2, -2);
+                        gCtx.lineTo(-50, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 5: {
+                        // 6. 8-Bit Pixel-Art Lambda (Row 3 Right of NixOSnowflake.svg)
+                        const px = 14;
+                        const pixels = [
+                            [-3, -6], [-2, -6],
+                            [-2, -5], [-1, -4], [-1, -3], [0, -2], [0, -1],
+                            [1, 0], [1, 1], [2, 2], [2, 3], [3, 4], [3, 5], [4, 6],
+                            [-1, 0], [-2, 1], [-2, 2], [-3, 3], [-3, 4], [-4, 5], [-4, 6]
+                        ];
+                        for (let p = 0; p < pixels.length; p++) {
+                            gCtx.fillRect(pixels[p][0] * px - px * 0.5, pixels[p][1] * px - px * 0.5, px + 0.8, px + 0.8);
+                        }
+                        break;
+                    }
+                    case 6: {
+                        // 7. Calligraphic Swash Serif Lambda (Row 4 Left)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 16;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-54, -74);
+                        gCtx.bezierCurveTo(-26, -94, -14, -45, 42, 78);
+                        gCtx.quadraticCurveTo(54, 96, 70, 80);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 12;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-2, -10);
+                        gCtx.lineTo(-48, 86);
+                        gCtx.quadraticCurveTo(-58, 94, -66, 82);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 7: {
+                        // 8. Bold Italic Swash Serif Lambda (Row 4 Right)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 22;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-48, -72);
+                        gCtx.quadraticCurveTo(-24, -86, -8, -42);
+                        gCtx.lineTo(44, 82);
+                        gCtx.quadraticCurveTo(56, 94, 68, 78);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 15;
+                        gCtx.beginPath();
+                        gCtx.moveTo(0, -10);
+                        gCtx.lineTo(-48, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 8: {
+                        // 9. Medium Transitional Serif Lambda (Row 5 Left)
+                        gCtx.lineCap = 'butt';
+                        gCtx.lineWidth = 18;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-36, -82);
+                        gCtx.lineTo(48, 88);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 13;
+                        gCtx.beginPath();
+                        gCtx.moveTo(0, -8);
+                        gCtx.lineTo(-48, 88);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 9;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-54, -82); gCtx.lineTo(-18, -82);
+                        gCtx.moveTo(-66, 88);  gCtx.lineTo(-30, 88);
+                        gCtx.moveTo(28, 88);   gCtx.lineTo(68, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 9: {
+                        // 10. Heavy Bubble Rounded Lambda (Row 5 Right)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineJoin = 'round';
+                        gCtx.lineWidth = 28;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-44, -74);
+                        gCtx.quadraticCurveTo(-24, -80, -10, -44);
+                        gCtx.lineTo(46, 84);
+                        gCtx.moveTo(0, -4);
+                        gCtx.lineTo(-46, 84);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 10: {
+                        // 11. Ball-Terminal Serif Lambda (Row 6 Left)
+                        // Separate beginPath() per ball terminal so ctx.fill() NEVER bridges a triangle between legs!
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 17;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-44, -74);
+                        gCtx.quadraticCurveTo(-22, -88, -6, -42);
+                        gCtx.lineTo(44, 82);
+                        gCtx.moveTo(-1, -8);
+                        gCtx.lineTo(-48, 84);
+                        gCtx.stroke();
+
+                        const balls = [
+                            [-48, -72, 10.5],
+                            [50, 84, 10.5],
+                            [-50, 86, 9.0]
+                        ];
+                        for (let b = 0; b < balls.length; b++) {
+                            gCtx.beginPath();
+                            gCtx.arc(balls[b][0], balls[b][1], balls[b][2], 0, Math.PI * 2);
+                            gCtx.fill();
+                        }
+                        break;
+                    }
+                    case 11: {
+                        // 12. Monospace / JetBrains Technical Lambda (Row 6 Right)
+                        gCtx.lineCap = 'square';
+                        gCtx.lineWidth = 15;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-52, -80);
+                        gCtx.lineTo(-22, -80);
+                        gCtx.lineTo(48, 86);
+                        gCtx.moveTo(-2, -6);
+                        gCtx.lineTo(-48, 86);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 12: {
+                        // 13. Extra-Bold Slab Serif Lambda (Row 7 Left)
+                        gCtx.lineCap = 'butt';
+                        gCtx.lineWidth = 25;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-34, -80);
+                        gCtx.lineTo(46, 86);
+                        gCtx.moveTo(2, -8);
+                        gCtx.lineTo(-46, 86);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 14;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-58, -80); gCtx.lineTo(-14, -80);
+                        gCtx.moveTo(-68, 86);  gCtx.lineTo(-24, 86);
+                        gCtx.moveTo(24, 86);   gCtx.lineTo(70, 86);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 13: {
+                        // 14. Chancery / Flared Display Lambda (Row 7 Right)
+                        gCtx.lineCap = 'round';
+                        gCtx.lineWidth = 21;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-48, -74);
+                        gCtx.quadraticCurveTo(-20, -82, -6, -40);
+                        gCtx.lineTo(44, 80);
+                        gCtx.lineTo(64, 72);
+                        gCtx.moveTo(0, -6);
+                        gCtx.lineTo(-48, 86);
+                        gCtx.stroke();
+                        break;
+                    }
+                    case 14: {
+                        // 15. Stencil / High-Contrast Geometric Serif Lambda (Row 8 Left)
+                        gCtx.lineCap = 'butt';
+                        gCtx.lineWidth = 22;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-36, -82);
+                        gCtx.lineTo(48, 88);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 14;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-4, -2);
+                        gCtx.lineTo(-48, 88);
+                        gCtx.stroke();
+                        gCtx.lineWidth = 11;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-54, -82); gCtx.lineTo(-18, -82);
+                        gCtx.moveTo(26, 88);   gCtx.lineTo(68, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                    default: {
+                        // 16. Humanist Sans Flared Lambda (Row 8 Right)
+                        gCtx.lineCap = 'butt';
+                        gCtx.lineWidth = 19;
+                        gCtx.beginPath();
+                        gCtx.moveTo(-48, -78);
+                        gCtx.quadraticCurveTo(-24, -82, -10, -46);
+                        gCtx.lineTo(48, 88);
+                        gCtx.moveTo(0, -6);
+                        gCtx.lineTo(-48, 88);
+                        gCtx.stroke();
+                        break;
+                    }
+                }
+            }
+
+            // Draws a complete 6-fold interlocking NixOS snowflake in cell `idx` (0..15, rows 0..3)
+            // with the long spine of each lambda forming the inner central hexagon and the two legs facing outward
+            function drawSnowflakeCell(idx) {
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const cx = col * cellSize + cellSize * 0.5;
+                const cy = row * cellSize + cellSize * 0.5;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(col * cellSize + 8, row * cellSize + 8, cellSize - 16, cellSize - 16);
+                ctx.clip();
+
+                // Draw 6 interlocking lambdas in a 60-degree hexagonal ring matching NixOSnowflake.svg:
+                // k = 0 is the upright lambda at the bottom-left; its long spine forms the inner hexagon edge
+                // while its two legs (/ and \) and ascender tip point outward around the perimeter.
+                for (let k = 0; k < 6; k++) {
+                    const angle = k * (Math.PI / 3);
+                    const color = (k % 2 === 0) ? DARK_NIX : LIGHT_NIX;
+
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.scale(1.25, 1.25);
+                    ctx.rotate(angle);
+                    ctx.translate(-33, 53);
+                    ctx.rotate(-0.13);
+                    ctx.scale(0.74, 0.74);
+                    drawLambdaGlyph(ctx, idx, color);
+                    ctx.restore();
+                }
+
+                ctx.restore();
+            }
+
+            // Draws a single standalone lambda glyph in cell `16 + idx` (16..31, rows 4..7) for shatter-on-impact
+            function drawSingleLambdaCell(idx) {
+                const cellIdx = 16 + idx;
+                const col = cellIdx % cols;
+                const row = Math.floor(cellIdx / cols);
+                const cx = col * cellSize + cellSize * 0.5;
+                const cy = row * cellSize + cellSize * 0.5;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(col * cellSize + 8, row * cellSize + 8, cellSize - 16, cellSize - 16);
+                ctx.clip();
+
+                ctx.translate(cx, cy);
+                ctx.scale(1.65, 1.65);
+                // Drawn in pure #ffffff so the fragment shader tints each shard to #5277C3 or #7EBAE4 via parity!
+                drawLambdaGlyph(ctx, idx, '#ffffff');
+                ctx.restore();
+            }
+
+            ctx.clearRect(0, 0, atlasW, atlasH);
+            for (let i = 0; i < 16; i++) {
+                drawSnowflakeCell(i);
+                drawSingleLambdaCell(i);
+            }
+            tex.needsUpdate = true;
+            return tex;
+        }
+
+        // Pareto-optimized Single-Draw-Call Instanced Snowflake + Lambda Shard System:
+        // Shard-first buffer packing so `snowInstGeo.instanceCount` dynamically trims inactive falling flakes:
+        // - Indices 0 .. MAX_SHARDS - 1: Impact lambda shards / dissolving flakes (cells 16..31 or 0..15)
+        // - Indices MAX_SHARDS .. MAX_SHARDS + MAX_FALLING - 1: Actively falling snowflakes (cells 0..15)
+        const MAX_SHARDS = 360;
+        const MAX_FALLING = 700;
+        const MAX_INSTANCES = MAX_SHARDS + MAX_FALLING;
+        const NUM_PILE_BINS = 160;
+
+        const snowAtlasTex = createNixOSLambdaSnowflakeAtlas();
+        const snowUniforms = {
+            uAtlas: { value: snowAtlasTex },
+            uColorTheme: sharedUniforms.uColorTheme,
+            uGlobalSnowAlpha: { value: 1.0 },
+            uSnowColorMode: { value: 0.0 } // 0.0 = SVG Original (#5277C3 & #7EBAE4), 1.0 = Theme Tint, 2.0 = Frost White
+        };
+
+        const baseQuadGeo = new THREE.PlaneGeometry(1, 1);
+        const snowInstGeo = new THREE.InstancedBufferGeometry();
+        snowInstGeo.index = baseQuadGeo.index;
+        snowInstGeo.attributes.position = baseQuadGeo.attributes.position;
+        snowInstGeo.attributes.uv = baseQuadGeo.attributes.uv;
+
+        // Per-instance Float32Arrays (0 GC allocations during animation loop):
+        // - instPosArray:   x, y, z, scale (updated every frame)
+        // - instRotArray:   rotZ, tiltX, tiltY, alpha (updated every frame)
+        // - instStateArray: cellIdx (0..31), parity (0=dark, 1=light), isShard (0=flake, 1=shard), seed (dirty-flagged!)
+        const instPosArray = new Float32Array(MAX_INSTANCES * 4);
+        const instRotArray = new Float32Array(MAX_INSTANCES * 4);
+        const instStateArray = new Float32Array(MAX_INSTANCES * 4);
+
+        const instPosAttr = new THREE.InstancedBufferAttribute(instPosArray, 4);
+        const instRotAttr = new THREE.InstancedBufferAttribute(instRotArray, 4);
+        const instStateAttr = new THREE.InstancedBufferAttribute(instStateArray, 4);
+
+        instPosAttr.setUsage(THREE.DynamicDrawUsage);
+        instRotAttr.setUsage(THREE.DynamicDrawUsage);
+        instStateAttr.setUsage(THREE.StaticDrawUsage);
+
+        snowInstGeo.setAttribute('aInstPos', instPosAttr);
+        snowInstGeo.setAttribute('aInstRot', instRotAttr);
+        snowInstGeo.setAttribute('aInstState', instStateAttr);
+
+        let instStateDirty = true;
+
+        const snowMaterial = new THREE.ShaderMaterial({
+            uniforms: snowUniforms,
+            transparent: true,
+            depthWrite: false,
+            depthTest: true,
+            side: THREE.DoubleSide,
+            vertexShader: `
+                attribute vec4 aInstPos;
+                attribute vec4 aInstRot;
+                attribute vec4 aInstState;
+
+                varying vec2 vAtlasUv;
+                varying vec4 vState;
+                varying float vAlpha;
+                varying float vSpecular;
+
+                void main() {
+                    float scale = aInstPos.w;
+                    float alpha = aInstRot.w;
+
+                    if (alpha <= 0.002 || scale <= 0.001) {
+                        gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+                        return;
+                    }
+
+                    // Compute 4-column x 8-row atlas UV for cellIdx 0..31 (stored in aInstState.x, with tex.flipY = false):
+                    // - Cells 0..15 (rows 0..3): Full 6-lambda snowflakes
+                    // - Cells 16..31 (rows 4..7): Individual single lambdas
+                    float cell = floor(clamp(aInstState.x, 0.0, 31.0) + 0.5);
+                    float col = mod(cell, 4.0);
+                    float row = floor(cell / 4.0);
+                    vec2 localUv = clamp(vec2(uv.x, 1.0 - uv.y), 0.02, 0.98);
+                    vAtlasUv = vec2((localUv.x + col) * 0.25, (localUv.y + row) * 0.125);
+                    vState = aInstState;
+                    vAlpha = alpha;
+
+                    // 3D rotation (rotZ in-plane spin + restricted or full tiltX/tiltY)
+                    float cz = cos(aInstRot.x), sz = sin(aInstRot.x);
+                    float cx = cos(aInstRot.y), sx = sin(aInstRot.y);
+                    float cy = cos(aInstRot.z), sy = sin(aInstRot.z);
+
+                    vec3 p = position * scale;
+                    vec3 p1 = vec3(p.x * cz - p.y * sz, p.x * sz + p.y * cz, p.z);
+                    vec3 p2 = vec3(p1.x, p1.y * cx - p1.z * sx, p1.y * sx + p1.z * cx);
+                    vec3 p3 = vec3(p2.x * cy + p2.z * sy, p2.y, -p2.x * sy + p2.z * cy);
+
+                    vec3 n = vec3(sy, -sx * cy, cx * cy);
+                    vSpecular = pow(max(abs(dot(normalize(n), normalize(vec3(0.35, 0.55, 0.75)))), 0.0), 8.0);
+
+                    vec3 worldPos = aInstPos.xyz + p3;
+                    gl_Position = projectionMatrix * viewMatrix * vec4(worldPos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D uAtlas;
+                uniform float uColorTheme;
+                uniform float uGlobalSnowAlpha;
+                uniform float uSnowColorMode;
+
+                varying vec2 vAtlasUv;
+                varying vec4 vState;
+                varying float vAlpha;
+                varying float vSpecular;
+
+                void main() {
+                    float instAlpha = vAlpha * uGlobalSnowAlpha;
+                    if (instAlpha <= 0.003) discard;
+
+                    vec4 texCol = texture2D(uAtlas, vAtlasUv);
+                    if (texCol.a < 0.08) discard;
+
+                    // Exact NixOSnowflake.svg two-tone colors (#5277C3 Cobalt Blue & #7EBAE4 Sky Blue)
+                    vec3 svgDarkBlue  = vec3(0.322, 0.467, 0.765); // #5277C3
+                    vec3 svgLightBlue = vec3(0.494, 0.729, 0.894); // #7EBAE4
+
+                    // Determine whether this fragment is a single-lambda shard (vState.x >= 16.0 or vState.z > 0.5)
+                    // or a full 6-lambda snowflake (vState.x < 16.0):
+                    // - Full snowflakes (cells 0..15) have #5277C3 and #7EBAE4 directly in texCol.rgb
+                    // - Single lambda shards (cells 16..31) are drawn in white and use vState.y (0 = #5277C3, 1 = #7EBAE4)
+                    float lightLambdaMask;
+                    vec3 svgOriginalRgb;
+                    if (vState.x >= 15.5 || vState.z > 0.5) {
+                        lightLambdaMask = step(0.5, vState.y);
+                        svgOriginalRgb = mix(svgDarkBlue, svgLightBlue, lightLambdaMask);
+                    } else {
+                        float lum = dot(texCol.rgb, vec3(0.299, 0.587, 0.114));
+                        lightLambdaMask = smoothstep(0.48, 0.62, lum);
+                        svgOriginalRgb = texCol.rgb;
+                    }
+
+                    vec3 finalRgb;
+                    if (uSnowColorMode < 0.5) {
+                        // MODE 0 ('svg'): Exact NixOSnowflake.svg two-tone blue colors (#5277C3 & #7EBAE4)
+                        finalRgb = svgOriginalRgb + vec3(0.05) * vSpecular;
+                    } else if (uSnowColorMode < 1.5) {
+                        // MODE 1 ('theme'): Two-tone Crimson/Rose in Red theme, NixOS Blues in Blue theme
+                        vec3 redDarkLambda  = vec3(0.78, 0.16, 0.20);
+                        vec3 redLightLambda = vec3(0.96, 0.52, 0.58);
+                        vec3 redFlakeCol    = mix(redDarkLambda, redLightLambda, lightLambdaMask);
+                        vec3 blueFlakeCol   = mix(svgDarkBlue, svgLightBlue, lightLambdaMask);
+                        finalRgb = mix(redFlakeCol, blueFlakeCol, uColorTheme) + vec3(0.06) * vSpecular;
+                    } else {
+                        // MODE 2 ('white'): Crisp two-tone ice/frost white
+                        vec3 frostDark  = vec3(0.78, 0.86, 0.95);
+                        vec3 frostLight = vec3(0.97, 0.99, 1.00);
+                        finalRgb = mix(frostDark, frostLight, lightLambdaMask);
+                    }
+
+                    gl_FragColor = vec4(finalRgb, texCol.a * instAlpha);
+                }
+            `
+        });
+
+        const snowMesh = new THREE.Mesh(snowInstGeo, snowMaterial);
+        snowMesh.frustumCulled = false;
+        snowMesh.renderOrder = 10;
+        scene.add(snowMesh);
+
+        // Soft continuous bottom snowbank contour mesh
+        const snowbankGeo = new THREE.BufferGeometry();
+        const bankVertCount = (NUM_PILE_BINS + 1) * 2;
+        const bankPositions = new Float32Array(bankVertCount * 3);
+        const bankUvs = new Float32Array(bankVertCount * 2);
+        const bankIndices = [];
+
+        for (let i = 0; i <= NUM_PILE_BINS; i++) {
+            const u = i / NUM_PILE_BINS;
+            bankUvs[i * 4 + 0] = u;
+            bankUvs[i * 4 + 1] = 1.0;
+            bankUvs[i * 4 + 2] = u;
+            bankUvs[i * 4 + 3] = 0.0;
+            if (i < NUM_PILE_BINS) {
+                const v0 = i * 2;
+                const v1 = v0 + 1;
+                const v2 = v0 + 2;
+                const v3 = v0 + 3;
+                bankIndices.push(v0, v1, v2, v2, v1, v3);
+            }
+        }
+        snowbankGeo.setIndex(bankIndices);
+        const bankPosAttr = new THREE.BufferAttribute(bankPositions, 3);
+        bankPosAttr.setUsage(THREE.DynamicDrawUsage);
+        snowbankGeo.setAttribute('position', bankPosAttr);
+        snowbankGeo.setAttribute('uv', new THREE.BufferAttribute(bankUvs, 2));
+
+        const snowbankMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                uColorTheme: sharedUniforms.uColorTheme,
+                uSnowColorMode: snowUniforms.uSnowColorMode,
+                uPileAlpha: { value: 1.0 }
+            },
+            transparent: true,
+            depthWrite: false,
+            depthTest: true,
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uColorTheme;
+                uniform float uSnowColorMode;
+                uniform float uPileAlpha;
+                varying vec2 vUv;
+
+                void main() {
+                    if (uPileAlpha <= 0.005) discard;
+                    float crestFade = smoothstep(1.0, 0.12, vUv.y);
+                    float topRim = exp(-pow((vUv.y - 0.86) * 7.0, 2.0)) * 0.35;
+
+                    // Match snowbank tint to SVG NixOS blue or active theme
+                    vec3 svgBankCol   = mix(vec3(0.18, 0.30, 0.56), vec3(0.49, 0.73, 0.89), vUv.y);
+                    vec3 redBankCol   = mix(vec3(0.32, 0.08, 0.12), vec3(0.85, 0.45, 0.52), vUv.y);
+                    vec3 whiteBankCol = mix(vec3(0.55, 0.68, 0.82), vec3(0.92, 0.96, 1.00), vUv.y);
+
+                    vec3 col;
+                    if (uSnowColorMode < 0.5) {
+                        col = svgBankCol;
+                    } else if (uSnowColorMode < 1.5) {
+                        col = mix(redBankCol, svgBankCol, uColorTheme);
+                    } else {
+                        col = whiteBankCol;
+                    }
+                    col += vec3(0.18, 0.24, 0.32) * topRim;
+
+                    float alpha = (crestFade * 0.52 + topRim) * uPileAlpha;
+                    gl_FragColor = vec4(col, alpha);
+                }
+            `
+        });
+
+        const snowbankMesh = new THREE.Mesh(snowbankGeo, snowbankMaterial);
+        snowbankMesh.frustumCulled = false;
+        snowbankMesh.renderOrder = 9;
+        scene.add(snowbankMesh);
+
+        // Physics & state arrays for falling flakes (0..MAX_FALLING-1, stored at buffer offset MAX_SHARDS + i)
+        const fallVelX = new Float32Array(MAX_FALLING);
+        const fallVelY = new Float32Array(MAX_FALLING);
+        const fallSpinZ = new Float32Array(MAX_FALLING);
+        const fallSpinX = new Float32Array(MAX_FALLING); // Used in 'tumble' mode or as angular velocity in 'facing' mode
+        const fallSpinY = new Float32Array(MAX_FALLING);
+        let currentSimulatedFalling = 0;
+
+        // Physics & state arrays for impact shards / dissolving flakes (0..MAX_SHARDS-1, stored at buffer offset 0..MAX_SHARDS-1)
+        const shardVelX = new Float32Array(MAX_SHARDS);
+        const shardVelY = new Float32Array(MAX_SHARDS);
+        const shardSpinZ = new Float32Array(MAX_SHARDS);
+        const shardLife = new Float32Array(MAX_SHARDS);
+        const shardMaxLife = new Float32Array(MAX_SHARDS);
+        const shardInitScale = new Float32Array(MAX_SHARDS);
+        const shardBinIndex = new Int16Array(MAX_SHARDS);
+        let nextShardSlot = 0;
+
+        const pileHeights = new Float32Array(NUM_PILE_BINS);
+        const pileTempHeights = new Float32Array(NUM_PILE_BINS);
+
+        // Snow settings initialized from WALLPAPER_DEFAULTS
+        let isSnowEnabled = Boolean(WALLPAPER_DEFAULTS.snowEnabled);
+        let snowIntensity = THREE.MathUtils.clamp(WALLPAPER_DEFAULTS.snowIntensity, 0.10, 2.00);
+        let snowForcefieldRadius = THREE.MathUtils.clamp(
+            WALLPAPER_DEFAULTS.snowForcefieldRadius !== undefined ? WALLPAPER_DEFAULTS.snowForcefieldRadius : 2.45,
+            0.00,
+            6.00
+        );
+        let snowColorMode = WALLPAPER_DEFAULTS.snowColorMode || 'svg';       // 'svg' | 'theme' | 'white'
+        let snowRotationMode = WALLPAPER_DEFAULTS.snowRotationMode || 'facing'; // 'facing' | 'tumble'
+        let isSnowPileEnabled = Boolean(WALLPAPER_DEFAULTS.snowPileEnabled);
+        let snowLandingMode = WALLPAPER_DEFAULTS.snowLandingMode || 'shatter'; // 'shatter' | 'dissolve' | 'mini'
+
+        let currentSnowVisibility = isSnowEnabled ? 1.0 : 0.0;
+        let currentPileVisibility = (isSnowEnabled && isSnowPileEnabled) ? 1.0 : 0.0;
+
+        const SNOW_BASE_Z = 2.6;
+        function getVisibleBoundsAtZ(zPlane) {
+            const dist = Math.max(4.0, BASE_CAM_Z - zPlane);
+            const vFovRad = THREE.MathUtils.degToRad(currentCamFov);
+            const halfH = Math.tan(vFovRad * 0.5) * dist;
+            const halfW = halfH * camera.aspect;
+            return { halfW, halfH };
+        }
+
+        function spawnFallingFlake(i, randomY = false) {
+            const depthLayerRand = Math.random();
+            const z = depthLayerRand < 0.68
+                ? THREE.MathUtils.lerp(-0.6, 4.2, Math.random())
+                : THREE.MathUtils.lerp(-5.2, -0.6, Math.random());
+
+            const bounds = getVisibleBoundsAtZ(z);
+            const x = (Math.random() * 2.0 - 1.0) * (bounds.halfW * 1.18);
+            const y = randomY
+                ? THREE.MathUtils.lerp(-bounds.halfH * 0.95, bounds.halfH * 1.25, Math.random())
+                : bounds.halfH * (1.06 + Math.random() * 0.28);
+
+            const depthFactor = THREE.MathUtils.clamp((z + 5.2) / 9.4, 0.0, 1.0);
+            const scale = THREE.MathUtils.lerp(0.18, 0.45, depthFactor) * (0.80 + Math.random() * 0.45);
+
+            const idx4 = (MAX_SHARDS + i) * 4;
+            instPosArray[idx4 + 0] = x;
+            instPosArray[idx4 + 1] = y;
+            instPosArray[idx4 + 2] = z;
+            instPosArray[idx4 + 3] = scale;
+
+            const baseAlpha = THREE.MathUtils.lerp(0.55, 0.98, depthFactor);
+            instRotArray[idx4 + 0] = Math.random() * Math.PI * 2;
+            const initTilt = snowRotationMode === 'facing' ? 0.08 : 1.2;
+            instRotArray[idx4 + 1] = (Math.random() - 0.5) * initTilt;
+            instRotArray[idx4 + 2] = (Math.random() - 0.5) * initTilt;
+            instRotArray[idx4 + 3] = baseAlpha;
+
+            instStateArray[idx4 + 0] = Math.floor(Math.random() * 16); // Cell 0..15 (full 6-lambda snowflake)
+            instStateArray[idx4 + 1] = 0.0;
+            instStateArray[idx4 + 2] = 0.0;
+            instStateArray[idx4 + 3] = Math.random() * 100.0;
+            instStateDirty = true;
+
+            fallVelX[i] = (Math.random() - 0.5) * 0.35;
+            fallVelY[i] = -THREE.MathUtils.lerp(0.68, 1.68, depthFactor) * (0.82 + Math.random() * 0.38);
+            fallSpinZ[i] = (Math.random() - 0.5) * 1.35;
+            fallSpinX[i] = (Math.random() - 0.5) * 1.55;
+            fallSpinY[i] = (Math.random() - 0.5) * 1.55;
+        }
+
+        // Spawns either 6 individual font-matched lambda shards ('shatter'),
+        // a smoothly melting flake ('dissolve'), or a tiny micro-flake ('mini') on pile impact
+        function handleFlakePileImpact(x, y, z, scale, rotZ, fontVariantIdx, binIdx) {
+            const fontIdx = Math.floor(THREE.MathUtils.clamp(fontVariantIdx, 0, 15));
+
+            if (snowLandingMode === 'shatter') {
+                // Break the full 6-lambda snowflake (fontIdx 0..15) into its 6 constituent single lambdas (cell 16 + fontIdx)
+                // with alternating Dark Cobalt Blue (#5277C3, parity 0) and Light Sky Blue (#7EBAE4, parity 1)!
+                const ringRadius = scale * 0.24;
+                const shardScale = scale * 0.48;
+
+                for (let k = 0; k < 6; k++) {
+                    const slot = nextShardSlot;
+                    nextShardSlot = (nextShardSlot + 1) % MAX_SHARDS;
+
+                    const idx4 = slot * 4;
+
+                    // World angle of arm k on the impacting snowflake (matching the bottom-left k=0 orientation)
+                    const armAngle = rotZ + k * (Math.PI / 3);
+                    const outDirX = Math.cos(armAngle - Math.PI * 0.68);
+                    const outDirY = Math.sin(armAngle - Math.PI * 0.68);
+
+                    instPosArray[idx4 + 0] = x + outDirX * ringRadius;
+                    instPosArray[idx4 + 1] = y + Math.max(-0.02, outDirY * ringRadius * 0.65);
+                    instPosArray[idx4 + 2] = SNOW_BASE_Z + (Math.random() - 0.5) * 0.35;
+                    instPosArray[idx4 + 3] = shardScale;
+
+                    instRotArray[idx4 + 0] = armAngle - 0.13;
+                    instRotArray[idx4 + 1] = (Math.random() - 0.5) * 0.16;
+                    instRotArray[idx4 + 2] = (Math.random() - 0.5) * 0.16;
+                    instRotArray[idx4 + 3] = 0.96;
+
+                    instStateArray[idx4 + 0] = 16 + fontIdx; // Cell 16..31: single lambda glyph matching this snowflake's font!
+                    instStateArray[idx4 + 1] = k % 2;        // Alternating 0 (#5277C3) and 1 (#7EBAE4) lambda arm color!
+                    instStateArray[idx4 + 2] = 1.0;          // isShard = 1.0 (single lambda)
+                    instStateArray[idx4 + 3] = 0.0;
+
+                    shardVelX[slot] = outDirX * (0.45 + Math.random() * 0.55) + (Math.random() - 0.5) * 0.25;
+                    shardVelY[slot] = Math.abs(outDirY) * (0.35 + Math.random() * 0.45) + 0.18;
+                    shardSpinZ[slot] = (Math.random() - 0.5) * 4.2;
+                    shardInitScale[slot] = shardScale;
+                    shardLife[slot] = 0.0;
+                    shardMaxLife[slot] = 2.4 + Math.random() * 1.8;
+                    shardBinIndex[slot] = binIdx;
+                }
+                instStateDirty = true;
+            } else if (snowLandingMode === 'dissolve') {
+                // Smoothly shrink & melt full snowflake into the snowbank without cluttering
+                const slot = nextShardSlot;
+                nextShardSlot = (nextShardSlot + 1) % MAX_SHARDS;
+                const idx4 = slot * 4;
+
+                instPosArray[idx4 + 0] = x;
+                instPosArray[idx4 + 1] = y;
+                instPosArray[idx4 + 2] = SNOW_BASE_Z;
+                instPosArray[idx4 + 3] = scale * 0.85;
+
+                instRotArray[idx4 + 0] = rotZ;
+                instRotArray[idx4 + 1] = 0.0;
+                instRotArray[idx4 + 2] = 0.0;
+                instRotArray[idx4 + 3] = 0.88;
+
+                instStateArray[idx4 + 0] = fontIdx; // Cell 0..15 (full snowflake)
+                instStateArray[idx4 + 1] = 0.0;
+                instStateArray[idx4 + 2] = 0.0;     // isShard = 0.0 (full snowflake)
+                instStateArray[idx4 + 3] = 0.0;
+                instStateDirty = true;
+
+                shardVelX[slot] = (Math.random() - 0.5) * 0.08;
+                shardVelY[slot] = -0.06;
+                shardSpinZ[slot] = (Math.random() - 0.5) * 0.4;
+                shardInitScale[slot] = scale * 0.85;
+                shardLife[slot] = 0.0;
+                shardMaxLife[slot] = 1.15 + Math.random() * 0.65;
+                shardBinIndex[slot] = binIdx;
+            } else {
+                // 'mini': settle as tiny delicate micro-flakes on top of the drift
+                const slot = nextShardSlot;
+                nextShardSlot = (nextShardSlot + 1) % MAX_SHARDS;
+                const idx4 = slot * 4;
+                const miniScale = scale * 0.30;
+
+                instPosArray[idx4 + 0] = x + (Math.random() - 0.5) * 0.05;
+                instPosArray[idx4 + 1] = y;
+                instPosArray[idx4 + 2] = SNOW_BASE_Z + (Math.random() - 0.5) * 0.25;
+                instPosArray[idx4 + 3] = miniScale;
+
+                instRotArray[idx4 + 0] = rotZ;
+                instRotArray[idx4 + 1] = 0.0;
+                instRotArray[idx4 + 2] = 0.0;
+                instRotArray[idx4 + 3] = 0.92;
+
+                instStateArray[idx4 + 0] = fontIdx; // Cell 0..15 (full snowflake)
+                instStateArray[idx4 + 1] = 0.0;
+                instStateArray[idx4 + 2] = 0.0;     // isShard = 0.0 (full snowflake)
+                instStateArray[idx4 + 3] = 0.0;
+                instStateDirty = true;
+
+                shardVelX[slot] = 0.0;
+                shardVelY[slot] = 0.0;
+                shardSpinZ[slot] = 0.0;
+                shardInitScale[slot] = miniScale;
+                shardLife[slot] = 0.0;
+                shardMaxLife[slot] = 8.0 + Math.random() * 4.0;
+                shardBinIndex[slot] = binIdx;
+            }
+        }
+
+        function initSnowSystem() {
+            for (let i = 0; i < MAX_SHARDS; i++) {
+                const idx4 = i * 4;
+                instRotArray[idx4 + 3] = 0.0;
+                shardBinIndex[i] = -1;
+            }
+            for (let i = 0; i < MAX_FALLING; i++) {
+                spawnFallingFlake(i, true);
+            }
+            currentSimulatedFalling = Math.floor(
+                THREE.MathUtils.clamp((snowIntensity / 2.0) * MAX_FALLING, 35, MAX_FALLING)
+            );
+            for (let i = currentSimulatedFalling; i < MAX_FALLING; i++) {
+                instRotArray[(MAX_SHARDS + i) * 4 + 3] = 0.0;
+            }
+
+            // Gentle initial snowbank contour along the bottom edge
+            const pileBounds = getVisibleBoundsAtZ(SNOW_BASE_Z);
+            for (let b = 0; b < NUM_PILE_BINS; b++) {
+                const u = b / (NUM_PILE_BINS - 1);
+                const wave = 0.07 + 0.04 * Math.sin(u * Math.PI * 5.0) + 0.025 * Math.cos(u * Math.PI * 11.0);
+                pileHeights[b] = wave;
+            }
+            // Seed a few scattered individual lambda shards resting on the initial drift
+            for (let s = 0; s < 18; s++) {
+                const bin = Math.floor(Math.random() * NUM_PILE_BINS);
+                const u = (bin + 0.5) / NUM_PILE_BINS;
+                const x = (u * 2.0 - 1.0) * pileBounds.halfW * 1.04;
+                const y = -pileBounds.halfH + pileHeights[bin] + 0.04;
+                handleFlakePileImpact(
+                    x,
+                    y,
+                    SNOW_BASE_Z,
+                    0.26 + Math.random() * 0.12,
+                    Math.random() * Math.PI * 2,
+                    Math.floor(Math.random() * 16),
+                    bin
+                );
+            }
+            instStateDirty = true;
+        }
+
+        initSnowSystem();
+
+        let prevCursorSnowWorld = new THREE.Vector2(0, 0);
+        const cursorSnowWorld = new THREE.Vector2(0, 0);
+        const cursorSnowVel = new THREE.Vector2(0, 0);
+
+        function updateSnowSystem(dt, elapsed) {
+            const targetSnowVis = (isSnowEnabled && currentViewMode !== 'blender') ? 1.0 : 0.0;
+            const targetPileVis = (isSnowEnabled && isSnowPileEnabled && currentViewMode !== 'blender') ? 1.0 : 0.0;
+
+            currentSnowVisibility = THREE.MathUtils.lerp(currentSnowVisibility, targetSnowVis, Math.min(1.0, dt * 6.0));
+            currentPileVisibility = THREE.MathUtils.lerp(currentPileVisibility, targetPileVis, Math.min(1.0, dt * 5.0));
+
+            snowUniforms.uGlobalSnowAlpha.value = currentSnowVisibility;
+            snowbankMaterial.uniforms.uPileAlpha.value = currentPileVisibility;
+            bgUniforms.uSnowAmount.value = currentSnowVisibility * THREE.MathUtils.clamp(snowIntensity, 0.2, 1.4);
+
+            snowMesh.visible = currentSnowVisibility > 0.005;
+            if (!snowMesh.visible) {
+                snowbankMesh.visible = false;
+                return;
+            }
+
+            const pileBounds = getVisibleBoundsAtZ(SNOW_BASE_Z);
+            const spanW = pileBounds.halfW * 1.05;
+            const bottomY = -pileBounds.halfH;
+            const maxPileHeight = pileBounds.halfH * 0.40;
+
+            cursorSnowWorld.set(mouseNDC.x * pileBounds.halfW, mouseNDC.y * pileBounds.halfH);
+            cursorSnowVel.subVectors(cursorSnowWorld, prevCursorSnowWorld).divideScalar(Math.max(dt, 0.008));
+            const cursorSpeed = THREE.MathUtils.clamp(cursorSnowVel.length(), 0.0, 28.0);
+            prevCursorSnowWorld.copy(cursorSnowWorld);
+
+            const targetActiveFalling = Math.floor(
+                THREE.MathUtils.clamp((snowIntensity / 2.0) * MAX_FALLING, 35, MAX_FALLING)
+            );
+            if (targetActiveFalling > currentSimulatedFalling) {
+                currentSimulatedFalling = targetActiveFalling;
+            }
+            const fallSpeedMult = THREE.MathUtils.lerp(0.68, 1.48, THREE.MathUtils.clamp(snowIntensity / 2.0, 0.0, 1.0));
+
+            // 1. Update heightfield diffusion & cursor snowplow at the bottom
+            let maxPileCheck = 0.0;
+            const forceScale = snowForcefieldRadius / 2.45;
+            if (isSnowPileEnabled) {
+                const cursorBinFloat = ((cursorSnowWorld.x / spanW) * 0.5 + 0.5) * NUM_PILE_BINS;
+                const cursorBin = Math.floor(cursorBinFloat);
+                if (forceScale > 0.01 && cursorBin >= 0 && cursorBin < NUM_PILE_BINS) {
+                    const localPileTop = bottomY + pileHeights[cursorBin];
+                    if (cursorSnowWorld.y < localPileTop + 0.65 * forceScale && cursorSpeed > 0.45) {
+                        const brushBins = Math.max(1, Math.round(6 * forceScale));
+                        for (let b = Math.max(0, cursorBin - brushBins); b <= Math.min(NUM_PILE_BINS - 1, cursorBin + brushBins); b++) {
+                            const falloff = 1.0 - Math.abs(b - cursorBin) / (brushBins + 1);
+                            pileHeights[b] = Math.max(0.02, pileHeights[b] - falloff * dt * Math.min(4.5 * forceScale, cursorSpeed * 0.35 * forceScale));
+                        }
+                    }
+                }
+
+                for (let b = 0; b < NUM_PILE_BINS; b++) {
+                    const left = pileHeights[Math.max(0, b - 1)];
+                    const right = pileHeights[Math.min(NUM_PILE_BINS - 1, b + 1)];
+                    const avg = (left + pileHeights[b] * 2.0 + right) * 0.25;
+                    let h = THREE.MathUtils.lerp(pileHeights[b], avg, Math.min(1.0, dt * 5.5));
+                    if (h > maxPileHeight * 0.75) {
+                        h -= (h - maxPileHeight * 0.75) * dt * 0.15;
+                    }
+                    pileTempHeights[b] = Math.min(maxPileHeight, h);
+                    if (pileTempHeights[b] > maxPileCheck) maxPileCheck = pileTempHeights[b];
+                }
+                for (let b = 0; b < NUM_PILE_BINS; b++) {
+                    pileHeights[b] = pileTempHeights[b];
+                }
+            } else {
+                for (let b = 0; b < NUM_PILE_BINS; b++) {
+                    pileHeights[b] = Math.max(0.0, pileHeights[b] - dt * 0.85);
+                    if (pileHeights[b] > maxPileCheck) maxPileCheck = pileHeights[b];
+                }
+            }
+
+            // 2. Update impact lambda shards / dissolving flakes (indices 0 .. MAX_SHARDS - 1)
+            for (let s = 0; s < MAX_SHARDS; s++) {
+                const idx4 = s * 4;
+                const a = instRotArray[idx4 + 3];
+                if (a <= 0.002) continue;
+
+                if (!isSnowPileEnabled) {
+                    instRotArray[idx4 + 3] = Math.max(0.0, a - dt * 2.5);
+                    instPosArray[idx4 + 3] *= Math.max(0.0, 1.0 - dt * 3.0);
+                    continue;
+                }
+
+                shardLife[s] += dt;
+                const lifeRatio = shardLife[s] / Math.max(0.1, shardMaxLife[s]);
+                if (lifeRatio >= 1.0) {
+                    instRotArray[idx4 + 3] = 0.0;
+                    instPosArray[idx4 + 3] = 0.0;
+                    continue;
+                }
+
+                const bIdx = shardBinIndex[s];
+                const surfaceY = (bIdx >= 0 && bIdx < NUM_PILE_BINS)
+                    ? (bottomY + pileHeights[bIdx] + 0.03)
+                    : bottomY;
+
+                let sx = instPosArray[idx4 + 0] + shardVelX[s] * dt;
+                let sy = instPosArray[idx4 + 1] + shardVelY[s] * dt;
+
+                shardVelY[s] -= 2.6 * dt;
+                shardVelX[s] *= Math.max(0.0, 1.0 - dt * 3.2);
+
+                if (sy <= surfaceY) {
+                    sy = surfaceY;
+                    shardVelY[s] = 0.0;
+                    shardVelX[s] *= Math.max(0.0, 1.0 - dt * 8.0);
+                    shardSpinZ[s] *= Math.max(0.0, 1.0 - dt * 7.0);
+                }
+
+                const cdx = sx - cursorSnowWorld.x;
+                const cdy = sy - cursorSnowWorld.y;
+                const cDistSq = cdx * cdx + cdy * cdy;
+                const shardWakeRadius = 1.2 * forceScale;
+                if (shardWakeRadius > 0.02 && cDistSq < shardWakeRadius * shardWakeRadius && cursorSpeed > 0.4) {
+                    const cDist = Math.sqrt(cDistSq) + 0.01;
+                    const kick = (1.0 - cDist / shardWakeRadius) * Math.min(3.0, cursorSpeed * 0.25) * Math.sqrt(forceScale);
+                    shardVelX[s] += (cdx / cDist) * kick;
+                    shardVelY[s] += Math.abs(cdy / cDist) * kick * 0.8 + 0.4 * Math.min(1.5, forceScale);
+                    shardSpinZ[s] += (Math.random() - 0.5) * 6.0 * kick;
+                }
+
+                instPosArray[idx4 + 0] = sx;
+                instPosArray[idx4 + 1] = sy;
+                instRotArray[idx4 + 0] += shardSpinZ[s] * dt;
+
+                const shrinkCurve = 1.0 - Math.pow(lifeRatio, 2.2);
+                instPosArray[idx4 + 3] = shardInitScale[s] * shrinkCurve;
+                instRotArray[idx4 + 3] = 0.94 * shrinkCurve;
+            }
+
+            // 3. Update actively falling snowflakes (indices MAX_SHARDS .. MAX_SHARDS + currentSimulatedFalling - 1)
+            const globalWindX = Math.sin(elapsed * 0.42) * 0.28 + Math.cos(elapsed * 0.19) * 0.16;
+            const isFacingMode = snowRotationMode === 'facing';
+            let highestActiveFallingIdx = targetActiveFalling;
+
+            for (let i = 0; i < currentSimulatedFalling; i++) {
+                const idx4 = (MAX_SHARDS + i) * 4;
+                const isSlotActive = i < targetActiveFalling;
+
+                const currentAlpha = instRotArray[idx4 + 3];
+                if (!isSlotActive) {
+                    const nextAlpha = Math.max(0.0, currentAlpha - dt * 1.8);
+                    instRotArray[idx4 + 3] = nextAlpha;
+                    if (nextAlpha <= 0.003) continue;
+                    highestActiveFallingIdx = i + 1;
+                } else if (currentAlpha < 0.78) {
+                    instRotArray[idx4 + 3] = Math.min(0.92, currentAlpha + dt * 1.8);
+                }
+
+                let x = instPosArray[idx4 + 0];
+                let y = instPosArray[idx4 + 1];
+                const z = instPosArray[idx4 + 2];
+                const scale = instPosArray[idx4 + 3];
+                const seed = instStateArray[idx4 + 3];
+
+                const flutterX = Math.sin(elapsed * 1.7 + seed) * 0.36 + Math.cos(elapsed * 0.9 + seed * 1.7) * 0.16;
+                let vx = fallVelX[i] + (globalWindX + flutterX - fallVelX[i]) * dt * 1.8;
+                let vy = fallVelY[i] * fallSpeedMult;
+                // Interactive cursor wind wake & repulsion (scaled by Forcefield Radius slider)
+                const dx = x - cursorSnowWorld.x;
+                const dy = y - cursorSnowWorld.y;
+                const distSq = dx * dx + dy * dy;
+                const wakeRadius = snowForcefieldRadius;
+                let pushImpulseX = 0.0;
+                let pushImpulseY = 0.0;
+
+                if (wakeRadius > 0.02 && distSq < wakeRadius * wakeRadius && distSq > 0.0001) {
+                    const dist = Math.sqrt(distSq);
+                    const force = Math.pow(1.0 - dist / wakeRadius, 1.6);
+                    const strengthMult = 0.45 + 0.55 * (wakeRadius / 2.45);
+                    const invDist = 1.0 / dist;
+                    pushImpulseX = (dx * invDist * 3.4 * strengthMult + cursorSnowVel.x * 0.28) * force;
+                    pushImpulseY = (dy * invDist * 2.2 * strengthMult + Math.max(-2.0, cursorSnowVel.y * 0.18)) * force;
+                    vx += pushImpulseX * dt * 8.0;
+                    vy += pushImpulseY * dt * 6.0;
+                    instRotArray[idx4 + 0] += force * strengthMult * dt * 6.5;
+                }
+
+                fallVelX[i] = THREE.MathUtils.clamp(vx, -5.5, 5.5);
+                x += fallVelX[i] * dt;
+                y += vy * dt;
+
+                instRotArray[idx4 + 0] += fallSpinZ[i] * dt;
+
+                if (isFacingMode) {
+                    const targetTiltY = THREE.MathUtils.clamp(fallVelX[i] * 0.12 + pushImpulseX * 0.06, -0.28, 0.28);
+                    const targetTiltX = THREE.MathUtils.clamp(
+                        Math.sin(elapsed * 2.2 + seed) * 0.07 - pushImpulseY * 0.05,
+                        -0.24,
+                        0.24
+                    );
+                    const tiltDamp = Math.min(1.0, dt * 7.5);
+                    instRotArray[idx4 + 1] = THREE.MathUtils.lerp(instRotArray[idx4 + 1], targetTiltX, tiltDamp);
+                    instRotArray[idx4 + 2] = THREE.MathUtils.lerp(instRotArray[idx4 + 2], targetTiltY, tiltDamp);
+                } else {
+                    instRotArray[idx4 + 1] += fallSpinX[i] * dt;
+                    instRotArray[idx4 + 2] += fallSpinY[i] * dt;
+                }
+
+                const bounds = getVisibleBoundsAtZ(z);
+                const wrapW = bounds.halfW * 1.18;
+                if (x > wrapW) x = -wrapW;
+                else if (x < -wrapW) x = wrapW;
+
+                // Check snowline intersection for bottom accumulation
+                const binFloat = ((x / spanW) * 0.5 + 0.5) * (NUM_PILE_BINS - 1);
+                const binIdx = THREE.MathUtils.clamp(Math.round(binFloat), 0, NUM_PILE_BINS - 1);
+                const localSnowlineY = -bounds.halfH + (isSnowPileEnabled ? pileHeights[binIdx] : -0.4);
+
+                if (y <= localSnowlineY + scale * 0.28) {
+                    if (isSnowPileEnabled && isSlotActive && z > -1.2 && pileHeights[binIdx] < maxPileHeight) {
+                        const addH = 0.016 * THREE.MathUtils.clamp(snowIntensity, 0.4, 1.6);
+                        pileHeights[binIdx] = Math.min(maxPileHeight, pileHeights[binIdx] + addH);
+                        if (binIdx > 0) {
+                            pileHeights[binIdx - 1] = Math.min(maxPileHeight, pileHeights[binIdx - 1] + addH * 0.55);
+                        }
+                        if (binIdx < NUM_PILE_BINS - 1) {
+                            pileHeights[binIdx + 1] = Math.min(maxPileHeight, pileHeights[binIdx + 1] + addH * 0.55);
+                        }
+
+                        const pileWorldX = ((binIdx / (NUM_PILE_BINS - 1)) * 2.0 - 1.0) * spanW;
+                        const pileWorldY = bottomY + pileHeights[binIdx] + 0.04;
+                        handleFlakePileImpact(
+                            pileWorldX,
+                            pileWorldY,
+                            z,
+                            scale,
+                            instRotArray[idx4 + 0],
+                            instStateArray[idx4 + 0],
+                            binIdx
+                        );
+                    }
+                    spawnFallingFlake(i, false);
+                } else {
+                    instPosArray[idx4 + 0] = x;
+                    instPosArray[idx4 + 1] = y;
+                }
+            }
+
+            currentSimulatedFalling = highestActiveFallingIdx;
+            snowInstGeo.instanceCount = MAX_SHARDS + currentSimulatedFalling;
+
+            // 4. Update the continuous bottom snowbank ribbon mesh vertices (cull when melted & disabled)
+            if (currentPileVisibility > 0.005 && maxPileCheck > 0.002) {
+                snowbankMesh.visible = true;
+                for (let b = 0; b <= NUM_PILE_BINS; b++) {
+                    const clampedBin = Math.min(NUM_PILE_BINS - 1, b);
+                    const u = b / NUM_PILE_BINS;
+                    const x = (u * 2.0 - 1.0) * spanW;
+                    const crestY = bottomY + pileHeights[clampedBin] + 0.08;
+
+                    const vTop = (b * 2) * 3;
+                    const vBot = (b * 2 + 1) * 3;
+
+                    bankPositions[vTop + 0] = x;
+                    bankPositions[vTop + 1] = crestY;
+                    bankPositions[vTop + 2] = SNOW_BASE_Z - 0.35;
+
+                    bankPositions[vBot + 0] = x;
+                    bankPositions[vBot + 1] = bottomY - 0.35;
+                    bankPositions[vBot + 2] = SNOW_BASE_Z - 0.35;
+                }
+                bankPosAttr.needsUpdate = true;
+            } else {
+                snowbankMesh.visible = false;
+            }
+
+            instPosAttr.needsUpdate = true;
+            instRotAttr.needsUpdate = true;
+            if (instStateDirty) {
+                instStateAttr.needsUpdate = true;
+                instStateDirty = false;
+            }
+        }
+
+        // ============================================================================
+        // 7. INTERACTIVE CONTROLS, PINNABLE HUD BAR & DROPDOWN SETTINGS MENU
+        // ============================================================================
+        const mouseNDC = new THREE.Vector2(0.18, -0.16);
+        const smoothedMouse = new THREE.Vector2(0.18, -0.16);
+        const raycaster = new THREE.Raycaster();
+
+        let targetRadius = THREE.MathUtils.clamp(WALLPAPER_DEFAULTS.hoverWireframeRadius, 0.30, 5.50);
+        let currentRadius = targetRadius;
+        let baseTightnessScale = THREE.MathUtils.clamp(WALLPAPER_DEFAULTS.tightness, 0.68, 1.35);
+        let bgGlowIntensity = THREE.MathUtils.clamp(WALLPAPER_DEFAULTS.bgGlowIntensity, 0.0, 2.0);
+        let isBlueTheme = WALLPAPER_DEFAULTS.colorTheme === 'blue';
+        let targetThemeMix = isBlueTheme ? 1.0 : 0.0;
+        sharedUniforms.uColorTheme.value = targetThemeMix;
+
+        let currentViewMode = WALLPAPER_DEFAULTS.viewMode || 'nuanced';
+        let isDraggingOrbit = false;
+        let prevPointer = { x: 0, y: 0 };
+        let orbitSpherical = {
+            theta: -0.58,
+            phi: 1.22,
+            radius: 13.5
+        };
+
+        let glitchTriggerMode = WALLPAPER_DEFAULTS.glitchTrigger || 'click';
+        let glitchTimingMode = WALLPAPER_DEFAULTS.glitchTiming || 'continuous';
+        tuxMesh.visible = Boolean(WALLPAPER_DEFAULTS.showTux);
+
+        let isPointerDown = false;
+        let clickLatchedInHex = false;
+        let clickPulseTimer = 0.0;
+
+        let discreteState = {
+            isGlitchingNow: false,
+            nextSwitchTime: 0.0,
+            burstIntensity: 1.0,
+            wasActiveLastFrame: false
+        };
+
+        let idleSettledTime = 0.0;
+        let lastRenderTimeMs = 0.0;
+        const IDLE_FRAME_INTERVAL_MS = 1000.0 / 22.0;
+
+        function wakeFromIdle() {
+            idleSettledTime = 0.0;
+        }
+
+        function getHexagonRadius() {
+            return 1.32 * Math.max(0.76, baseTightnessScale);
+        }
+
+        function isCursorInsideHexagon() {
+            if (currentViewMode === 'blender' || !tuxMesh.visible) return false;
+            raycaster.setFromCamera(mouseNDC, camera);
+            const distToCenter = raycaster.ray.distanceToPoint(tuxPlaneCenter);
+            return distToCenter < getHexagonRadius();
+        }
+
+        // Convert snowColorMode string to uniform value
+        function syncSnowColorUniform() {
+            snowUniforms.uSnowColorMode.value =
+                snowColorMode === 'svg' ? 0.0 :
+                snowColorMode === 'theme' ? 1.0 : 2.0;
+        }
+        syncSnowColorUniform();
+
+        // Active set of pinned control IDs (initialized from WALLPAPER_DEFAULTS.pinnedHudControls)
+        const pinnedControls = new Set(WALLPAPER_DEFAULTS.pinnedHudControls || []);
+        // Active set of sliders controlled by the Mouse Wheel (initialized from WALLPAPER_DEFAULTS.wheelControlledSliders)
+        const wheelControlledSliders = new Set(WALLPAPER_DEFAULTS.wheelControlledSliders || ['radius', 'snowForcefield']);
+        let isSettingsMenuOpen = Boolean(WALLPAPER_DEFAULTS.hudMenuOpenByDefault);
+
+        function setSettingsMenuOpen(open) {
+            isSettingsMenuOpen = open;
+            settingsDropdown.classList.toggle('hidden', !open);
+            settingsDropdown.classList.toggle('flex', open);
+            settingsChevron.textContent = open ? '▴' : '▾';
+            toggleSettingsMenuBtn.classList.toggle('active', open);
+        }
+
+        toggleSettingsMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            wakeFromIdle();
+            setSettingsMenuOpen(!isSettingsMenuOpen);
+        });
+
+        // Bind Mouse Wheel target checkboxes in the dropdown
+        document.querySelectorAll('.wheel-checkbox[data-wheel-slider]').forEach((cb) => {
+            cb.addEventListener('change', (e) => {
+                e.stopPropagation();
+                wakeFromIdle();
+                const sliderId = cb.dataset.wheelSlider;
+                if (cb.checked) {
+                    wheelControlledSliders.add(sliderId);
+                } else {
+                    wheelControlledSliders.delete(sliderId);
+                }
+                syncAllHudState();
+            });
+        });
+
+        // Action handlers shared by both the dropdown controls and the pinned top-bar widgets
+        function triggerToggleTheme() {
+            wakeFromIdle();
+            isBlueTheme = !isBlueTheme;
+            targetThemeMix = isBlueTheme ? 1.0 : 0.0;
+            syncAllHudState();
+        }
+
+        function triggerSetTightness(val) {
+            wakeFromIdle();
+            baseTightnessScale = THREE.MathUtils.clamp(parseFloat(val), 0.68, 1.35);
+            syncAllHudState();
+        }
+
+        function triggerSetRadius(val) {
+            wakeFromIdle();
+            targetRadius = THREE.MathUtils.clamp(parseFloat(val), 0.30, 5.50);
+            syncAllHudState();
+        }
+
+        function triggerSetBgGlow(val) {
+            wakeFromIdle();
+            bgGlowIntensity = THREE.MathUtils.clamp(parseFloat(val), 0.0, 2.0);
+            bgUniforms.uBgGlowIntensity.value = bgGlowIntensity;
+            syncAllHudState();
+        }
+
+        function setViewMode(mode) {
+            wakeFromIdle();
+            currentViewMode = mode;
+            blenderGridGroup.visible = (mode === 'blender');
+            syncAllHudState();
+        }
+
+        function triggerToggleSnow() {
+            wakeFromIdle();
+            isSnowEnabled = !isSnowEnabled;
+            syncAllHudState();
+        }
+
+        function triggerSetSnowIntensity(val) {
+            wakeFromIdle();
+            snowIntensity = THREE.MathUtils.clamp(parseFloat(val), 0.10, 2.00);
+            if (!isSnowEnabled) isSnowEnabled = true;
+            syncAllHudState();
+        }
+
+        function triggerSetSnowForcefield(val) {
+            wakeFromIdle();
+            snowForcefieldRadius = THREE.MathUtils.clamp(parseFloat(val), 0.00, 6.00);
+            syncAllHudState();
+        }
+
+        function triggerCycleSnowColor() {
+            wakeFromIdle();
+            if (snowColorMode === 'svg') snowColorMode = 'theme';
+            else if (snowColorMode === 'theme') snowColorMode = 'white';
+            else snowColorMode = 'svg';
+            syncSnowColorUniform();
+            syncAllHudState();
+        }
+
+        function triggerToggleSnowRotation() {
+            wakeFromIdle();
+            snowRotationMode = (snowRotationMode === 'facing') ? 'tumble' : 'facing';
+            syncAllHudState();
+        }
+
+        function triggerToggleSnowPile() {
+            wakeFromIdle();
+            isSnowPileEnabled = !isSnowPileEnabled;
+            syncAllHudState();
+        }
+
+        function triggerCycleSnowLanding() {
+            wakeFromIdle();
+            if (snowLandingMode === 'shatter') snowLandingMode = 'dissolve';
+            else if (snowLandingMode === 'dissolve') snowLandingMode = 'mini';
+            else snowLandingMode = 'shatter';
+            syncAllHudState();
+        }
+
+        function triggerToggleTux() {
+            wakeFromIdle();
+            tuxMesh.visible = !tuxMesh.visible;
+            if (!tuxMesh.visible) clickLatchedInHex = false;
+            syncAllHudState();
+        }
+
+        function triggerCycleGlitchMode() {
+            wakeFromIdle();
+            if (glitchTriggerMode === 'click') glitchTriggerMode = 'hover';
+            else if (glitchTriggerMode === 'hover') {
+                glitchTriggerMode = 'off';
+                clickLatchedInHex = false;
+            } else glitchTriggerMode = 'click';
+            syncAllHudState();
+        }
+
+        function triggerToggleGlitchTiming() {
+            wakeFromIdle();
+            if (glitchTimingMode === 'continuous') {
+                glitchTimingMode = 'discrete';
+                discreteState.isGlitchingNow = true;
+                discreteState.nextSwitchTime = clock.getElapsedTime() + 0.16;
+            } else {
+                glitchTimingMode = 'continuous';
+            }
+            syncAllHudState();
+        }
+
+        // Bind dropdown menu controls
+        toggleThemeBtn.addEventListener('click', triggerToggleTheme);
+        distanceSlider.addEventListener('input', (e) => triggerSetTightness(e.target.value));
+        radiusSlider.addEventListener('input', (e) => triggerSetRadius(e.target.value));
+        bgGlowSlider.addEventListener('input', (e) => triggerSetBgGlow(e.target.value));
+        toggleSnowBtn.addEventListener('click', triggerToggleSnow);
+        snowIntensitySlider.addEventListener('input', (e) => triggerSetSnowIntensity(e.target.value));
+        snowForcefieldSlider.addEventListener('input', (e) => triggerSetSnowForcefield(e.target.value));
+        toggleSnowColorBtn.addEventListener('click', triggerCycleSnowColor);
+        toggleSnowRotBtn.addEventListener('click', triggerToggleSnowRotation);
+        toggleSnowPileBtn.addEventListener('click', triggerToggleSnowPile);
+        toggleSnowLandingBtn.addEventListener('click', triggerCycleSnowLanding);
+        toggleTuxBtn.addEventListener('click', triggerToggleTux);
+        toggleGlitchModeBtn.addEventListener('click', triggerCycleGlitchMode);
+        toggleGlitchTimingBtn.addEventListener('click', triggerToggleGlitchTiming);
+
+        document.querySelectorAll('#settings-dropdown .mode-btn[data-mode]').forEach((btn) => {
+            btn.addEventListener('click', () => setViewMode(btn.dataset.mode));
+        });
+
+        // Bind Pin toggle buttons in the dropdown
+        document.querySelectorAll('.pin-btn[data-pin]').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                wakeFromIdle();
+                const pinId = btn.dataset.pin;
+                if (pinnedControls.has(pinId)) {
+                    pinnedControls.delete(pinId);
+                } else {
+                    pinnedControls.add(pinId);
+                }
+                rebuildPinnedBar();
+                syncAllHudState();
+            });
+        });
+
+        // Builds the compact top-right pinned bar based on `pinnedControls`
+        function rebuildPinnedBar() {
+            pinnedBarContainer.innerHTML = '';
+            const items = Array.from(pinnedControls);
+
+            items.forEach((pinId) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'flex items-center gap-1.5';
+
+                if (pinId === 'theme') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'theme';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerToggleTheme);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'tightness') {
+                    const lbl = document.createElement('span');
+                    lbl.textContent = 'Tightness';
+                    const input = document.createElement('input');
+                    input.type = 'range';
+                    input.min = '0.68';
+                    input.max = '1.35';
+                    input.step = '0.01';
+                    input.value = baseTightnessScale;
+                    input.dataset.pinnedWidget = 'tightness-slider';
+                    input.className = 'hud-slider w-14 cursor-pointer';
+                    input.addEventListener('input', (e) => triggerSetTightness(e.target.value));
+                    const read = document.createElement('span');
+                    read.dataset.pinnedWidget = 'tightness-readout';
+                    read.className = 'mono font-medium w-7 text-right';
+                    wrap.append(lbl, input, read);
+                } else if (pinId === 'radius') {
+                    const dot = document.createElement('span');
+                    dot.dataset.pinnedWidget = 'theme-dot';
+                    dot.className = 'inline-block w-1.5 h-1.5 rounded-full';
+                    const lbl = document.createElement('span');
+                    lbl.textContent = 'Radius';
+                    const read = document.createElement('span');
+                    read.dataset.pinnedWidget = 'radius-readout';
+                    read.className = 'mono font-medium';
+                    wrap.append(dot, lbl, read);
+                } else if (pinId === 'bgGlow') {
+                    const lbl = document.createElement('span');
+                    lbl.textContent = 'Glow';
+                    const input = document.createElement('input');
+                    input.type = 'range';
+                    input.min = '0.00';
+                    input.max = '2.00';
+                    input.step = '0.05';
+                    input.value = bgGlowIntensity;
+                    input.dataset.pinnedWidget = 'bgglow-slider';
+                    input.className = 'hud-slider w-12 cursor-pointer';
+                    input.addEventListener('input', (e) => triggerSetBgGlow(e.target.value));
+                    wrap.append(lbl, input);
+                } else if (pinId === 'viewMode') {
+                    ['nuanced', 'optical', 'legacy', 'blender'].forEach((m) => {
+                        const b = document.createElement('button');
+                        b.dataset.pinnedMode = m;
+                        b.className = 'mode-btn';
+                        b.textContent =
+                            m === 'nuanced' ? 'Nuanced' :
+                            m === 'optical' ? 'Optical' :
+                            m === 'legacy' ? 'Legacy' : 'Blender 3D';
+                        b.addEventListener('click', () => setViewMode(m));
+                        wrap.appendChild(b);
+                    });
+                } else if (pinId === 'snowToggle') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'snowToggle';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerToggleSnow);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'snowIntensity') {
+                    const input = document.createElement('input');
+                    input.type = 'range';
+                    input.min = '0.10';
+                    input.max = '2.00';
+                    input.step = '0.05';
+                    input.value = snowIntensity;
+                    input.dataset.pinnedWidget = 'snow-slider';
+                    input.className = 'hud-slider w-14 cursor-pointer';
+                    input.addEventListener('input', (e) => triggerSetSnowIntensity(e.target.value));
+                    const read = document.createElement('span');
+                    read.dataset.pinnedWidget = 'snow-readout';
+                    read.className = 'mono font-medium w-7 text-right';
+                    wrap.append(input, read);
+                } else if (pinId === 'snowForcefield') {
+                    const lbl = document.createElement('span');
+                    lbl.textContent = 'Force';
+                    const input = document.createElement('input');
+                    input.type = 'range';
+                    input.min = '0.00';
+                    input.max = '6.00';
+                    input.step = '0.10';
+                    input.value = snowForcefieldRadius;
+                    input.dataset.pinnedWidget = 'snow-forcefield-slider';
+                    input.className = 'hud-slider w-14 cursor-pointer';
+                    input.addEventListener('input', (e) => triggerSetSnowForcefield(e.target.value));
+                    const read = document.createElement('span');
+                    read.dataset.pinnedWidget = 'snow-forcefield-readout';
+                    read.className = 'mono font-medium w-7 text-right';
+                    wrap.append(lbl, input, read);
+                } else if (pinId === 'snowColor') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'snowColor';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerCycleSnowColor);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'snowRotation') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'snowRotation';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerToggleSnowRotation);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'snowPile') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'snowPile';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerToggleSnowPile);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'snowLanding') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'snowLanding';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerCycleSnowLanding);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'tux') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'tux';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerToggleTux);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'glitchMode') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'glitchMode';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerCycleGlitchMode);
+                    wrap.appendChild(btn);
+                } else if (pinId === 'glitchTiming') {
+                    const btn = document.createElement('button');
+                    btn.dataset.pinnedWidget = 'glitchTiming';
+                    btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                    btn.addEventListener('click', triggerToggleGlitchTiming);
+                    wrap.appendChild(btn);
+                }
+
+                pinnedBarContainer.appendChild(wrap);
+
+                // Separator pipe after each pinned item
+                const sep = document.createElement('span');
+                sep.className = 'text-neutral-700';
+                sep.textContent = '|';
+                pinnedBarContainer.appendChild(sep);
+            });
+        }
+
+        // Synchronizes all labels, sliders, theme accents, and pin highlights across dropdown & pinned bar
+        function syncAllHudState() {
+            const accentClass = isBlueTheme ? 'text-sky-400' : 'text-red-400';
+            document.body.classList.toggle('theme-blue', isBlueTheme);
+
+            // Dropdown readouts & buttons
+            toggleThemeBtn.textContent = isBlueTheme ? 'Color: NixOS Blue' : 'Color: Red';
+            toggleThemeBtn.className = `mode-btn font-medium ${accentClass}`;
+
+            distanceSlider.value = baseTightnessScale;
+            distanceReadout.textContent = baseTightnessScale.toFixed(2);
+            distanceReadout.className = `mono font-medium w-8 text-right ${accentClass}`;
+
+            radiusSlider.value = targetRadius;
+            radiusReadout.textContent = targetRadius.toFixed(2);
+            radiusReadout.className = `mono font-medium w-8 text-right ${accentClass}`;
+
+            bgGlowSlider.value = bgGlowIntensity;
+            bgGlowReadout.textContent = bgGlowIntensity.toFixed(2);
+            bgGlowReadout.className = `mono font-medium w-8 text-right ${accentClass}`;
+
+            document.querySelectorAll('#settings-dropdown .mode-btn[data-mode]').forEach((btn) => {
+                btn.classList.toggle('active', btn.dataset.mode === currentViewMode);
+            });
+
+            // Snow controls in dropdown
+            toggleSnowBtn.textContent = isSnowEnabled ? '❄ Snow: ON' : '❄ Snow: OFF';
+            toggleSnowBtn.className = isSnowEnabled
+                ? 'mode-btn text-sky-300 font-medium'
+                : 'mode-btn text-neutral-500';
+            snowSliderWrap.style.opacity = isSnowEnabled ? '1' : '0.45';
+            snowIntensitySlider.value = snowIntensity;
+            snowIntensityReadout.textContent = snowIntensity.toFixed(2);
+
+            snowForcefieldWrap.style.opacity = isSnowEnabled ? '1' : '0.45';
+            snowForcefieldSlider.value = snowForcefieldRadius;
+            snowForcefieldReadout.textContent = snowForcefieldRadius.toFixed(2);
+
+            const snowColLabel =
+                snowColorMode === 'svg' ? 'Colors: SVG Original' :
+                snowColorMode === 'theme' ? 'Colors: Theme Tint' : 'Colors: Frost White';
+            toggleSnowColorBtn.textContent = snowColLabel;
+
+            const snowRotLabel = snowRotationMode === 'facing' ? 'Spin: Camera-Facing' : 'Spin: Full 3D Tumble';
+            toggleSnowRotBtn.textContent = snowRotLabel;
+
+            toggleSnowPileBtn.textContent = isSnowPileEnabled ? 'Pile: ON' : 'Pile: OFF';
+            toggleSnowPileBtn.className = isSnowPileEnabled
+                ? 'mode-btn text-sky-200 font-medium'
+                : 'mode-btn text-neutral-500';
+
+            const landingLabel =
+                snowLandingMode === 'shatter' ? 'Impact: Break into λs' :
+                snowLandingMode === 'dissolve' ? 'Impact: Dissolve' : 'Impact: Micro-Flake';
+            toggleSnowLandingBtn.textContent = landingLabel;
+
+            // Tux & Glitch in dropdown
+            toggleTuxBtn.textContent = tuxMesh.visible ? 'Tux: ON' : 'Tux: OFF';
+            toggleTuxBtn.className = tuxMesh.visible
+                ? 'mode-btn text-neutral-200 font-medium'
+                : 'mode-btn text-neutral-500';
+
+            const glitchModeLabel =
+                glitchTriggerMode === 'click' ? 'Glitch: On Click' :
+                glitchTriggerMode === 'hover' ? 'Glitch: On Hover' : 'Glitch: OFF';
+            toggleGlitchModeBtn.textContent = glitchModeLabel;
+            toggleGlitchModeBtn.className = glitchTriggerMode === 'off'
+                ? 'mode-btn text-neutral-500'
+                : `mode-btn ${accentClass} font-medium`;
+
+            const glitchTimingLabel = glitchTimingMode === 'continuous' ? 'Timing: Continuous' : 'Timing: Random';
+            toggleGlitchTimingBtn.textContent = glitchTimingLabel;
+
+            // Pin button active states
+            document.querySelectorAll('.pin-btn[data-pin]').forEach((btn) => {
+                btn.classList.toggle('pinned', pinnedControls.has(btn.dataset.pin));
+            });
+
+            // Wheel checkbox active states
+            document.querySelectorAll('.wheel-checkbox[data-wheel-slider]').forEach((cb) => {
+                const isChecked = wheelControlledSliders.has(cb.dataset.wheelSlider);
+                cb.checked = isChecked;
+                const parentLabel = cb.closest('.wheel-check-label');
+                if (parentLabel) {
+                    parentLabel.classList.toggle('checked', isChecked);
+                }
+            });
+
+            // Sync Pinned Bar widgets
+            const pTheme = pinnedBarContainer.querySelector('[data-pinned-widget="theme"]');
+            if (pTheme) {
+                pTheme.textContent = isBlueTheme ? 'Color: NixOS Blue' : 'Color: Red';
+                pTheme.className = `hover:text-white transition cursor-pointer font-medium px-1 ${accentClass}`;
+            }
+            const pTightSlider = pinnedBarContainer.querySelector('[data-pinned-widget="tightness-slider"]');
+            if (pTightSlider) pTightSlider.value = baseTightnessScale;
+            const pTightRead = pinnedBarContainer.querySelector('[data-pinned-widget="tightness-readout"]');
+            if (pTightRead) {
+                pTightRead.textContent = baseTightnessScale.toFixed(2);
+                pTightRead.className = `mono font-medium w-7 text-right ${accentClass}`;
+            }
+            const pDot = pinnedBarContainer.querySelector('[data-pinned-widget="theme-dot"]');
+            if (pDot) {
+                pDot.className = `inline-block w-1.5 h-1.5 rounded-full ${isBlueTheme ? 'bg-sky-400' : 'bg-red-600'}`;
+            }
+            const pRadRead = pinnedBarContainer.querySelector('[data-pinned-widget="radius-readout"]');
+            if (pRadRead) {
+                pRadRead.textContent = targetRadius.toFixed(2);
+                pRadRead.className = `mono font-medium ${accentClass}`;
+            }
+            const pBgGlow = pinnedBarContainer.querySelector('[data-pinned-widget="bgglow-slider"]');
+            if (pBgGlow) pBgGlow.value = bgGlowIntensity;
+
+            pinnedBarContainer.querySelectorAll('[data-pinned-mode]').forEach((b) => {
+                b.classList.toggle('active', b.dataset.pinnedMode === currentViewMode);
+            });
+
+            const pSnow = pinnedBarContainer.querySelector('[data-pinned-widget="snowToggle"]');
+            if (pSnow) {
+                pSnow.textContent = isSnowEnabled ? '❄ Snow: ON' : '❄ Snow: OFF';
+                pSnow.className = isSnowEnabled
+                    ? 'hover:text-white transition cursor-pointer text-sky-300 font-medium px-1'
+                    : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
+            }
+            const pSnowSlider = pinnedBarContainer.querySelector('[data-pinned-widget="snow-slider"]');
+            if (pSnowSlider) pSnowSlider.value = snowIntensity;
+            const pSnowRead = pinnedBarContainer.querySelector('[data-pinned-widget="snow-readout"]');
+            if (pSnowRead) {
+                pSnowRead.textContent = snowIntensity.toFixed(2);
+                pSnowRead.className = 'mono font-medium w-7 text-right text-sky-300';
+            }
+            const pSnowForceSlider = pinnedBarContainer.querySelector('[data-pinned-widget="snow-forcefield-slider"]');
+            if (pSnowForceSlider) pSnowForceSlider.value = snowForcefieldRadius;
+            const pSnowForceRead = pinnedBarContainer.querySelector('[data-pinned-widget="snow-forcefield-readout"]');
+            if (pSnowForceRead) {
+                pSnowForceRead.textContent = snowForcefieldRadius.toFixed(2);
+                pSnowForceRead.className = 'mono font-medium w-7 text-right text-sky-300';
+            }
+            const pSnowCol = pinnedBarContainer.querySelector('[data-pinned-widget="snowColor"]');
+            if (pSnowCol) {
+                pSnowCol.textContent = snowColLabel;
+                pSnowCol.className = 'hover:text-white transition cursor-pointer text-sky-300 font-medium px-1';
+            }
+            const pSnowRot = pinnedBarContainer.querySelector('[data-pinned-widget="snowRotation"]');
+            if (pSnowRot) {
+                pSnowRot.textContent = snowRotLabel;
+                pSnowRot.className = 'hover:text-white transition cursor-pointer text-sky-200 font-medium px-1';
+            }
+            const pSnowPile = pinnedBarContainer.querySelector('[data-pinned-widget="snowPile"]');
+            if (pSnowPile) {
+                pSnowPile.textContent = isSnowPileEnabled ? 'Pile: ON' : 'Pile: OFF';
+                pSnowPile.className = isSnowPileEnabled
+                    ? 'hover:text-white transition cursor-pointer text-sky-200 font-medium px-1'
+                    : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
+            }
+            const pSnowLand = pinnedBarContainer.querySelector('[data-pinned-widget="snowLanding"]');
+            if (pSnowLand) {
+                pSnowLand.textContent = landingLabel;
+                pSnowLand.className = 'hover:text-white transition cursor-pointer text-sky-200 font-medium px-1';
+            }
+            const pTux = pinnedBarContainer.querySelector('[data-pinned-widget="tux"]');
+            if (pTux) {
+                pTux.textContent = tuxMesh.visible ? 'Tux: ON' : 'Tux: OFF';
+                pTux.className = tuxMesh.visible
+                    ? 'hover:text-white transition cursor-pointer text-neutral-200 font-medium px-1'
+                    : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
+            }
+            const pGlitchM = pinnedBarContainer.querySelector('[data-pinned-widget="glitchMode"]');
+            if (pGlitchM) {
+                pGlitchM.textContent = glitchModeLabel;
+                pGlitchM.className = glitchTriggerMode === 'off'
+                    ? 'hover:text-white transition cursor-pointer text-neutral-500 px-1'
+                    : `hover:text-white transition cursor-pointer ${accentClass} font-medium px-1`;
+            }
+            const pGlitchT = pinnedBarContainer.querySelector('[data-pinned-widget="glitchTiming"]');
+            if (pGlitchT) {
+                pGlitchT.textContent = glitchTimingLabel;
+                pGlitchT.className = 'hover:text-white transition cursor-pointer text-neutral-200 font-medium px-1';
+            }
+        }
+
+        rebuildPinnedBar();
+        setSettingsMenuOpen(isSettingsMenuOpen);
+        setViewMode(currentViewMode);
+
+        function updatePointerNDC(clientX, clientY) {
+            mouseNDC.x = (clientX / window.innerWidth) * 2 - 1;
+            mouseNDC.y = -(clientY / window.innerHeight) * 2 + 1;
+        }
+
+        // Helper: safely resolves the DOM Element under the event even when KDE Plasma's
+        // WallpaperInputBridge dispatches synthetic events directly on `window` (where e.target === window)
+        function getEventTargetElement(e) {
+            if (e.target && typeof e.target.closest === 'function') {
+                return e.target;
+            }
+            if (typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+                return document.elementFromPoint(e.clientX, e.clientY);
+            }
+            return null;
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            wakeFromIdle();
+            updatePointerNDC(e.clientX, e.clientY);
+
+            if (currentViewMode === 'blender' && isDraggingOrbit) {
+                const dx = e.clientX - prevPointer.x;
+                const dy = e.clientY - prevPointer.y;
+                orbitSpherical.theta -= dx * 0.007;
+                orbitSpherical.phi = THREE.MathUtils.clamp(
+                    orbitSpherical.phi - dy * 0.007,
+                    0.15,
+                    Math.PI - 0.15
+                );
+                prevPointer.x = e.clientX;
+                prevPointer.y = e.clientY;
+            }
+        }, { passive: true });
+
+        window.addEventListener('mousedown', (e) => {
+            wakeFromIdle();
+            // Ignore clicks inside the top-right pill or settings dropdown
+            const targetEl = getEventTargetElement(e);
+            if (targetEl && (targetEl.closest('.hud-pill') || targetEl.closest('#settings-dropdown'))) return;
+
+            // Close settings dropdown when clicking on the 3D scene
+            if (isSettingsMenuOpen) {
+                setSettingsMenuOpen(false);
+            }
+
+            updatePointerNDC(e.clientX, e.clientY);
+            isPointerDown = true;
+
+            if (currentViewMode === 'blender') {
+                isDraggingOrbit = true;
+                prevPointer.x = e.clientX;
+                prevPointer.y = e.clientY;
+            } else if (isCursorInsideHexagon()) {
+                clickLatchedInHex = !clickLatchedInHex;
+                if (clickLatchedInHex) {
+                    clickPulseTimer = 0.55;
+                    discreteState.isGlitchingNow = true;
+                    discreteState.burstIntensity = 0.95;
+                    discreteState.nextSwitchTime = clock.getElapsedTime() + 0.18 + Math.random() * 0.16;
+                }
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isPointerDown = false;
+            isDraggingOrbit = false;
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            wakeFromIdle();
+            const targetEl = getEventTargetElement(e);
+            if (targetEl && (targetEl.closest('.hud-pill') || targetEl.closest('#settings-dropdown'))) return;
+            if (isSettingsMenuOpen) {
+                setSettingsMenuOpen(false);
+            }
+            if (e.touches.length > 0) {
+                updatePointerNDC(e.touches[0].clientX, e.touches[0].clientY);
+                prevPointer.x = e.touches[0].clientX;
+                prevPointer.y = e.touches[0].clientY;
+                isPointerDown = true;
+                isDraggingOrbit = true;
+
+                if (currentViewMode !== 'blender' && isCursorInsideHexagon()) {
+                    clickLatchedInHex = !clickLatchedInHex;
+                    if (clickLatchedInHex) {
+                        clickPulseTimer = 0.55;
+                        discreteState.isGlitchingNow = true;
+                        discreteState.burstIntensity = 0.95;
+                        discreteState.nextSwitchTime = clock.getElapsedTime() + 0.18 + Math.random() * 0.16;
+                    }
+                }
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            wakeFromIdle();
+            if (e.touches.length > 0) {
+                const tx = e.touches[0].clientX;
+                const ty = e.touches[0].clientY;
+                updatePointerNDC(tx, ty);
+                if (currentViewMode === 'blender' && isDraggingOrbit) {
+                    const dx = tx - prevPointer.x;
+                    const dy = ty - prevPointer.y;
+                    orbitSpherical.theta -= dx * 0.007;
+                    orbitSpherical.phi = THREE.MathUtils.clamp(
+                        orbitSpherical.phi - dy * 0.007,
+                        0.15,
+                        Math.PI - 0.15
+                    );
+                    prevPointer.x = tx;
+                    prevPointer.y = ty;
+                }
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            isPointerDown = false;
+            isDraggingOrbit = false;
+        });
+
+        window.addEventListener('wheel', (e) => {
+            wakeFromIdle();
+            const targetEl = getEventTargetElement(e);
+            const dropdownEl = targetEl ? targetEl.closest('#settings-dropdown') : null;
+            if (dropdownEl) {
+                // If synthetic wheel event from KDE Plasma plugin occurs over the open dropdown, scroll it
+                if (e.target === window) {
+                    dropdownEl.scrollTop += e.deltaY;
+                }
+                return;
+            }
+            e.preventDefault();
+            const dY = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+            if (dY === 0 || wheelControlledSliders.size === 0) return;
+
+            // Scroll up (dY < 0) increases checked sliders; scroll down (dY > 0) decreases them
+            const dir = -Math.sign(dY);
+
+            if (wheelControlledSliders.has('tightness')) {
+                baseTightnessScale = THREE.MathUtils.clamp(baseTightnessScale + dir * 0.025, 0.68, 1.35);
+            }
+            if (wheelControlledSliders.has('radius')) {
+                targetRadius = THREE.MathUtils.clamp(targetRadius + dir * 0.18, 0.30, 5.50);
+            }
+            if (wheelControlledSliders.has('bgGlow')) {
+                bgGlowIntensity = THREE.MathUtils.clamp(bgGlowIntensity + dir * 0.08, 0.00, 2.00);
+                bgUniforms.uBgGlowIntensity.value = bgGlowIntensity;
+            }
+            if (wheelControlledSliders.has('snowIntensity')) {
+                snowIntensity = THREE.MathUtils.clamp(snowIntensity + dir * 0.07, 0.10, 2.00);
+                if (!isSnowEnabled && dir > 0) isSnowEnabled = true;
+            }
+            if (wheelControlledSliders.has('snowForcefield')) {
+                snowForcefieldRadius = THREE.MathUtils.clamp(snowForcefieldRadius + dir * 0.20, 0.00, 6.00);
+            }
+            syncAllHudState();
+        }, { passive: false });
+
+        window.addEventListener('resize', () => {
+            wakeFromIdle();
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            bgUniforms.uAspect.value = camera.aspect;
+            renderer.setPixelRatio(getOptimalPixelRatio());
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ============================================================================
+        // 8. ANIMATION LOOP: 4 MODES + SPRING-DAMPER COHERENCE + SNOW + TUX GLITCH
+        // ============================================================================
+        const clock = new THREE.Clock();
+        const lookAtTarget = new THREE.Vector3(0, 0, 0);
+        const defaultForward = new THREE.Vector3(0, 0, -1);
+        const identityQuat = new THREE.Quaternion(0, 0, 0, 1);
+        const tempWorldPos = new THREE.Vector3();
+        const tempRayToPiece = new THREE.Vector3();
+        const tempWorldCompQuat = new THREE.Quaternion();
+        const tempLocalCompQuat = new THREE.Quaternion();
+        const tempTiltQuat = new THREE.Quaternion();
+        const tuxPlaneCenter = new THREE.Vector3(0, -0.04, 0);
+        let currentSquish = 0.0;
+        let avgRingCompression = 0.0;
+
+        syncAllHudState();
+
+        function animate(nowMs = 0) {
+            requestAnimationFrame(animate);
+
+            if (document.hidden) {
+                clock.getDelta();
+                return;
+            }
+
+            // Throttle to ~22 FPS only when snow is OFF and cursor/physics have been settled > 2s
+            if (!isSnowEnabled && idleSettledTime > 2.0 && (nowMs - lastRenderTimeMs) < IDLE_FRAME_INTERVAL_MS) {
+                return;
+            }
+            lastRenderTimeMs = nowMs;
+
+            const dt = Math.min(clock.getDelta(), 0.05);
+            const elapsed = clock.getElapsedTime();
+            const damp = 1.0 - Math.exp(-8.0 * dt);
+
+            smoothedMouse.lerp(mouseNDC, damp);
+            currentRadius = THREE.MathUtils.lerp(currentRadius, targetRadius, damp * 1.5);
+            sharedUniforms.uRadius.value = currentRadius;
+            sharedUniforms.uColorTheme.value = THREE.MathUtils.lerp(
+                sharedUniforms.uColorTheme.value,
+                targetThemeMix,
+                damp * 1.6
+            );
+
+            // Update background glow shader uniforms
+            bgUniforms.uPointerOffset.value.copy(smoothedMouse);
+            bgUniforms.uBlenderMode.value = THREE.MathUtils.lerp(
+                bgUniforms.uBlenderMode.value,
+                currentViewMode === 'blender' ? 1.0 : 0.0,
+                damp * 1.8
+            );
+            bgUniforms.uTime.value = elapsed;
+
+            const targetFov =
+                currentViewMode === 'optical' ? 22 :
+                currentViewMode === 'nuanced' ? 28 : 34;
+
+            if (Math.abs(currentCamFov - targetFov) > 0.02) {
+                currentCamFov = THREE.MathUtils.lerp(currentCamFov, targetFov, damp * 1.4);
+                camera.fov = currentCamFov;
+                camera.updateProjectionMatrix();
+            }
+
+            const mouseRadialDist = Math.min(1.35, smoothedMouse.length());
+
+            if (currentViewMode === 'nuanced') {
+                const camBaseZ = 20.4;
+                camera.position.x = smoothedMouse.x * 4.45;
+                camera.position.y = smoothedMouse.y * 4.45;
+                camera.position.z = camBaseZ - mouseRadialDist * 0.85 - currentSquish * 0.55;
+                lookAtTarget.set(smoothedMouse.x * 0.30, smoothedMouse.y * 0.30, 0);
+                camera.lookAt(lookAtTarget);
+            } else if (currentViewMode === 'optical') {
+                const opticalCamZ = 25.2;
+                camera.position.x = smoothedMouse.x * 2.85;
+                camera.position.y = smoothedMouse.y * 2.85;
+                camera.position.z = opticalCamZ - mouseRadialDist * 0.65 - currentSquish * 0.45;
+                lookAtTarget.set(smoothedMouse.x * 0.14, smoothedMouse.y * 0.14, 0);
+                camera.lookAt(lookAtTarget);
+            } else if (currentViewMode === 'legacy') {
+                const legacyCamZ = 16.5;
+                camera.position.x = smoothedMouse.x * 2.65;
+                camera.position.y = smoothedMouse.y * 2.65;
+                camera.position.z = legacyCamZ - mouseRadialDist * 0.55;
+                lookAtTarget.set(smoothedMouse.x * 0.18, smoothedMouse.y * 0.18, 0);
+                camera.lookAt(lookAtTarget);
+            } else {
+                const sinPhi = Math.sin(orbitSpherical.phi);
+                camera.position.set(
+                    orbitSpherical.radius * sinPhi * Math.sin(orbitSpherical.theta),
+                    orbitSpherical.radius * Math.cos(orbitSpherical.phi),
+                    orbitSpherical.radius * sinPhi * Math.cos(orbitSpherical.theta)
+                );
+                camera.lookAt(0, 0, 0);
+            }
+            camera.updateMatrixWorld();
+
+            raycaster.setFromCamera(mouseNDC, camera);
+            sharedUniforms.uRayOrigin.value.copy(raycaster.ray.origin);
+            sharedUniforms.uRayDir.value.copy(raycaster.ray.direction);
+
+            const rayToTuxDist = raycaster.ray.distanceToPoint(tuxPlaneCenter);
+            const hexRadius = getHexagonRadius();
+            const isInsideHex = currentViewMode !== 'blender' && tuxMesh.visible && rayToTuxDist < hexRadius;
+
+            const normalizedDist = THREE.MathUtils.clamp(rayToTuxDist / hexRadius, 0.0, 1.0);
+            const centerProximity = 0.08 + 0.92 * Math.pow(1.0 - normalizedDist, 1.35);
+
+            if (!isInsideHex) {
+                clickLatchedInHex = false;
+            }
+            if (clickPulseTimer > 0) {
+                clickPulseTimer = Math.max(0.0, clickPulseTimer - dt);
+            }
+
+            let isGlitchTriggered = false;
+            if (tuxMesh.visible && currentViewMode !== 'blender') {
+                if (glitchTriggerMode === 'hover') {
+                    isGlitchTriggered = isInsideHex;
+                } else if (glitchTriggerMode === 'click') {
+                    isGlitchTriggered = isInsideHex && (isPointerDown || clickLatchedInHex || clickPulseTimer > 0.0);
+                } else {
+                    isGlitchTriggered = false;
+                }
+            }
+
+            let targetGlitchEnvelope = 0.0;
+            if (isGlitchTriggered) {
+                if (glitchTimingMode === 'continuous') {
+                    targetGlitchEnvelope = centerProximity;
+                } else {
+                    const maxCalmPause = THREE.MathUtils.lerp(1.15, 0.14, centerProximity);
+                    const minCalmPause = THREE.MathUtils.lerp(0.38, 0.035, centerProximity);
+                    const minBurstDur  = THREE.MathUtils.lerp(0.04, 0.09, centerProximity);
+                    const maxBurstDur  = THREE.MathUtils.lerp(0.11, 0.25, centerProximity);
+
+                    if (!discreteState.wasActiveLastFrame) {
+                        discreteState.isGlitchingNow = true;
+                        discreteState.burstIntensity = 0.75 + Math.random() * 0.25;
+                        discreteState.nextSwitchTime = elapsed + minBurstDur + Math.random() * (maxBurstDur - minBurstDur);
+                    } else {
+                        if (!discreteState.isGlitchingNow) {
+                            discreteState.nextSwitchTime = Math.min(
+                                discreteState.nextSwitchTime,
+                                elapsed + maxCalmPause
+                            );
+                        }
+                        if (elapsed >= discreteState.nextSwitchTime) {
+                            discreteState.isGlitchingNow = !discreteState.isGlitchingNow;
+                            if (discreteState.isGlitchingNow) {
+                                discreteState.burstIntensity = 0.68 + Math.random() * 0.32;
+                                discreteState.nextSwitchTime = elapsed + minBurstDur + Math.random() * (maxBurstDur - minBurstDur);
+                            } else {
+                                discreteState.nextSwitchTime = elapsed + minCalmPause + Math.random() * (maxCalmPause - minCalmPause);
+                            }
+                        }
+                    }
+                    targetGlitchEnvelope = discreteState.isGlitchingNow
+                        ? discreteState.burstIntensity * centerProximity
+                        : 0.0;
+                }
+            } else {
+                targetGlitchEnvelope = 0.0;
+            }
+            discreteState.wasActiveLastFrame = isGlitchTriggered;
+
+            const tightnessAutoSquish = THREE.MathUtils.clamp((0.86 - baseTightnessScale) * 2.2, 0.0, 0.65);
+            const activeSquishTarget = isGlitchTriggered
+                ? (glitchTimingMode === 'continuous'
+                    ? centerProximity
+                    : (0.35 * centerProximity + 0.65 * targetGlitchEnvelope))
+                : (isInsideHex && glitchTriggerMode === 'click' ? 0.18 * centerProximity : 0.0);
+
+            const squishTarget = Math.min(1.0, activeSquishTarget + tightnessAutoSquish * 0.45);
+            currentSquish = THREE.MathUtils.lerp(currentSquish, squishTarget, damp * 1.85);
+
+            const outerExpand = THREE.MathUtils.smoothstep(mouseRadialDist, 0.32, 1.15);
+            const collectiveRadialScale =
+                baseTightnessScale
+                - activeSquishTarget * 0.165
+                + outerExpand * 0.21;
+
+            let maxVelSq = 0.0;
+
+            if (currentViewMode === 'nuanced') {
+                for (let i = 0; i < NUM_BLOCKS; i++) {
+                    const b = tBlocks[i];
+
+                    const radialDot = smoothedMouse.x * b.worldRadialDir.x + smoothedMouse.y * b.worldRadialDir.y;
+                    const tangentDot = smoothedMouse.x * b.worldTangentDir.x + smoothedMouse.y * b.worldTangentDir.y;
+
+                    const breatheWave = Math.sin(elapsed * 2.2 + b.phaseOffset) * 0.014;
+                    const squeezeTremor = Math.sin(elapsed * 44.0 + i * 2.09) * 0.012 * currentSquish;
+                    const pieceRadialScale =
+                        collectiveRadialScale
+                        + radialDot * (0.075 * (1.0 - currentSquish * 0.6))
+                        + breatheWave
+                        + squeezeTremor;
+
+                    const localCoherenceSlideX = (-tangentDot * 0.15 + radialDot * 0.045) * (1.0 - currentSquish * 0.35);
+                    const localCoherenceDepthZ = radialDot * 0.22 - tangentDot * 0.085;
+
+                    b.targetPos.set(
+                        BASE_SLOT_POS.x * pieceRadialScale + localCoherenceSlideX,
+                        BASE_SLOT_POS.y * pieceRadialScale,
+                        localCoherenceDepthZ
+                    );
+
+                    const fx = -b.stiffness * (b.posSpring.x - b.targetPos.x) - b.damping * b.posVel.x;
+                    const fy = -b.stiffness * (b.posSpring.y - b.targetPos.y) - b.damping * b.posVel.y;
+                    const fz = -b.stiffness * (b.posSpring.z - b.targetPos.z) - b.damping * b.posVel.z;
+
+                    b.posVel.x += fx * dt;
+                    b.posVel.y += fy * dt;
+                    b.posVel.z += fz * dt;
+
+                    b.posSpring.x += b.posVel.x * dt;
+                    b.posSpring.y += b.posVel.y * dt;
+                    b.posSpring.z += b.posVel.z * dt;
+
+                    const velSq = b.posVel.lengthSq();
+                    if (velSq > maxVelSq) maxVelSq = velSq;
+
+                    b.rigGroup.position.copy(b.posSpring);
+
+                    b.rigGroup.getWorldPosition(tempWorldPos);
+                    tempRayToPiece.subVectors(tempWorldPos, camera.position).normalize();
+                    tempWorldCompQuat.setFromUnitVectors(defaultForward, tempRayToPiece);
+                    tempWorldCompQuat.slerp(identityQuat, 0.42);
+
+                    tempLocalCompQuat.copy(b.sectorQuatInv).multiply(tempWorldCompQuat).multiply(b.sectorQuat);
+
+                    const velTiltAngle = THREE.MathUtils.clamp(
+                        (b.posVel.y * 0.032 - b.posVel.x * 0.022) + currentSquish * 0.035,
+                        -0.11,
+                        0.11
+                    );
+                    tempTiltQuat.setFromAxisAngle(uVec, velTiltAngle);
+
+                    b.targetQuat.copy(tempLocalCompQuat).multiply(baseTQuat).multiply(tempTiltQuat);
+                    b.currentQuat.slerp(b.targetQuat, damp * 1.4);
+                    b.orientedTGroup.quaternion.copy(b.currentQuat);
+                }
+            } else if (currentViewMode === 'optical') {
+                for (let i = 0; i < NUM_BLOCKS; i++) {
+                    const b = tBlocks[i];
+                    const dirDot = smoothedMouse.x * b.worldRadialDir.x + smoothedMouse.y * b.worldRadialDir.y;
+                    const squeezeTremor = Math.sin(elapsed * 44.0 + i * 2.09) * 0.010 * currentSquish;
+                    const targetScale = collectiveRadialScale + dirDot * 0.04 + squeezeTremor;
+
+                    b.targetPos.set(
+                        BASE_SLOT_POS.x * targetScale,
+                        BASE_SLOT_POS.y * targetScale,
+                        0
+                    );
+                    b.posSpring.lerp(b.targetPos, damp);
+                    b.posVel.set(0, 0, 0);
+                    b.rigGroup.position.copy(b.posSpring);
+
+                    b.rigGroup.getWorldPosition(tempWorldPos);
+                    tempRayToPiece.subVectors(tempWorldPos, camera.position).normalize();
+                    tempWorldCompQuat.setFromUnitVectors(defaultForward, tempRayToPiece);
+                    tempWorldCompQuat.slerp(identityQuat, 0.18);
+
+                    tempLocalCompQuat.copy(b.sectorQuatInv).multiply(tempWorldCompQuat).multiply(b.sectorQuat);
+                    b.targetQuat.copy(tempLocalCompQuat).multiply(baseTQuat);
+                    b.currentQuat.slerp(b.targetQuat, damp * 1.6);
+                    b.orientedTGroup.quaternion.copy(b.currentQuat);
+                }
+            } else if (currentViewMode === 'legacy') {
+                for (let i = 0; i < NUM_BLOCKS; i++) {
+                    const b = tBlocks[i];
+                    const dirDot = smoothedMouse.x * b.worldRadialDir.x + smoothedMouse.y * b.worldRadialDir.y;
+                    const squeezeTremor = Math.sin(elapsed * 44.0 + i * 2.09) * 0.010 * currentSquish;
+                    const targetScale = collectiveRadialScale + dirDot * 0.045 + squeezeTremor;
+
+                    b.targetPos.set(
+                        BASE_SLOT_POS.x * targetScale,
+                        BASE_SLOT_POS.y * targetScale,
+                        0
+                    );
+                    b.posSpring.lerp(b.targetPos, damp);
+                    b.posVel.set(0, 0, 0);
+                    b.rigGroup.position.copy(b.posSpring);
+
+                    b.currentQuat.slerp(baseTQuat, damp * 1.6);
+                    b.orientedTGroup.quaternion.copy(b.currentQuat);
+                }
+            } else {
+                for (let i = 0; i < NUM_BLOCKS; i++) {
+                    const b = tBlocks[i];
+                    b.targetPos.set(
+                        BASE_SLOT_POS.x * baseTightnessScale,
+                        BASE_SLOT_POS.y * baseTightnessScale,
+                        0
+                    );
+                    b.posSpring.lerp(b.targetPos, damp);
+                    b.posVel.set(0, 0, 0);
+                    b.rigGroup.position.copy(b.posSpring);
+
+                    b.currentQuat.slerp(baseTQuat, damp * 1.6);
+                    b.orientedTGroup.quaternion.copy(b.currentQuat);
+                }
+            }
+
+            // Update interactive NixOS Lambda Snowflake simulation & bottom snowpile
+            updateSnowSystem(dt, elapsed);
+
+            const isPointerSettled = smoothedMouse.distanceTo(mouseNDC) < 0.001;
+            const isPhysicsSettled =
+                isPointerSettled &&
+                currentSquish < 0.005 &&
+                !isGlitchTriggered &&
+                !isDraggingOrbit &&
+                maxVelSq < 0.0001;
+
+            if (isPhysicsSettled) {
+                idleSettledTime += dt;
+            } else {
+                idleSettledTime = 0.0;
+            }
+
+            const glitchLerpRate = glitchTimingMode === 'discrete' ? Math.min(1.0, dt * 28.0) : damp * 2.1;
+            avgRingCompression = THREE.MathUtils.lerp(
+                avgRingCompression,
+                targetGlitchEnvelope,
+                glitchLerpRate
+            );
+
+            sharedUniforms.uSquishGlow.value = tuxMesh.visible ? currentSquish : 0.0;
+            tuxUniforms.uTime.value = elapsed;
+            tuxUniforms.uSquish.value = tuxMesh.visible ? currentSquish : 0.0;
+            tuxUniforms.uGlitch.value = tuxMesh.visible
+                ? THREE.MathUtils.clamp(avgRingCompression * 1.12, 0.0, 1.0)
+                : 0.0;
+
+            if (tuxMesh.visible) {
+                const sq = currentSquish;
+                const gl = avgRingCompression;
+                const wobbleX = Math.sin(elapsed * 39.0) * 0.026 * gl;
+                const wobbleY = Math.cos(elapsed * 43.0) * 0.022 * gl;
+                tuxMesh.scale.set(
+                    1.0 - sq * 0.135 + wobbleX,
+                    1.0 - sq * 0.105 + wobbleY,
+                    1.0
+                );
+                tuxMesh.position.set(
+                    Math.sin(elapsed * 55.0) * 0.018 * gl,
+                    -0.04 + Math.cos(elapsed * 49.0) * 0.015 * gl,
+                    0.0
+                );
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+        } // end initSceneApp
+
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', () => ensureThreeLoaded(initSceneApp));
+        } else {
+            ensureThreeLoaded(initSceneApp);
+        }
+    </script>
+</body>
+</html>
