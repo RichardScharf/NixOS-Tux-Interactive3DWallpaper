@@ -1,13 +1,16 @@
 { config, pkgs, lib, ... }:
 
 let
-  defaultWallpaperUrl = "";
-
   # Offline Three.js r128 fallback in /nix/store
   threeJsLib = builtins.fetchurl {
     url = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
     sha256 = "1qhw5j590xf1q2z9j1dagvxqrakmqwqmsavkdii6hqfrr37bnx4j";
   };
+  tuxSvgFile = builtins.fetchurl {
+     url = "https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg";
+     sha256 = "0hwpvgblznav95mnkzvld1d1gcibi5xzb74mky3g4vz123akll6d";
+   };
+   defaultWallpaperUrl = "file:///home/richard/Videos/RedNixPromptgram/red_nixos_tux_3d_interactive_scene.html?three=file://${threeJsLib}&tux=file://${tuxSvgFile}";
 
   declarativeWebWallpaperPlugin = pkgs.stdenv.mkDerivation {
     pname = "plasma6-webwallpaper-declarative";
@@ -886,7 +889,12 @@ let
           WebEngineView {
               id: webview
               anchors.fill: parent
-              url: root.configuredUrl
+              url: {
+                  const base = root.configuredUrl;
+                  if (base.indexOf("three=") !== -1) return base;
+                  const sep = base.indexOf("?") === -1 ? "?" : "&";
+                  return base + sep + "three=file://${threeJsLib}&tux=file://${tuxSvgFile}";
+              }
               backgroundColor: "transparent"
 
               settings.accelerated2dCanvasEnabled: true
@@ -903,6 +911,10 @@ let
                   if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
                       webview.runJavaScript(`
                           (function() {
+                              window.__NIXOS_LOCAL_TUX_SVG = "file://${tuxSvgFile}";
+                              if (window.__applyNixLocalTux) {
+                                  window.__applyNixLocalTux(window.__NIXOS_LOCAL_TUX_SVG);
+                              }
                               if (window.__nixosWallpaperBridgeInstalled) return;
                               window.__nixosWallpaperBridgeInstalled = true;
 
