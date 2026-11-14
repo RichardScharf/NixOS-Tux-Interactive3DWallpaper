@@ -15,11 +15,11 @@ Interactive NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
 ## How to install:
 If you're on NixOS you can just place it in the same folder as your main configuration.nix file (usually /etc/nixos) and then import it like this:
 
-`(your configuration.nix file)`
+_(place this line inside configuration.nix file:)_
 
-imports = [
+``imports = [
 ./wallpaperPlugin.nix
-];
+];``
 
 then run `sudo nixos-rebuild switch`, reboot into the new configuration and then you can go into the Wallpaper Settings of KDE Plasma (by right clicking on an empty space on your desktop and selecting "Desktop and Wallpaper", or pressing Ctrl+Shift+D) and then you should see and select the Wallpaper type: ``NixOS WebGL Wallpaper``
 
