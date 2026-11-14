@@ -10,7 +10,7 @@ let
      url = "https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg";
      sha256 = "0hwpvgblznav95mnkzvld1d1gcibi5xzb74mky3g4vz123akll6d";
    };
-   defaultWallpaperUrl = "file:///home/richard/Videos/RedNixPromptgram/red_nixos_tux_3d_interactive_scene.html?three=file://${threeJsLib}&tux=file://${tuxSvgFile}";
+   defaultWallpaperUrl = "file:///home/YOURUSERNAME/PATH/TO/FILE/nixos_tux_interactive_3d_wallpaper.html?three=file://${threeJsLib}&tux=file://${tuxSvgFile}";
 
   declarativeWebWallpaperPlugin = pkgs.stdenv.mkDerivation {
     pname = "plasma6-webwallpaper-declarative";
