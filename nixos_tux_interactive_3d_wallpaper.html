@@ -419,6 +419,20 @@
                     </div>
                 </div>
 
+                <!-- Pulse Propagation Speed -->
+                <div id="backdrop-pulse-speed-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Pulse Wave Speed</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="backdrop-pulse-speed-slider" type="range" min="6.0" max="60.0" step="1.0" value="15.0" class="hud-slider w-16 cursor-pointer" />
+                        <span id="backdrop-pulse-speed-readout" class="mono text-sky-300 font-medium w-8 text-right">15.0</span>
+                        <label class="wheel-check-label" title="Control Pulse Wave Speed with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="backdropPulseSpeed" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="backdropPulseSpeed" class="pin-btn" title="Pin/Unpin Pulse Wave Speed">📌</button>
+                    </div>
+                </div>
+
                 <!-- Plane Drift Speed -->
                 <div id="backdrop-speed-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
                     <span class="text-neutral-300">Plane Drift Speed</span>
@@ -554,6 +568,81 @@
                 </div>
             </div>
 
+            <!-- SECTION 3.5: CALISTHENICS DUAL SKILL OVERLAY -->
+            <div class="flex flex-col gap-2 border-t border-white/10 pt-2.5">
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-emerald-300">🤸 Calisthenics Dual Overlay</div>
+
+                <!-- Calisthenics Master Visibility Toggle -->
+                <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Calisthenics Overlay</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-calisthenics-btn" class="mode-btn text-sky-400 font-medium">🤸 Calisthenics: ON</button>
+                        <button data-pin="calisthenicsToggle" class="pin-btn" title="Pin/Unpin Calisthenics Toggle">📌</button>
+                    </div>
+                </div>
+
+                <!-- Fill Look: Silhouette vs Hologram -->
+                <div id="calisthenics-style-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Athlete Fill Style</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-calisthenics-style-btn" class="mode-btn text-sky-300 font-medium">Look: Silhouette</button>
+                        <button data-pin="calisthenicsStyle" class="pin-btn" title="Pin/Unpin Calisthenics Look">📌</button>
+                    </div>
+                </div>
+
+                <!-- Skill Transitions (Left: Planche <-> HSPU | Right: Front Lever <-> Hefesto) -->
+                <div id="calisthenics-skills-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Skill Transitions</span>
+                    <div class="flex items-center gap-1">
+                        <button id="calisthenics-left-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Left Athlete: Full Planche Push-Ups ⟷ Deep Handstand Push-Ups">L: Planche</button>
+                        <button id="calisthenics-right-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Right Athlete: Front Lever Pull-Ups ⟷ Back Lever + Hefesto">R: Front Lever</button>
+                        <button data-pin="calisthenicsSkills" class="pin-btn" title="Pin/Unpin Skill Transition Buttons">📌</button>
+                    </div>
+                </div>
+
+                <!-- Rim & Glitch Drive -->
+                <div id="calisthenics-drive-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Rim & Glitch Drive</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="calisthenics-drive-slider" type="range" min="0.20" max="1.80" step="0.05" value="1.00" class="hud-slider w-16 cursor-pointer" />
+                        <span id="calisthenics-drive-readout" class="mono text-sky-300 font-medium w-8 text-right">1.00</span>
+                        <label class="wheel-check-label" title="Control Rim & Glitch Drive with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="calisthenicsDrive" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="calisthenicsDrive" class="pin-btn" title="Pin/Unpin Rim & Glitch Drive">📌</button>
+                    </div>
+                </div>
+
+                <!-- Station Spacing -->
+                <div id="calisthenics-spacing-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Station Spacing</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="calisthenics-spacing-slider" type="range" min="3.00" max="9.00" step="0.05" value="6.85" class="hud-slider w-16 cursor-pointer" />
+                        <span id="calisthenics-spacing-readout" class="mono text-sky-300 font-medium w-8 text-right">6.85</span>
+                        <label class="wheel-check-label" title="Control Station Spacing with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="calisthenicsSpacing" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="calisthenicsSpacing" class="pin-btn" title="Pin/Unpin Station Spacing">📌</button>
+                    </div>
+                </div>
+
+                <!-- Overlay Scale -->
+                <div id="calisthenics-scale-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Overlay Scale</span>
+                    <div class="flex items-center gap-1.5">
+                        <input id="calisthenics-scale-slider" type="range" min="0.18" max="0.85" step="0.01" value="0.34" class="hud-slider w-16 cursor-pointer" />
+                        <span id="calisthenics-scale-readout" class="mono text-sky-300 font-medium w-8 text-right">0.34</span>
+                        <label class="wheel-check-label" title="Control Calisthenics Scale with Mouse Wheel">
+                            <input type="checkbox" data-wheel-slider="calisthenicsScale" class="wheel-checkbox" />
+                            <span>🖱️</span>
+                        </label>
+                        <button data-pin="calisthenicsScale" class="pin-btn" title="Pin/Unpin Calisthenics Scale">📌</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- SECTION 4: TUX & GLITCH -->
             <div class="flex flex-col gap-2 border-t border-white/10 pt-2.5">
                 <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Linux Tux & Glitch</div>
@@ -597,6 +686,7 @@
             mainLogoEnabled: true,          // true | false (Show 3D NixOS 6-Lambda Ring + Tux centerpiece)
             backdropEnabled: true,          // true | false (Show 3D Coaxial Math Matrix Backdrop layer)
             snowEnabled: true,              // true | false (Enable winter NixOS lambda snowfall)
+            calisthenicsEnabled: true,      // true | false (Enable 3D Calisthenics Dual Skill Overlay)
 
             // --- Scene & Centerpiece Defaults ---
             colorTheme: 'blue',             // 'red' | 'blue' (Synchronizes Main Logo, Backdrop & Background)
@@ -608,8 +698,9 @@
             glitchTrigger: 'click',         // 'click' | 'hover' | 'off'
             glitchTiming: 'continuous',     // 'continuous' | 'discrete'
 
-            // --- 3D Math Matrix Backdrop Defaults ---
-            backdropPulseOnClick: true,     // true | false (Emit radial formula pulse wave at cursor on click)
+            // --- 3D Math Matrix Backdrop & Radial Pulse Defaults ---
+            backdropPulseOnClick: true,     // true | false (Emit radial formula & logo wireframe pulse wave at cursor on click)
+            backdropPulseSpeed: 15.0,       // 6.0 .. 60.0 (Radial pulse propagation speed)
             backdropFlightSpeed: 0.020,     // 0.000 .. 0.100 (Formula plane drift speed)
             backdropGridSpacing: 1.00,      // 0.70 .. 1.75 (Orthogonal lattice scale / sparsity)
             backdropBoreSightLock: 0.76,    // 0.00 .. 1.00 (Coaxial hexagonal portal alignment lock)
@@ -618,15 +709,23 @@
             // --- Winter Lambda Snow Defaults ---
             snowIntensity: 0.25,            // 0.10 .. 2.00 (Snowflake count & fall speed multiplier)
             snowForcefieldRadius: 2.50,     // 0.00 .. 6.00 (Cursor repulsion wake radius & push strength)
-            snowColorMode: 'theme',           // 'svg' (Original #5277C3 & #7EBAE4) | 'theme' | 'white'
+            snowColorMode: 'theme',         // 'svg' (Original #5277C3 & #7EBAE4) | 'theme' | 'white'
             snowRotationMode: 'facing',     // 'facing' (Face camera + subtle tilt) | 'tumble' (Full 3D spin)
             snowPileEnabled: true,          // true | false (Accumulate snowbank at the bottom)
             snowLandingMode: 'shatter',     // 'shatter' (Break into 6 λs) | 'dissolve' | 'mini'
+
+            // --- Calisthenics Dual Skill Overlay Defaults ---
+            calisthenicsUseBlackFill: true, // true = Solid Black Silhouette ('silhouette'), false = Scanline Hologram ('hologram')
+            calisthenicsGlitchDrive: 1.00,  // 0.20 .. 1.80 (Rim & glitch shard intensity)
+            calisthenicsSpacing: 6.85,      // 3.00 .. 9.00 (Horizontal corner offset for lower-left & lower-right stations)
+            calisthenicsScale: 0.34,        // 0.18 .. 0.85 (Compact corner scale resting on the snowbank)
+
             hudMenuOpenByDefault: false,    // true | false (Start with the Settings dropdown open)
 
             // Sliders adjusted simultaneously by the Mouse Wheel:
-            // ('tightness', 'radius', 'bgGlow', 'backdropSpeed', 'backdropSpacing',
-            //  'backdropBoresight', 'backdropGrid', 'snowIntensity', 'snowForcefield')
+            // ('tightness', 'radius', 'bgGlow', 'backdropPulseSpeed', 'backdropSpeed', 'backdropSpacing',
+            //  'backdropBoresight', 'backdropGrid', 'snowIntensity', 'snowForcefield',
+            //  'calisthenicsDrive', 'calisthenicsSpacing', 'calisthenicsScale')
             wheelControlledSliders: [
                 'radius',
                 'snowForcefield'
@@ -634,8 +733,10 @@
 
             // Controls pinned to the top-right bar on startup:
             // Available IDs:
-            // 'mainLogoToggle', 'backdropToggle', 'backdropPulse', 'backdropSpeed',
+            // 'mainLogoToggle', 'backdropToggle', 'backdropPulse', 'backdropPulseSpeed', 'backdropSpeed',
             // 'backdropSpacing', 'backdropBoresight', 'backdropGrid',
+            // 'calisthenicsToggle', 'calisthenicsStyle', 'calisthenicsSkills',
+            // 'calisthenicsDrive', 'calisthenicsSpacing', 'calisthenicsScale',
             // 'theme', 'tightness', 'radius', 'bgGlow', 'viewMode',
             // 'snowToggle', 'snowIntensity', 'snowForcefield', 'snowColor', 'snowRotation',
             // 'snowPile', 'snowLanding', 'tux', 'glitchMode', 'glitchTiming'
@@ -643,6 +744,7 @@
                 'theme',
                 'mainLogoToggle',
                 'backdropToggle',
+                'calisthenicsToggle',
                 'snowToggle',
                 'snowIntensity',
                 'snowRotation'
@@ -1543,6 +1645,7 @@
                 this.themeKey = WALLPAPER_THEMES[options.theme] ? options.theme : 'nixos';
                 this.theme = WALLPAPER_THEMES[this.themeKey];
 
+                this.pulseSpeed = options.pulseSpeed !== undefined ? options.pulseSpeed : 24.0;
                 this.flightSpeed = options.flightSpeed !== undefined ? options.flightSpeed : 0.020;
                 this.gridSpacing = options.gridSpacing !== undefined ? options.gridSpacing : 1.00;
                 this.boreSightLock = options.boreSightLock !== undefined ? options.boreSightLock : 0.76;
@@ -1691,22 +1794,22 @@
             }
 
             /**
-             * Fast Projective Hexagonal Portal Mask evaluated directly in `rootGroup` local space
-             * or world space without requiring per-card Matrix4 multiplications.
+             * Evaluates the Projective Hexagonal Portal Mask in local space so equations and
+             * slabs never cross behind Tux when the Main 3D NixOS Logo is visible.
              */
-            computeHexPortalFade(pos, camPos, halfExtent = 0.0) {
+            computeHexPortalFade(localPos, localCamPos, halfExtent = 0.0) {
                 if (this.portalOcclusionStrength <= 0.001) return 1.0;
-                const dz = camPos.z - pos.z;
+                const dz = localCamPos.z - localPos.z;
                 if (dz <= 0.001) return 1.0;
 
-                const t0 = camPos.z / dz;
-                const hexX = camPos.x + t0 * (pos.x - camPos.x);
-                const hexY = camPos.y + t0 * (pos.y - camPos.y);
+                const t0 = localCamPos.z / dz;
+                const hexX = localCamPos.x + t0 * (localPos.x - localCamPos.x);
+                const hexY = localCamPos.y + t0 * (localPos.y - localCamPos.y);
 
                 const ax = Math.abs(hexX);
                 const ay = Math.abs(hexY);
                 const tScale = Math.max(0.75, this.hexTightnessScale);
-                if (ax > 3.4 * tScale || ay > 3.4 * tScale) return 1.0;
+                if (ax > 3.6 * tScale || ay > 3.6 * tScale) return 1.0;
 
                 const hexDist = Math.max(ax * 0.8660254 + ay * 0.5, ay);
                 const projectedMargin = halfExtent * t0 * 0.38;
@@ -1717,7 +1820,7 @@
                     this.baseHexPortalInnerRadius * tScale,
                     this.baseHexPortalOuterRadius * tScale
                 );
-                return THREE.MathUtils.lerp(1.0, rawMask, this.portalOcclusionStrength);
+                return 1.0 - this.portalOcclusionStrength * (1.0 - rawMask);
             }
 
             getOrBakeThemeTextures(themeKey) {
@@ -1759,13 +1862,13 @@
                 this.coordOrigins = [];
                 this.dynamicGridSystems = [];
 
+                this.gridSharedUniforms.uHighlightColor.value.setHex(this.theme.laserHex);
+
                 const cached = this.getOrBakeThemeTextures(this.themeKey);
                 this.heroTextures = cached.hero;
                 this.midTextures = cached.mid;
                 this.ambientTextures = cached.ambient;
                 this.glitchTextures = cached.glitch;
-
-                this.gridSharedUniforms.uHighlightColor.value.setHex(this.theme.laserHex);
 
                 this.buildCartesianGridAndSlabs();
                 this.buildLaserStreaks();
@@ -1829,16 +1932,13 @@
             }
 
             /**
-             * GPU-Accelerated Grid Line Segments:
-             * Computes cursor ray proximity boost, radial pulse wave shockwaves, and hexagonal portal
-             * occlusion directly in the vertex shader (zero CPU vertex loop or buffer upload per frame!).
+             * GPU Vertex-Shader-Driven 3D Orthogonal Grid Segments (Zero per-frame CPU vertex loops).
              */
             createDynamicGridSegments(uvsCoords, hexColor, baseAlpha = 0.5, isSubGrid = false) {
                 const vertexCount = uvsCoords.length / 3;
                 const geometry = new THREE.BufferGeometry();
                 const uvsArray = new Float32Array(uvsCoords);
                 const positions = new Float32Array(vertexCount * 3);
-                const baseColor = new THREE.Color(hexColor);
                 const tmpP = new THREE.Vector3();
 
                 for (let i = 0; i < vertexCount; i++) {
@@ -1855,31 +1955,29 @@
 
                 const material = new THREE.ShaderMaterial({
                     uniforms: {
-                        uBaseColor: { value: new THREE.Vector3(baseColor.r * baseAlpha, baseColor.g * baseAlpha, baseColor.b * baseAlpha) },
+                        uBaseColor: { value: new THREE.Color(hexColor) },
+                        uBaseAlpha: { value: baseAlpha },
                         uOpacity: { value: this.gridIntensity * this.visibilityAlpha },
                         uLocalRayOrigin: this.gridSharedUniforms.uLocalRayOrigin,
                         uLocalRayDir: this.gridSharedUniforms.uLocalRayDir,
                         uRadiusSq: this.gridSharedUniforms.uRadiusSq,
                         uHighlightColor: this.gridSharedUniforms.uHighlightColor,
-                        uCameraWorldPos: this.gridSharedUniforms.uCameraWorldPos,
                         uPortalOcclusion: this.gridSharedUniforms.uPortalOcclusion,
                         uHexInner: this.gridSharedUniforms.uHexInner,
                         uHexOuter: this.gridSharedUniforms.uHexOuter,
                         uPulseCenters: this.gridSharedUniforms.uPulseCenters,
-                        uPulseParams: this.gridSharedUniforms.uPulseParams,
-                        uFogColor: { value: new THREE.Color(this.theme.fogColor) },
-                        uFogDensity: { value: 0.017 }
+                        uPulseParams: this.gridSharedUniforms.uPulseParams
                     },
                     transparent: true,
                     blending: THREE.AdditiveBlending,
                     depthWrite: false,
                     vertexShader: `
                         uniform vec3 uBaseColor;
+                        uniform float uBaseAlpha;
                         uniform vec3 uLocalRayOrigin;
                         uniform vec3 uLocalRayDir;
                         uniform float uRadiusSq;
                         uniform vec3 uHighlightColor;
-                        uniform vec3 uCameraWorldPos;
                         uniform float uPortalOcclusion;
                         uniform float uHexInner;
                         uniform float uHexOuter;
@@ -1887,73 +1985,68 @@
                         uniform vec4 uPulseParams[4];
 
                         varying vec3 vColor;
-                        varying float vFogDepth;
+                        varying float vDepthFade;
 
                         void main() {
-                            vec3 lPos = position;
-                            vec4 worldPos4 = modelMatrix * vec4(lPos, 1.0);
-                            vec3 wPos = worldPos4.xyz;
+                            vec3 p = position;
 
-                            // 1. Coaxial Hexagonal Portal Masking
+                            // 1. Projective Hexagonal Portal Mask in local space
                             float hexMask = 1.0;
-                            if (uPortalOcclusion > 0.01 && abs(lPos.x) < 3.6 && abs(lPos.y) < 3.4) {
-                                float dz = uCameraWorldPos.z - wPos.z;
+                            if (uPortalOcclusion > 0.001 && abs(p.x) < 3.8 && abs(p.y) < 3.6) {
+                                float dz = uLocalRayOrigin.z - p.z;
                                 if (dz > 0.001) {
-                                    float t0 = uCameraWorldPos.z / dz;
-                                    vec2 hexXY = abs(uCameraWorldPos.xy + t0 * (wPos.xy - uCameraWorldPos.xy));
+                                    float t0 = uLocalRayOrigin.z / dz;
+                                    vec2 hexXY = abs(uLocalRayOrigin.xy + t0 * (p.xy - uLocalRayOrigin.xy));
                                     float hexDist = max(hexXY.x * 0.8660254 + hexXY.y * 0.5, hexXY.y);
                                     float rawMask = smoothstep(uHexInner, uHexOuter, hexDist);
-                                    hexMask = mix(1.0, rawMask, uPortalOcclusion);
+                                    hexMask = 1.0 - uPortalOcclusion * (1.0 - rawMask);
                                 }
                             }
 
                             // 2. Cursor Ray Proximity Boost
                             float boost = 0.0;
-                            if (lPos.z > -48.0) {
-                                vec3 op = lPos - uLocalRayOrigin;
-                                float t = max(0.0, dot(op, uLocalRayDir));
+                            if (p.z > -48.0) {
+                                vec3 op = p - uLocalRayOrigin;
+                                float t = dot(op, uLocalRayDir);
                                 vec3 closest = uLocalRayOrigin + uLocalRayDir * t;
-                                vec3 diff = lPos - closest;
-                                float dRaySq = dot(diff, diff);
-                                if (dRaySq < uRadiusSq) {
-                                    float normD = 1.0 - dRaySq / uRadiusSq;
-                                    boost = normD * sqrt(normD) * 0.85;
+                                vec3 diff = p - closest;
+                                float dSq = dot(diff, diff);
+                                if (dSq < uRadiusSq) {
+                                    float f = 1.0 - dSq / uRadiusSq;
+                                    boost = f * sqrt(f) * 0.85;
                                 }
                             }
 
-                            // 3. Radial 3D Cursor Pulse Waves
+                            // 3. Radial 3D Click Pulse Waves
                             for (int w = 0; w < 4; w++) {
                                 float wIntensity = uPulseParams[w].z;
                                 if (wIntensity > 0.005) {
-                                    vec3 pd = lPos - uPulseCenters[w];
+                                    vec3 pd = p - uPulseCenters[w];
                                     pd.z *= 0.45;
                                     float dist = length(pd);
                                     float ringDiff = abs(dist - uPulseParams[w].x);
                                     float bandW = uPulseParams[w].y;
                                     if (ringDiff < bandW) {
-                                        float ringProfile = 1.0 - ringDiff / bandW;
-                                        boost += ringProfile * ringProfile * wIntensity * 0.95;
+                                        float prof = 1.0 - ringDiff / bandW;
+                                        boost += prof * prof * wIntensity * 0.90;
                                     }
                                 }
                             }
 
-                            vColor = min(vec3(1.0), (uBaseColor + uHighlightColor * boost) * hexMask);
-                            vec4 mvPosition = viewMatrix * worldPos4;
-                            vFogDepth = -mvPosition.z;
-                            gl_Position = projectionMatrix * mvPosition;
+                            vColor = min(vec3(1.0), (uBaseColor * uBaseAlpha + uHighlightColor * boost) * hexMask);
+                            vDepthFade = smoothstep(78.0, 14.0, -p.z);
+
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
                         }
                     `,
                     fragmentShader: `
                         uniform float uOpacity;
-                        uniform vec3 uFogColor;
-                        uniform float uFogDensity;
                         varying vec3 vColor;
-                        varying float vFogDepth;
+                        varying float vDepthFade;
 
                         void main() {
-                            float fogFactor = 1.0 - exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth);
-                            vec3 finalCol = mix(vColor, uFogColor, clamp(fogFactor, 0.0, 1.0));
-                            gl_FragColor = vec4(finalCol, uOpacity);
+                            if (uOpacity <= 0.002) discard;
+                            gl_FragColor = vec4(vColor, uOpacity * vDepthFade);
                         }
                     `
                 });
@@ -1968,7 +2061,6 @@
                     uvsArray,
                     positions,
                     posAttr,
-                    baseColor,
                     baseAlpha,
                     isSubGrid
                 });
@@ -2001,15 +2093,17 @@
                     this.corridorToWorld(o.u, o.v, o.s, o.group.position);
                 }
 
-                // Update cached base positions for non-ambient formula cards and glitch clusters
                 for (let i = 0; i < this.formulaCards.length; i++) {
                     const card = this.formulaCards[i];
                     this.corridorToWorld(card.baseU, card.baseV, card.baseS, card.cachedBasePos);
-                    card.basePos.copy(card.cachedBasePos);
+                    this.corridorToWorld(card.u, card.v, card.s, card.basePos);
+                    card.group.position.copy(card.basePos);
                 }
+
                 for (let i = 0; i < this.glitchClusters.length; i++) {
                     const g = this.glitchClusters[i];
                     this.corridorToWorld(g.u, g.v, g.baseS, g.cachedBasePos);
+                    g.mesh.position.copy(g.cachedBasePos);
                 }
             }
 
@@ -2215,11 +2309,10 @@
                 ];
 
                 for (let i = 0; i < 22; i++) {
-                    const baseOp = 0.26 + (i % 3) * 0.15;
                     const mat = new THREE.MeshBasicMaterial({
                         color: this.theme.laserHex,
                         transparent: true,
-                        opacity: baseOp * this.gridIntensity * this.visibilityAlpha,
+                        opacity: (0.26 + (i % 3) * 0.15) * this.gridIntensity * this.visibilityAlpha,
                         blending: THREE.AdditiveBlending,
                         side: THREE.DoubleSide,
                         depthWrite: false
@@ -2239,7 +2332,7 @@
                         u: rail.u,
                         v: rail.v,
                         s,
-                        baseOpacity: baseOp,
+                        baseOpacity: 0.38,
                         speed: (4.5 + (i % 4) * 2.2) * (i % 3 === 0 ? -0.6 : 1.0)
                     });
                 }
@@ -2370,8 +2463,8 @@
                     baseV: v,
                     baseS: s,
                     planeShear,
-                    cachedBasePos: cardGroup.position.clone(),
                     basePos: cardGroup.position.clone(),
+                    cachedBasePos: cardGroup.position.clone(),
                     baseRotY: ry,
                     baseOpacity: opacity,
                     hoverIntensity: 0,
@@ -2418,6 +2511,24 @@
                     { formulaIndex: 5,  tier: 'hero',planeType: 'XY', u: 4.5,  v: -4.25,s: 9.8,  scale: 1.58, aspectStretch: 1.0,  planeShear: 0.9,   opacity: 0.98 }
                 ];
 
+                USER_CUSTOM_FORMULAS.forEach((customSpec, idx) => {
+                    const catalogIndex = 19 + idx;
+                    if (customSpec.u !== undefined || customSpec.v !== undefined || customSpec.s !== undefined) {
+                        heroLayout.push({
+                            formulaIndex: catalogIndex,
+                            tier: customSpec.tier || 'hero',
+                            planeType: customSpec.planeType || 'XY',
+                            u: customSpec.u !== undefined ? customSpec.u : -4.8,
+                            v: customSpec.v !== undefined ? customSpec.v : 2.6,
+                            s: customSpec.s !== undefined ? customSpec.s : 11.5,
+                            scale: customSpec.scale || 1.4,
+                            aspectStretch: (customSpec.planeType === 'YZ') ? 1.38 : 1.0,
+                            planeShear: customSpec.planeShear !== undefined ? customSpec.planeShear : 0.8,
+                            opacity: customSpec.opacity !== undefined ? customSpec.opacity : 0.96
+                        });
+                    }
+                });
+
                 const sBays = [0, 28];
                 for (let b = 0; b < sBays.length; b++) {
                     const sOff = sBays[b];
@@ -2436,7 +2547,7 @@
             placeDeepMatrixFormulaCloud() {
                 const count = 210;
                 const uPlanes = [-14, -11, -8.8, -6.2, -4.2, -2.8, 2.8, 4.2, 6.2, 8.8, 11.0, 14.0];
-                const vPlanes = [-8.5, -6.5, -5.0, -3.5, -2.5, 2.5, 3.5, 5.0, 6.5, 8.5];
+                const vPlanes = [-8.5, -6.5, -5.0, -3.5, -3.5, -2.5, 2.5, 3.5, 5.0, 6.5, 8.5];
 
                 for (let i = 0; i < count; i++) {
                     const formulaIndex = (i * 7 + 3) % this.formulaCatalog.length;
@@ -2468,10 +2579,10 @@
             }
 
             /**
-             * Emits a 3D Radial Formula Pulse Wave centered directly at the current 3D cursor position!
+             * Emits a 3D Radial Formula & Wireframe Pulse Wave centered directly at the current 3D cursor position!
+             * Works even if the Math Backdrop is toggled off so the Main 3D NixOS Logo wireframe still pulses.
              */
             triggerPulseWave(customMouseNDC = null) {
-                if (!this.isBuilt || !this.rootGroup.visible) return;
                 if (customMouseNDC && this.camera) {
                     this.pointerNDC.copy(customMouseNDC);
                     this.raycaster.setFromCamera(this.pointerNDC, this.camera);
@@ -2479,11 +2590,11 @@
                     this._localRay.copy(this.raycaster.ray).applyMatrix4(this._invRootMat);
                 }
 
+                // 1. Compute 3D epicenter in Backdrop Local Space (z ≈ -11.5)
                 const originLocal = new THREE.Vector3();
-                if (this.cachedHitCard) {
+                if (this.isBuilt && this.rootGroup.visible && this.cachedHitCard) {
                     originLocal.copy(this.cachedHitCard.basePos);
                 } else {
-                    // Place the radial epicenter right along the cursor ray at the foreground hero depth (z ≈ -11.5)
                     const dirZ = Math.min(-0.15, this._localRay.direction.z);
                     const tTarget = (-11.5 - this._localRay.origin.z) / dirZ;
                     originLocal.copy(this._localRay.origin).addScaledVector(
@@ -2492,18 +2603,71 @@
                     );
                 }
 
+                // 2. Compute 3D epicenter on the Main 3D NixOS Logo plane (z = 0 in World Space)
+                const originWorldZ0 = new THREE.Vector3(0, 0, 0);
+                if (this.camera) {
+                    const ray = this.raycaster.ray;
+                    const dirZ = Math.min(-0.15, ray.direction.z);
+                    const tZ0 = -ray.origin.z / dirZ;
+                    originWorldZ0.copy(ray.origin).addScaledVector(ray.direction, Math.max(1.0, tZ0));
+                }
+
                 if (this.pulseWaves.length >= this.MAX_SHADER_PULSES) {
                     this.pulseWaves.shift();
                 }
 
                 this.pulseWaves.push({
                     origin: originLocal,
+                    worldOriginZ0: originWorldZ0,
                     radius: 0.0,
                     maxRadius: 42.0,
-                    speed: 24.0,
+                    speed: this.pulseSpeed,
                     bandWidth: 5.5,
                     intensity: 1.0
                 });
+            }
+
+            /**
+             * Advances active radial pulse waves and syncs the GPU uniform arrays (called every frame
+             * even if the Math Backdrop is hidden so the Main 3D NixOS Logo wireframe pulse stays active).
+             */
+            updatePulseWaves(clampedDt, logoPulseCenters, logoPulseParams) {
+                // Perspective ratio between Main Logo plane (z = 0, dist 20.4) and Backdrop plane (z = -11.5, dist 31.9)
+                // so the shockwave ring expands at the exact same screen-space speed across both layers!
+                const logoPerspectiveRatio = 20.4 / 31.9;
+
+                for (let w = this.pulseWaves.length - 1; w >= 0; w--) {
+                    const wave = this.pulseWaves[w];
+                    wave.speed = this.pulseSpeed;
+                    wave.radius += wave.speed * clampedDt;
+                    const progress = wave.radius / wave.maxRadius;
+                    wave.intensity = Math.max(0.0, 1.0 - progress * progress);
+                    if (wave.radius >= wave.maxRadius) {
+                        this.pulseWaves.splice(w, 1);
+                    }
+                }
+
+                for (let w = 0; w < this.MAX_SHADER_PULSES; w++) {
+                    if (w < this.pulseWaves.length) {
+                        const wave = this.pulseWaves[w];
+                        this.gridPulseCenters[w].copy(wave.origin);
+                        this.gridPulseParams[w].set(wave.radius, wave.bandWidth, wave.intensity, 0.0);
+                        if (logoPulseCenters && logoPulseParams) {
+                            logoPulseCenters[w].copy(wave.worldOriginZ0);
+                            logoPulseParams[w].set(
+                                wave.radius * logoPerspectiveRatio,
+                                Math.max(1.15, wave.bandWidth * 0.34),
+                                wave.intensity,
+                                0.0
+                            );
+                        }
+                    } else {
+                        this.gridPulseParams[w].set(0.0, 1.0, 0.0, 0.0);
+                        if (logoPulseParams) {
+                            logoPulseParams[w].set(0.0, 1.0, 0.0, 0.0);
+                        }
+                    }
+                }
             }
 
             setTheme(themeKey) {
@@ -2591,28 +2755,7 @@
                 }
                 const hitCardState = this.cachedHitCard;
 
-                // 3. Update Radial 3D Cursor Pulse Waves & sync GPU uniforms
-                for (let w = this.pulseWaves.length - 1; w >= 0; w--) {
-                    const wave = this.pulseWaves[w];
-                    wave.radius += wave.speed * clampedDt;
-                    const progress = wave.radius / wave.maxRadius;
-                    wave.intensity = Math.max(0.0, 1.0 - progress * progress);
-                    if (wave.radius >= wave.maxRadius) {
-                        this.pulseWaves.splice(w, 1);
-                    }
-                }
-
-                for (let w = 0; w < this.MAX_SHADER_PULSES; w++) {
-                    if (w < this.pulseWaves.length) {
-                        const wave = this.pulseWaves[w];
-                        this.gridPulseCenters[w].copy(wave.origin);
-                        this.gridPulseParams[w].set(wave.radius, wave.bandWidth, wave.intensity, 0.0);
-                    } else {
-                        this.gridPulseParams[w].set(0.0, 1.0, 0.0, 0.0);
-                    }
-                }
-
-                // 4. Sync GPU Grid Shader Uniforms (Zero CPU vertex loops!)
+                // 3. Sync GPU Grid Shader Uniforms (Zero CPU vertex loops!)
                 const tScale = Math.max(0.75, this.hexTightnessScale);
                 this.gridSharedUniforms.uLocalRayOrigin.value.copy(this._localRay.origin);
                 this.gridSharedUniforms.uLocalRayDir.value.copy(this._localRay.direction);
@@ -2765,6 +2908,1801 @@
         window.MathWallpaperLayer = MathWallpaperLayer;
 
         // ============================================================================
+        // 1D. CALISTHENICS DUAL SKILL OVERLAY (Theme-Adaptive Silhouette & Hologram)
+        // ============================================================================
+        class CalisthenicsDualOverlay {
+            constructor(scene, camera, sharedUniforms, options = {}) {
+                this.scene = scene;
+                this.camera = camera;
+                this.sharedUniforms = sharedUniforms;
+
+                this.config = Object.assign({
+                    stationSpacing: 6.85,
+                    globalScale: 0.34,
+                    minFrequency: 0.10,          // Realistic slow 0.10 Hz at outer hover edge
+                    plancheMaxFrequency: 1.75,   // Absolute maximum 1.75 Hz for Full Planche Push-Ups
+                    handstandMaxFrequency: 0.50, // Absolute maximum 0.50 Hz for Deep Handstand Push-Ups
+                    frontLeverMaxFrequency: 1.25,// Absolute maximum 1.25 Hz for Front Lever Pull-Ups
+                    backLeverMaxFrequency: 0.60, // Absolute maximum 0.60 Hz for Back Lever Pull-Ups
+                    hoverRadiusWorld: 4.35,
+                    strokeRadius: 2.00,
+                    useBlackFill: true,          // Default look: Silhouette
+                    glitchDrive: 1.00,
+                    showRadars: false,
+                    manualMode: false,
+                    manualProgress: 0.0
+                }, options);
+
+                this.visibilityAlpha = options.enabled !== false ? 1.0 : 0.0;
+
+                // Shared uniforms linked to Main Scene ray, radius, pulse waves, and color theme
+                this.calisthenicsUniforms = {
+                    uRayOrigin: sharedUniforms.uRayOrigin,
+                    uRayDir: sharedUniforms.uRayDir,
+                    uStrokeRadius: sharedUniforms.uRadius,
+                    uColorTheme: sharedUniforms.uColorTheme,
+                    uPulseCenters: sharedUniforms.uPulseCenters,
+                    uPulseParams: sharedUniforms.uPulseParams,
+                    uBlackFill: { value: this.config.useBlackFill ? 1.0 : 0.0 },
+                    uOverlayAlpha: { value: this.visibilityAlpha }
+                };
+
+                this.rootGroup = new THREE.Group();
+                this.rootGroup.name = 'CalisthenicsDualOverlayGroup';
+                this.rootGroup.visible = options.enabled !== false;
+                this.scene.add(this.rootGroup);
+
+                this._redThemeColor = new THREE.Color(0xff2828);
+                this._blueThemeColor = new THREE.Color(0x4db8ff);
+                this._activeThemeColor = new THREE.Color();
+
+                this._initSharedAssets();
+
+                this.planche = this._createPlancheStation();
+                this.frontLever = this._createFrontLeverStation();
+
+                this.rootGroup.add(this.planche.group);
+                this.rootGroup.add(this.frontLever.group);
+
+                this._initSparkParticles();
+                this._updateStationLayout();
+
+                this.pointerNDC = new THREE.Vector2(-99, -99);
+                this.pointerWorld = new THREE.Vector3(-999, -999, 0);
+                this.raycaster = new THREE.Raycaster();
+                this.zeroPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+                this._applyPlancheKinematics(0.0, 0.0, 0.0, 0.0);
+                this._applyFrontLeverKinematics(0.0, 0.0, 0.0, 0.0);
+            }
+
+            _initSharedAssets() {
+                this.unitQuadGeo = new THREE.PlaneGeometry(1, 1);
+
+                // 1. Pre-baked 128x128 Soft Dark Smoky Aura Texture
+                const smokeCanvas = document.createElement('canvas');
+                smokeCanvas.width = 128;
+                smokeCanvas.height = 128;
+                const sCtx = smokeCanvas.getContext('2d');
+                const sGrad = sCtx.createRadialGradient(64, 64, 4, 64, 64, 64);
+                sGrad.addColorStop(0.0, 'rgba(0, 0, 0, 0.86)');
+                sGrad.addColorStop(0.45, 'rgba(10, 10, 12, 0.46)');
+                sGrad.addColorStop(0.78, 'rgba(20, 12, 14, 0.14)');
+                sGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
+                sCtx.fillStyle = sGrad;
+                sCtx.fillRect(0, 0, 128, 128);
+                this.smokeTexture = new THREE.CanvasTexture(smokeCanvas);
+
+                // 2. Pre-baked 128x128 Neutral White Radial Glow Texture (tinted dynamically by theme color!)
+                const glowCanvas = document.createElement('canvas');
+                glowCanvas.width = 128;
+                glowCanvas.height = 128;
+                const rCtx = glowCanvas.getContext('2d');
+                const rGrad = rCtx.createRadialGradient(64, 64, 2, 64, 64, 64);
+                rGrad.addColorStop(0.0, 'rgba(255, 255, 255, 0.62)');
+                rGrad.addColorStop(0.40, 'rgba(255, 255, 255, 0.26)');
+                rGrad.addColorStop(0.75, 'rgba(255, 255, 255, 0.07)');
+                rGrad.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
+                rCtx.fillStyle = rGrad;
+                rCtx.fillRect(0, 0, 128, 128);
+                this.glowTexture = new THREE.CanvasTexture(glowCanvas);
+
+                this.matFloorPad = new THREE.MeshBasicMaterial({
+                    color: 0x565a62,
+                    transparent: true,
+                    opacity: 0.85,
+                    depthTest: false,
+                    depthWrite: false
+                });
+                this.matFloorBorder = new THREE.MeshBasicMaterial({
+                    color: 0x3f434a,
+                    transparent: true,
+                    opacity: 0.80,
+                    depthTest: false,
+                    depthWrite: false
+                });
+            }
+
+            /**
+             * Creates per-station Stencil-Locked Hologram & Silhouette ShaderMaterials.
+             * All tiers within a station share `stationUniforms` by reference so updating
+             * 3 uniform values per frame updates all 12 passes simultaneously.
+             */
+            _createStationMaterials() {
+                const cu = this.calisthenicsUniforms;
+                const stationUniforms = {
+                    uTime: { value: 0.0 },
+                    uEnergy: { value: 0.0 },
+                    uDrive: { value: this.config.glitchDrive }
+                };
+
+                const makeStencilHologramTier = (refCore, refRim, refHalo, baseAlpha) => {
+                    const core = new THREE.ShaderMaterial({
+                        uniforms: {
+                            uTime: stationUniforms.uTime,
+                            uEnergy: stationUniforms.uEnergy,
+                            uDrive: stationUniforms.uDrive,
+                            uBaseAlpha: { value: baseAlpha },
+                            uBlackFill: cu.uBlackFill,
+                            uColorTheme: cu.uColorTheme,
+                            uOverlayAlpha: cu.uOverlayAlpha
+                        },
+                        vertexShader: `
+                            varying vec3 vWorldPos;
+                            void main() {
+                                vec4 wp = modelMatrix * vec4(position, 1.0);
+                                vWorldPos = wp.xyz;
+                                gl_Position = projectionMatrix * viewMatrix * wp;
+                            }
+                        `,
+                        fragmentShader: `
+                            varying vec3 vWorldPos;
+                            uniform float uTime;
+                            uniform float uEnergy;
+                            uniform float uDrive;
+                            uniform float uBaseAlpha;
+                            uniform float uBlackFill;
+                            uniform float uColorTheme;
+                            uniform float uOverlayAlpha;
+
+                            void main() {
+                                if (uOverlayAlpha <= 0.003) discard;
+                                if (uBlackFill > 0.999) {
+                                    gl_FragColor = vec4(0.0, 0.0, 0.0, uOverlayAlpha);
+                                    return;
+                                }
+                                float scan = 0.5 + 0.5 * sin(vWorldPos.y * 52.0 - uTime * 9.0);
+                                float pulse = 0.5 + 0.5 * sin(vWorldPos.x * 1.6 + uTime * 3.2);
+
+                                // Red Theme Hologram Core
+                                vec3 redDeep   = vec3(0.09, 0.010, 0.014);
+                                vec3 redPlasma = vec3(0.36, 0.025, 0.030) * (0.42 + 0.58 * pulse);
+                                vec3 redScan   = vec3(0.18, 0.018, 0.020) * scan * (0.28 + 0.55 * uEnergy * uDrive);
+                                vec3 redHolo   = redDeep + redPlasma * (0.55 + 0.45 * uEnergy) + redScan;
+
+                                // NixOS Blue Theme Hologram Core (#5277C3 & #7EBAE4)
+                                vec3 blueDeep   = vec3(0.012, 0.036, 0.085);
+                                vec3 bluePlasma = vec3(0.10, 0.28, 0.56) * (0.42 + 0.58 * pulse);
+                                vec3 blueScan   = vec3(0.16, 0.42, 0.72) * scan * (0.28 + 0.55 * uEnergy * uDrive);
+                                vec3 blueHolo   = blueDeep + bluePlasma * (0.55 + 0.45 * uEnergy) + blueScan;
+
+                                vec3 holoCol = mix(redHolo, blueHolo, uColorTheme);
+                                vec3 finalCol = mix(holoCol, vec3(0.0, 0.0, 0.0), uBlackFill);
+                                float finalAlpha = mix(uBaseAlpha, 1.0, uBlackFill) * uOverlayAlpha;
+                                gl_FragColor = vec4(finalCol, finalAlpha);
+                            }
+                        `,
+                        transparent: true,
+                        depthTest: false,
+                        depthWrite: false,
+                        stencilWrite: true,
+                        stencilRef: refCore,
+                        stencilFunc: THREE.GreaterStencilFunc,
+                        stencilFail: THREE.KeepStencilOp,
+                        stencilZFail: THREE.KeepStencilOp,
+                        stencilZPass: THREE.ReplaceStencilOp
+                    });
+
+                    const rim = new THREE.ShaderMaterial({
+                        uniforms: {
+                            uRayOrigin: cu.uRayOrigin,
+                            uRayDir: cu.uRayDir,
+                            uStrokeRadius: cu.uStrokeRadius,
+                            uBlackFill: cu.uBlackFill,
+                            uColorTheme: cu.uColorTheme,
+                            uOverlayAlpha: cu.uOverlayAlpha,
+                            uPulseCenters: cu.uPulseCenters,
+                            uPulseParams: cu.uPulseParams,
+                            uEnergy: stationUniforms.uEnergy,
+                            uDrive: stationUniforms.uDrive,
+                            uTime: stationUniforms.uTime
+                        },
+                        vertexShader: `
+                            varying vec3 vWorldPos;
+                            void main() {
+                                vec4 wp = modelMatrix * vec4(position, 1.0);
+                                vWorldPos = wp.xyz;
+                                gl_Position = projectionMatrix * viewMatrix * wp;
+                            }
+                        `,
+                        fragmentShader: `
+                            varying vec3 vWorldPos;
+                            uniform vec3 uRayOrigin;
+                            uniform vec3 uRayDir;
+                            uniform float uStrokeRadius;
+                            uniform float uBlackFill;
+                            uniform float uColorTheme;
+                            uniform float uOverlayAlpha;
+                            uniform vec3 uPulseCenters[4];
+                            uniform vec4 uPulseParams[4];
+                            uniform float uEnergy;
+                            uniform float uDrive;
+                            uniform float uTime;
+
+                            float distToRay(vec3 p, vec3 ro, vec3 rd) {
+                                vec3 op = p - ro;
+                                float t = dot(op, rd);
+                                vec3 closest = ro + rd * t;
+                                return length(p - closest);
+                            }
+
+                            void main() {
+                                if (uOverlayAlpha <= 0.003) discard;
+                                float dRay = distToRay(vWorldPos, uRayOrigin, uRayDir);
+                                float hoverMask = 1.0 - smoothstep(uStrokeRadius * 0.16, uStrokeRadius * 1.35, dRay);
+                                hoverMask = pow(clamp(hoverMask, 0.0, 1.0), 1.35);
+
+                                // Radial Click Pulse Wave boost along the athlete & bar outlines
+                                float pulseBoost = 0.0;
+                                for (int w = 0; w < 4; w++) {
+                                    float wIntensity = uPulseParams[w].z;
+                                    if (wIntensity > 0.005) {
+                                        float dist = length(vWorldPos.xy - uPulseCenters[w].xy);
+                                        float ringDiff = abs(dist - uPulseParams[w].x);
+                                        float bandW = uPulseParams[w].y;
+                                        if (ringDiff < bandW) {
+                                            float p = 1.0 - ringDiff / bandW;
+                                            pulseBoost += p * p * wIntensity;
+                                        }
+                                    }
+                                }
+
+                                hoverMask = clamp(hoverMask + pulseBoost * 0.75, 0.0, 1.0);
+
+                                // Red Theme Rim Palette
+                                vec3 redHoloIdle = vec3(0.86, 0.09, 0.08);
+                                vec3 redSilIdle  = vec3(0.50, 0.05, 0.055);
+                                vec3 redHotRim   = vec3(1.00, 0.18, 0.09);
+                                vec3 redPeakRim  = vec3(1.00, 0.55, 0.30);
+
+                                // NixOS Blue Theme Rim Palette (#5277C3 & #7EBAE4 -> Cyan Peak)
+                                vec3 blueHoloIdle = vec3(0.42, 0.72, 0.94);
+                                vec3 blueSilIdle  = vec3(0.26, 0.46, 0.78);
+                                vec3 blueHotRim   = vec3(0.49, 0.80, 0.98);
+                                vec3 bluePeakRim  = vec3(0.86, 0.97, 1.00);
+
+                                vec3 holoIdleRim = mix(redHoloIdle, blueHoloIdle, uColorTheme);
+                                vec3 silIdleRim  = mix(redSilIdle,  blueSilIdle,  uColorTheme);
+                                vec3 activeHotRim = mix(redHotRim,  blueHotRim,   uColorTheme);
+                                vec3 peakCoreRim  = mix(redPeakRim, bluePeakRim,  uColorTheme);
+
+                                vec3 baseIdleRim = mix(holoIdleRim, silIdleRim, uBlackFill);
+                                float gradMix = clamp(hoverMask * (0.85 + 0.25 * uDrive) + uEnergy * 0.32, 0.0, 1.0);
+                                vec3 rimCol = mix(baseIdleRim, activeHotRim, smoothstep(0.0, 0.65, gradMix));
+                                rimCol = mix(rimCol, peakCoreRim, smoothstep(0.58, 1.0, hoverMask * uDrive));
+
+                                float baseIdleAlpha = mix(0.90, 0.65, uBlackFill);
+                                float rimAlpha = mix(baseIdleAlpha, 1.0, clamp(hoverMask * 0.92 + uEnergy * 0.35, 0.0, 1.0)) * uOverlayAlpha;
+                                gl_FragColor = vec4(rimCol, rimAlpha);
+                            }
+                        `,
+                        transparent: true,
+                        depthTest: false,
+                        depthWrite: false,
+                        stencilWrite: true,
+                        stencilRef: refRim,
+                        stencilFunc: THREE.GreaterStencilFunc,
+                        stencilFail: THREE.KeepStencilOp,
+                        stencilZFail: THREE.KeepStencilOp,
+                        stencilZPass: THREE.ReplaceStencilOp
+                    });
+
+                    const halo = new THREE.ShaderMaterial({
+                        uniforms: {
+                            uRayOrigin: cu.uRayOrigin,
+                            uRayDir: cu.uRayDir,
+                            uStrokeRadius: cu.uStrokeRadius,
+                            uBlackFill: cu.uBlackFill,
+                            uColorTheme: cu.uColorTheme,
+                            uOverlayAlpha: cu.uOverlayAlpha,
+                            uPulseCenters: cu.uPulseCenters,
+                            uPulseParams: cu.uPulseParams,
+                            uEnergy: stationUniforms.uEnergy,
+                            uDrive: stationUniforms.uDrive
+                        },
+                        vertexShader: `
+                            varying vec3 vWorldPos;
+                            void main() {
+                                vec4 wp = modelMatrix * vec4(position, 1.0);
+                                vWorldPos = wp.xyz;
+                                gl_Position = projectionMatrix * viewMatrix * wp;
+                            }
+                        `,
+                        fragmentShader: `
+                            varying vec3 vWorldPos;
+                            uniform vec3 uRayOrigin;
+                            uniform vec3 uRayDir;
+                            uniform float uStrokeRadius;
+                            uniform float uBlackFill;
+                            uniform float uColorTheme;
+                            uniform float uOverlayAlpha;
+                            uniform vec3 uPulseCenters[4];
+                            uniform vec4 uPulseParams[4];
+                            uniform float uEnergy;
+                            uniform float uDrive;
+
+                            float distToRay(vec3 p, vec3 ro, vec3 rd) {
+                                vec3 op = p - ro;
+                                float t = dot(op, rd);
+                                vec3 closest = ro + rd * t;
+                                return length(p - closest);
+                            }
+
+                            void main() {
+                                if (uOverlayAlpha <= 0.003) discard;
+                                float dRay = distToRay(vWorldPos, uRayOrigin, uRayDir);
+                                float hoverMask = 1.0 - smoothstep(uStrokeRadius * 0.16, uStrokeRadius * 1.35, dRay);
+                                hoverMask = pow(clamp(hoverMask, 0.0, 1.0), 1.35);
+
+                                float pulseBoost = 0.0;
+                                for (int w = 0; w < 4; w++) {
+                                    float wIntensity = uPulseParams[w].z;
+                                    if (wIntensity > 0.005) {
+                                        float dist = length(vWorldPos.xy - uPulseCenters[w].xy);
+                                        float ringDiff = abs(dist - uPulseParams[w].x);
+                                        float bandW = uPulseParams[w].y;
+                                        if (ringDiff < bandW) {
+                                            float p = 1.0 - ringDiff / bandW;
+                                            pulseBoost += p * p * wIntensity;
+                                        }
+                                    }
+                                }
+                                hoverMask = clamp(hoverMask + pulseBoost * 0.65, 0.0, 1.0);
+
+                                vec3 redHalo  = mix(vec3(0.68, 0.03, 0.03), vec3(1.0, 0.12, 0.05), hoverMask);
+                                vec3 blueHalo = mix(vec3(0.14, 0.36, 0.76), vec3(0.45, 0.80, 1.00), hoverMask);
+                                vec3 haloCol  = mix(redHalo, blueHalo, uColorTheme);
+
+                                float baseHalo = mix(0.16, 0.08, uBlackFill);
+                                float haloAlpha = (baseHalo + 0.44 * hoverMask + 0.18 * uEnergy) * clamp(uDrive, 0.3, 1.8) * uOverlayAlpha;
+                                gl_FragColor = vec4(haloCol, clamp(haloAlpha, 0.0, 0.72));
+                            }
+                        `,
+                        transparent: true,
+                        depthTest: false,
+                        depthWrite: false,
+                        stencilWrite: true,
+                        stencilRef: refHalo,
+                        stencilFunc: THREE.GreaterStencilFunc,
+                        stencilFail: THREE.KeepStencilOp,
+                        stencilZFail: THREE.KeepStencilOp,
+                        stencilZPass: THREE.ReplaceStencilOp
+                    });
+
+                    return { core, rim, halo };
+                };
+
+                const farTier = makeStencilHologramTier(3, 2, 1, 0.84);
+                const nearTier = makeStencilHologramTier(6, 5, 4, 0.88);
+                const athleteTier = makeStencilHologramTier(10, 9, 8, 0.88);
+                const fgBarTier = makeStencilHologramTier(14, 13, 12, 0.88);
+
+                return {
+                    stationUniforms,
+                    barFarCore: farTier.core,
+                    barFarRim: farTier.rim,
+                    barFarHalo: farTier.halo,
+                    barNearCore: nearTier.core,
+                    barNearRim: nearTier.rim,
+                    barNearHalo: nearTier.halo,
+                    athleteCore: athleteTier.core,
+                    athleteRim: athleteTier.rim,
+                    athleteHalo: athleteTier.halo,
+                    barFgCore: fgBarTier.core,
+                    barFgRim: fgBarTier.rim,
+                    barFgHalo: fgBarTier.halo,
+                    matSmokeAura: new THREE.MeshBasicMaterial({
+                        map: this.smokeTexture,
+                        transparent: true,
+                        opacity: 0.78,
+                        depthTest: false,
+                        depthWrite: false
+                    }),
+                    matRedGlowAura: new THREE.MeshBasicMaterial({
+                        map: this.glowTexture,
+                        color: 0x4db8ff,
+                        transparent: true,
+                        opacity: 0.28,
+                        blending: THREE.AdditiveBlending,
+                        depthTest: false,
+                        depthWrite: false
+                    }),
+                    matGlitchShard: new THREE.MeshBasicMaterial({
+                        color: 0x4db8ff,
+                        transparent: true,
+                        opacity: 0.0,
+                        blending: THREE.AdditiveBlending,
+                        depthTest: false,
+                        depthWrite: false
+                    }),
+                    matRadar: new THREE.LineBasicMaterial({
+                        color: 0x4db8ff,
+                        transparent: true,
+                        opacity: 0.45
+                    })
+                };
+            }
+
+            _smoothPolygon(pts, iterations = 3) {
+                let current = pts.map(p => [p[0], p[1], p[2] || 0]);
+                for (let iter = 0; iter < iterations; iter++) {
+                    const next = [];
+                    const n = current.length;
+                    for (let i = 0; i < n; i++) {
+                        const p0 = current[i];
+                        const p1 = current[(i + 1) % n];
+                        if (p0[2] === 1) {
+                            next.push([p0[0], p0[1], 1]);
+                        } else {
+                            next.push([0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1], 0]);
+                        }
+                        if (p1[2] !== 1) {
+                            next.push([0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1], 0]);
+                        }
+                    }
+                    current = next;
+                }
+                return current.map(p => [p[0], p[1]]);
+            }
+
+            _offsetPolygon(pts, offset) {
+                if (Math.abs(offset) < 1e-5) return pts;
+                let area = 0;
+                const n = pts.length;
+                for (let i = 0; i < n; i++) {
+                    const p1 = pts[i];
+                    const p2 = pts[(i + 1) % n];
+                    area += (p1[0] * p2[1] - p2[0] * p1[1]);
+                }
+                const wind = area >= 0 ? 1 : -1;
+
+                const out = [];
+                for (let i = 0; i < n; i++) {
+                    const prev = pts[(i - 1 + n) % n];
+                    const curr = pts[i];
+                    const next = pts[(i + 1) % n];
+
+                    let dx1 = curr[0] - prev[0], dy1 = curr[1] - prev[1];
+                    const l1 = Math.hypot(dx1, dy1) || 1e-6;
+                    dx1 /= l1; dy1 /= l1;
+
+                    let dx2 = next[0] - curr[0], dy2 = next[1] - curr[1];
+                    const l2 = Math.hypot(dx2, dy2) || 1e-6;
+                    dx2 /= l2; dy2 /= l2;
+
+                    const nx1 = dy1 * wind, ny1 = -dx1 * wind;
+                    const nx2 = dy2 * wind, ny2 = -dx2 * wind;
+
+                    const cross = dx1 * dy2 - dy1 * dx2;
+                    const dotNormals = nx1 * nx2 + ny1 * ny2;
+                    const isConvexOuter = (cross * wind) < 0;
+
+                    if (isConvexOuter && dotNormals < 0.75 && offset > 0) {
+                        const angle1 = Math.atan2(ny1, nx1);
+                        let angle2 = Math.atan2(ny2, nx2);
+                        let diff = angle2 - angle1;
+                        while (diff > Math.PI) diff -= Math.PI * 2;
+                        while (diff < -Math.PI) diff += Math.PI * 2;
+
+                        const arcSteps = 3;
+                        for (let s = 0; s <= arcSteps; s++) {
+                            const a = angle1 + diff * (s / arcSteps);
+                            out.push([curr[0] + Math.cos(a) * offset, curr[1] + Math.sin(a) * offset]);
+                        }
+                    } else {
+                        let bx = nx1 + nx2, by = ny1 + ny2;
+                        const bLen = Math.hypot(bx, by);
+                        if (bLen < 1e-4) {
+                            out.push([curr[0] + nx1 * offset, curr[1] + ny1 * offset]);
+                        } else {
+                            bx /= bLen; by /= bLen;
+                            const dot = nx1 * bx + ny1 * by;
+                            const miter = Math.min(offset * 1.18, offset / Math.max(0.55, dot));
+                            out.push([curr[0] + bx * miter, curr[1] + by * miter]);
+                        }
+                    }
+                }
+                return out;
+            }
+
+            _buildRoundedPiBarPolygon(leftX, leftBottomY, leftTopY, rightX, rightBottomY, rightTopY, halfThickness, cornerRadius) {
+                const dxTop = rightX - leftX;
+                const dyTop = rightTopY - leftTopY;
+                const topLen = Math.hypot(dxTop, dyTop) || 1.0;
+                const ux = dxTop / topLen;
+                const uy = dyTop / topLen;
+
+                const cr = Math.min(cornerRadius, topLen * 0.35);
+                const spine = [];
+
+                const addSpinePt = (x, y, tx, ty) => {
+                    const tl = Math.hypot(tx, ty) || 1.0;
+                    spine.push({ x, y, nx: -ty / tl, ny: tx / tl });
+                };
+
+                addSpinePt(leftX, leftBottomY, 0, 1);
+                addSpinePt(leftX, leftTopY - cr, 0, 1);
+
+                const pL0x = leftX, pL0y = leftTopY - cr;
+                const pL1x = leftX + ux * cr, pL1y = leftTopY + uy * cr;
+                const arcSegs = 18;
+                for (let i = 1; i <= arcSegs; i++) {
+                    const t = i / arcSegs;
+                    const mt = 1 - t;
+                    const x = mt * mt * pL0x + 2 * mt * t * leftX + t * t * pL1x;
+                    const y = mt * mt * pL0y + 2 * mt * t * leftTopY + t * t * pL1y;
+                    const tx = 2 * mt * (leftX - pL0x) + 2 * t * (pL1x - leftX);
+                    const ty = 2 * mt * (leftTopY - pL0y) + 2 * t * (pL1y - leftTopY);
+                    addSpinePt(x, y, tx, ty);
+                }
+
+                const pR0x = rightX - ux * cr, pR0y = rightTopY - uy * cr;
+                const pR1x = rightX, pR1y = rightTopY - cr;
+                for (let i = 0; i <= arcSegs; i++) {
+                    const t = i / arcSegs;
+                    const mt = 1 - t;
+                    const x = mt * mt * pR0x + 2 * mt * t * rightX + t * t * pR1x;
+                    const y = mt * mt * pR0y + 2 * mt * t * rightTopY + t * t * pR1y;
+                    const tx = 2 * mt * (rightX - pR0x) + 2 * t * (pR1x - rightX);
+                    const ty = 2 * mt * (rightTopY - pR0y) + 2 * t * (pR1y - rightTopY);
+                    addSpinePt(x, y, tx, ty);
+                }
+
+                addSpinePt(rightX, rightBottomY, 0, -1);
+
+                const pts = [];
+                for (let i = 0; i < spine.length; i++) {
+                    const s = spine[i];
+                    pts.push([s.x + s.nx * halfThickness, s.y + s.ny * halfThickness]);
+                }
+
+                const capSegs = 6;
+                for (let i = 1; i < capSegs; i++) {
+                    const a = (i / capSegs) * Math.PI;
+                    pts.push([rightX + Math.cos(a) * halfThickness, rightBottomY - Math.sin(a) * halfThickness * 0.35]);
+                }
+
+                for (let i = spine.length - 1; i >= 0; i--) {
+                    const s = spine[i];
+                    pts.push([s.x - s.nx * halfThickness, s.y - s.ny * halfThickness]);
+                }
+
+                for (let i = 1; i < capSegs; i++) {
+                    const a = (i / capSegs) * Math.PI;
+                    pts.push([leftX + Math.cos(a) * halfThickness, leftBottomY - Math.sin(a) * halfThickness * 0.35]);
+                }
+
+                return pts;
+            }
+
+            _createRoundedPiBar(leftX, leftBottomY, leftTopY, rightX, rightBottomY, rightTopY, tubeRadius, cornerRadius, coreMat, rimMat, haloMat, options = {}) {
+                const rimWidth = options.rimWidth !== undefined ? options.rimWidth : 0.038;
+                const haloWidth = options.haloWidth !== undefined ? options.haloWidth : 0.082;
+                const baseOrder = (options.baseOrder !== undefined ? options.baseOrder : 14) + 40;
+
+                const corePts = this._buildRoundedPiBarPolygon(
+                    leftX, leftBottomY, leftTopY, rightX, rightBottomY, rightTopY,
+                    tubeRadius, cornerRadius
+                );
+                const rimPts = this._buildRoundedPiBarPolygon(
+                    leftX, leftBottomY, leftTopY, rightX, rightBottomY, rightTopY,
+                    tubeRadius + rimWidth, cornerRadius
+                );
+                const haloPts = this._buildRoundedPiBarPolygon(
+                    leftX, leftBottomY, leftTopY, rightX, rightBottomY, rightTopY,
+                    tubeRadius + haloWidth, cornerRadius
+                );
+
+                const barGroup = new THREE.Group();
+
+                const coreMesh = new THREE.Mesh(this._pointsToShapeGeometry(corePts), coreMat);
+                coreMesh.renderOrder = baseOrder;
+                barGroup.add(coreMesh);
+
+                const rimMesh = new THREE.Mesh(this._pointsToShapeGeometry(rimPts), rimMat);
+                rimMesh.renderOrder = baseOrder + 1;
+                barGroup.add(rimMesh);
+
+                const haloMesh = new THREE.Mesh(this._pointsToShapeGeometry(haloPts), haloMat);
+                haloMesh.renderOrder = baseOrder + 2;
+                barGroup.add(haloMesh);
+
+                return barGroup;
+            }
+
+            _createSmoothLimbSegment(wStart, wMid, wEnd, bulgeX, mats) {
+                const pts = [];
+                const capSteps = 10;
+                const r0 = wStart * 0.88;
+                for (let i = 0; i <= capSteps; i++) {
+                    const a = Math.PI + (i / capSteps) * Math.PI;
+                    pts.push([Math.cos(a) * r0, Math.sin(a) * (r0 * 0.55)]);
+                }
+                pts.push([wStart, 0.16]);
+                pts.push([wMid + bulgeX, 0.50]);
+                pts.push([wEnd, 0.84]);
+
+                const r1 = wEnd * 0.88;
+                for (let i = 0; i <= capSteps; i++) {
+                    const a = (i / capSteps) * Math.PI;
+                    pts.push([Math.cos(a) * r1, 1.0 + Math.sin(a) * (r1 * 0.55)]);
+                }
+                pts.push([-wEnd, 0.84]);
+                pts.push([-wMid + bulgeX * 0.6, 0.50]);
+                pts.push([-wStart, 0.16]);
+
+                return this._createAnatomicalPart(pts, mats, {
+                    subdivisions: 2,
+                    rimWidth: 0.042,
+                    haloWidth: 0.088,
+                    baseOrder: 30
+                });
+            }
+
+            _createJointCircleCap(radius, mats) {
+                const capPts = [];
+                const segs = 20;
+                for (let i = 0; i < segs; i++) {
+                    const a = (i / segs) * Math.PI * 2;
+                    capPts.push([Math.cos(a) * radius, Math.sin(a) * radius]);
+                }
+                return this._createAnatomicalPart(capPts, mats, {
+                    subdivisions: 1,
+                    rimWidth: 0.042,
+                    haloWidth: 0.088,
+                    baseOrder: 30
+                });
+            }
+
+            _pointsToShapeGeometry(pts) {
+                const shape = new THREE.Shape();
+                shape.moveTo(pts[0][0], pts[0][1]);
+                for (let i = 1; i < pts.length; i++) {
+                    shape.lineTo(pts[i][0], pts[i][1]);
+                }
+                shape.closePath();
+                return new THREE.ShapeGeometry(shape);
+            }
+
+            _createStencilPart(rawPoints, coreMat, rimMat, haloMat, options = {}) {
+                const subdivisions = options.subdivisions !== undefined ? options.subdivisions : 3;
+                const rimWidth = options.rimWidth !== undefined ? options.rimWidth : 0.042;
+                const haloWidth = options.haloWidth !== undefined ? options.haloWidth : 0.092;
+                const baseOrder = (options.baseOrder !== undefined ? options.baseOrder : 30) + 40;
+
+                const smoothPts = this._smoothPolygon(rawPoints, subdivisions);
+                const rimPts = this._offsetPolygon(smoothPts, rimWidth);
+                const haloPts = this._offsetPolygon(smoothPts, haloWidth);
+
+                const partGroup = new THREE.Group();
+
+                const coreGeo = this._pointsToShapeGeometry(smoothPts);
+                const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+                coreMesh.renderOrder = baseOrder;
+                partGroup.add(coreMesh);
+
+                const rimGeo = this._pointsToShapeGeometry(rimPts);
+                const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+                rimMesh.renderOrder = baseOrder + 1;
+                partGroup.add(rimMesh);
+
+                const haloGeo = this._pointsToShapeGeometry(haloPts);
+                const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+                haloMesh.renderOrder = baseOrder + 2;
+                partGroup.add(haloMesh);
+
+                return partGroup;
+            }
+
+            _createAnatomicalPart(rawPoints, stationMats, options = {}) {
+                return this._createStencilPart(
+                    rawPoints,
+                    stationMats.athleteCore,
+                    stationMats.athleteRim,
+                    stationMats.athleteHalo,
+                    Object.assign({ baseOrder: 30 }, options)
+                );
+            }
+
+            _createAuraQuad(width, height, material, renderOrder, x = 0, y = 0, rotZ = 0) {
+                const mesh = new THREE.Mesh(this.unitQuadGeo, material);
+                mesh.scale.set(width, height, 1);
+                mesh.position.set(x, y, 0);
+                mesh.rotation.z = rotZ;
+                mesh.renderOrder = renderOrder + 40;
+                return mesh;
+            }
+
+            _createGlitchPool(parentGroup, matGlitchShard) {
+                const shards = [];
+                const configs = [
+                    { w: 2.2, h: 0.032, x: -0.4, y: 0.8 },
+                    { w: 1.6, h: 0.025, x: 0.7, y: 0.4 },
+                    { w: 2.5, h: 0.030, x: -0.2, y: 1.3 },
+                    { w: 1.4, h: 0.024, x: 1.1, y: 1.0 },
+                    { w: 1.9, h: 0.028, x: -1.2, y: 0.5 }
+                ];
+                for (let i = 0; i < configs.length; i++) {
+                    const c = configs[i];
+                    const m = new THREE.Mesh(this.unitQuadGeo, matGlitchShard);
+                    m.scale.set(c.w, c.h, 1);
+                    m.position.set(c.x, c.y, 0);
+                    m.renderOrder = 76;
+                    m.visible = false;
+                    parentGroup.add(m);
+                    shards.push({ mesh: m, baseX: c.x, baseY: c.y, baseW: c.w });
+                }
+                return shards;
+            }
+
+            _createRadarHelper(centerX, centerY, radius, matRadar) {
+                const radarGroup = new THREE.Group();
+                radarGroup.position.set(centerX, centerY, 0);
+                radarGroup.visible = false;
+
+                const makeRing = (r) => {
+                    const pts = [];
+                    const segs = 64;
+                    for (let i = 0; i <= segs; i++) {
+                        const a = (i / segs) * Math.PI * 2;
+                        pts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0));
+                    }
+                    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+                    const line = new THREE.Line(geo, matRadar);
+                    line.renderOrder = 80;
+                    return line;
+                };
+
+                radarGroup.add(makeRing(radius));
+                radarGroup.add(makeRing(radius * 0.5));
+                return radarGroup;
+            }
+
+            _initSparkParticles() {
+                this.sparkCount = 48;
+                const positions = new Float32Array(this.sparkCount * 3);
+                this.sparkData = [];
+
+                for (let i = 0; i < this.sparkCount; i++) {
+                    const stationIdx = i < 24 ? 0 : 1;
+                    const lx = (Math.random() - 0.5) * 5.2;
+                    const ly = (Math.random() - 0.2) * 2.2;
+                    positions[i * 3 + 0] = lx;
+                    positions[i * 3 + 1] = ly;
+                    positions[i * 3 + 2] = 0;
+                    this.sparkData.push({
+                        stationIdx,
+                        lx,
+                        ly,
+                        speedY: 0.45 + Math.random() * 0.85,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+
+                const sparkGeo = new THREE.BufferGeometry();
+                sparkGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+                const sparkMat = new THREE.PointsMaterial({
+                    map: this.glowTexture,
+                    color: 0x4db8ff,
+                    size: 0.24,
+                    transparent: true,
+                    opacity: 0.75,
+                    blending: THREE.AdditiveBlending,
+                    depthTest: false,
+                    depthWrite: false
+                });
+
+                this.sparkPoints = new THREE.Points(sparkGeo, sparkMat);
+                this.sparkPoints.renderOrder = 78;
+                this.rootGroup.add(this.sparkPoints);
+            }
+
+            _createPlancheStation() {
+                const group = new THREE.Group();
+                const mats = this._createStationMaterials();
+
+                const matPts = this._smoothPolygon([
+                    [-3.75, -1.28, 1],
+                    [-1.60, -1.22],
+                    [1.10, -1.26],
+                    [2.16, -1.12, 1],
+                    [2.58, -1.62],
+                    [2.82, -2.55],
+                    [2.72, -3.12, 1],
+                    [-0.40, -3.14],
+                    [-3.68, -3.08, 1],
+                    [-3.96, -2.52],
+                    [-3.92, -1.68]
+                ], 3);
+                const matBorderPts = this._offsetPolygon(matPts, 0.028);
+                const floorBorderMesh = new THREE.Mesh(this._pointsToShapeGeometry(matBorderPts), this.matFloorBorder);
+                floorBorderMesh.renderOrder = 50;
+                group.add(floorBorderMesh);
+
+                const floorPadMesh = new THREE.Mesh(this._pointsToShapeGeometry(matPts), this.matFloorPad);
+                floorPadMesh.renderOrder = 51;
+                group.add(floorPadMesh);
+
+                group.add(this._createAuraQuad(2.3, 3.0, mats.matSmokeAura, 12, 1.38, -1.45, 0));
+                group.add(this._createAuraQuad(1.7, 2.6, mats.matRedGlowAura, 12, 1.40, -1.55, 0));
+                group.add(this._createAuraQuad(2.3, 3.0, mats.matSmokeAura, 12, -3.05, -1.45, 0));
+                group.add(this._createAuraQuad(1.7, 2.6, mats.matRedGlowAura, 12, -3.05, -1.55, 0));
+                group.add(this._createAuraQuad(5.2, 0.9, mats.matSmokeAura, 12, -0.85, -0.22, 0));
+
+                const barsGroup = new THREE.Group();
+                group.add(barsGroup);
+
+                // Near / Foreground П-Bar (Lower & Left in 3D isometric foreground)
+                const nearBarGroup = this._createRoundedPiBar(
+                    -3.58, -2.58, -0.38,
+                    0.62, -2.58, -0.38,
+                    0.082, 0.28,
+                    mats.barNearCore,
+                    mats.barNearRim,
+                    mats.barNearHalo,
+                    { rimWidth: 0.038, haloWidth: 0.080, baseOrder: 13 }
+                );
+                barsGroup.add(nearBarGroup);
+
+                // Far / Rear П-Bar (Higher & Right in 3D isometric depth — clearly separated!)
+                const farBarGroup = this._createRoundedPiBar(
+                    -2.96, -2.18, 0.10,
+                    1.28, -2.18, 0.10,
+                    0.076, 0.28,
+                    mats.barFarCore,
+                    mats.barFarRim,
+                    mats.barFarHalo,
+                    { rimWidth: 0.036, haloWidth: 0.075, baseOrder: 16 }
+                );
+                barsGroup.add(farBarGroup);
+
+                // Near Hand Grip Cap wrapping the Foreground П-Bar near the right rounded end (x = +0.20)
+                const nearGripPts = [
+                    [0.02, -0.32], [0.08, -0.52], [0.28, -0.54],
+                    [0.38, -0.40], [0.34, -0.22], [0.06, -0.22]
+                ];
+                barsGroup.add(this._createAnatomicalPart(nearGripPts, mats, {
+                    subdivisions: 3, rimWidth: 0.040, haloWidth: 0.085, baseOrder: 30
+                }));
+
+                // Far Hand Grip Cap wrapping the Rear П-Bar near the right rounded end (x = +0.54)
+                const farGripPts = [
+                    [0.38, 0.14], [0.44, -0.04], [0.62, -0.05],
+                    [0.70, 0.08], [0.66, 0.24], [0.42, 0.24]
+                ];
+                barsGroup.add(this._createAnatomicalPart(farGripPts, mats, {
+                    subdivisions: 3, rimWidth: 0.040, haloWidth: 0.085, baseOrder: 30
+                }));
+
+                const bodyGroup = new THREE.Group();
+                group.add(bodyGroup);
+
+                const bodySmokeAura = this._createAuraQuad(7.6, 2.35, mats.matSmokeAura, 20, -0.50, 1.25, 0);
+                const bodyRedAura = this._createAuraQuad(6.8, 1.95, mats.matRedGlowAura, 21, -0.45, 1.25, 0);
+                group.add(bodySmokeAura, bodyRedAura);
+
+                const torsoPts = [
+                    [1.64, 1.48], [1.58, 1.14], [1.36, 0.96], [1.00, 0.84],
+                    [0.64, 0.88], [0.24, 1.00], [-0.08, 1.02], [-0.12, 1.32],
+                    [0.02, 1.66], [0.42, 1.64], [0.95, 1.65], [1.36, 1.64]
+                ];
+                bodyGroup.add(this._createAnatomicalPart(torsoPts, mats, { subdivisions: 3 }));
+
+                const headPivot = new THREE.Group();
+                headPivot.position.set(1.58, 1.32, 0);
+                bodyGroup.add(headPivot);
+
+                const headLocalPts = [
+                    [-0.18, 0.22], [0.18, 0.14, 1], [0.34, 0.34], [0.58, 0.44],
+                    [0.84, 0.36], [0.98, 0.16, 1], [0.88, -0.08], [0.83, -0.20, 1],
+                    [0.68, -0.22], [0.56, -0.32, 1], [0.40, -0.30, 1], [0.28, -0.20],
+                    [-0.04, -0.18], [-0.22, 0.02]
+                ];
+                headPivot.add(this._createAnatomicalPart(headLocalPts, mats, { subdivisions: 3 }));
+
+                const pelvisPivot = new THREE.Group();
+                pelvisPivot.position.set(0.18, 1.34, 0);
+                bodyGroup.add(pelvisPivot);
+
+                const pelvisLocalPts = [
+                    [0.22, 0.30], [-0.12, 0.48, 1], [-0.44, 0.47, 1], [-0.83, 0.32],
+                    [-1.43, 0.18], [-1.88, 0.16], [-1.96, -0.02], [-1.90, -0.16],
+                    [-1.44, -0.30, 1], [-1.40, -0.47, 1], [-0.93, -0.49, 1], [-0.36, -0.52, 1],
+                    [0.06, -0.32, 1], [0.26, -0.10]
+                ];
+                pelvisPivot.add(this._createAnatomicalPart(pelvisLocalPts, mats, { subdivisions: 3 }));
+
+                const legsPivot = new THREE.Group();
+                legsPivot.position.set(-1.72, 0.00, 0);
+                pelvisPivot.add(legsPivot);
+
+                const legsLocalPts = [
+                    [0.22, 0.18], [-0.10, 0.22], [-0.63, 0.20], [-1.22, 0.12, 1],
+                    [-1.40, 0.20, 1], [-1.60, 0.08], [-1.92, -0.06], [-2.00, -0.18, 1],
+                    [-1.96, -0.28, 1], [-1.80, -0.29], [-1.56, -0.22], [-1.14, -0.07],
+                    [-0.56, -0.12], [0.05, -0.16], [0.26, -0.02]
+                ];
+                legsPivot.add(this._createAnatomicalPart(legsLocalPts, mats, { subdivisions: 3 }));
+
+                const backLegsPivot = new THREE.Group();
+                backLegsPivot.position.set(-1.68, 0.04, 0);
+                pelvisPivot.add(backLegsPivot);
+                backLegsPivot.add(this._createAnatomicalPart(legsLocalPts, mats, { subdivisions: 3 }));
+
+                const farUpperArm = this._createSmoothLimbSegment(0.15, 0.17, 0.18, 0.020, mats);
+                const farForearm = this._createSmoothLimbSegment(0.13, 0.15, 0.15, 0.015, mats);
+                const farElbowCap = this._createJointCircleCap(0.155, mats);
+                const farShoulderCap = this._createJointCircleCap(0.185, mats);
+
+                const nearUpperArm = this._createSmoothLimbSegment(0.16, 0.19, 0.21, 0.026, mats);
+                const nearForearm = this._createSmoothLimbSegment(0.14, 0.16, 0.16, 0.020, mats);
+                const nearElbowCap = this._createJointCircleCap(0.165, mats);
+                const nearShoulderCap = this._createJointCircleCap(0.21, mats);
+
+                group.add(farUpperArm, farForearm, farElbowCap, farShoulderCap);
+                group.add(nearUpperArm, nearForearm, nearElbowCap, nearShoulderCap);
+
+                const glitchPool = this._createGlitchPool(group, mats.matGlitchShard);
+                const radar = this._createRadarHelper(-0.35, 0.85, this.config.hoverRadiusWorld, mats.matRadar);
+                group.add(radar);
+
+                return {
+                    id: 'planche',
+                    maxFrequency: this.config.plancheMaxFrequency,
+                    altMaxFrequency: this.config.handstandMaxFrequency,
+                    transitionSpeed: 0.38,
+                    group,
+                    mats,
+                    barsGroup,
+                    bodyGroup,
+                    headPivot,
+                    pelvisPivot,
+                    legsPivot,
+                    backLegsPivot,
+                    bodySmokeAura,
+                    bodyRedAura,
+                    nearUpperArm,
+                    nearForearm,
+                    nearElbowCap,
+                    nearShoulderCap,
+                    farUpperArm,
+                    farForearm,
+                    farElbowCap,
+                    farShoulderCap,
+                    glitchPool,
+                    radar,
+                    hoverCenterLocal: new THREE.Vector2(-0.35, 0.85),
+                    state: {
+                        mode: 'IDLE',
+                        isHovering: false,
+                        proximity: 0.0,
+                        smoothedProximity: 0.0,
+                        currentFrequency: 0.0,
+                        cyclePhase: 0.0,
+                        lagPhase: 0.0,
+                        progress: 0.0,
+                        lagProgress: 0.0,
+                        energy: 0.0,
+                        repCount: 0,
+                        altSkillTarget: 0.0,
+                        pendingSkillTarget: null,
+                        transitionMix: 0.0
+                    }
+                };
+            }
+
+            _createFrontLeverStation() {
+                const group = new THREE.Group();
+                const mats = this._createStationMaterials();
+
+                const matPts = this._smoothPolygon([
+                    [-3.68, -2.28], [0.00, -2.20], [2.15, -1.96, 1],
+                    [2.48, -2.26], [2.60, -2.78], [2.46, -3.14, 1],
+                    [-0.50, -3.16], [-3.65, -3.12, 1], [-3.82, -2.65]
+                ], 3);
+                const matBorderPts = this._offsetPolygon(matPts, 0.028);
+                const floorBorderMesh = new THREE.Mesh(this._pointsToShapeGeometry(matBorderPts), this.matFloorBorder);
+                floorBorderMesh.renderOrder = 50;
+                group.add(floorBorderMesh);
+
+                const floorPadMesh = new THREE.Mesh(this._pointsToShapeGeometry(matPts), this.matFloorPad);
+                floorPadMesh.renderOrder = 51;
+                group.add(floorPadMesh);
+
+                const rigGroup = new THREE.Group();
+                group.add(rigGroup);
+
+                const rigStencilPart = this._createRoundedPiBar(
+                    -3.61, -2.92, 2.72,
+                    2.39, -2.22, 1.36,
+                    0.096, 0.34,
+                    mats.barNearCore,
+                    mats.barNearRim,
+                    mats.barNearHalo,
+                    { rimWidth: 0.042, haloWidth: 0.088, baseOrder: 14 }
+                );
+                rigGroup.add(rigStencilPart);
+
+                // Foreground Left Post Overlay (stencilRef = 14..12) so the pole is 100% visible
+                // AND the athlete's legs pass BEHIND the Left Post in Back Lever mode!
+                const fgLeftPostPts = [
+                    [-3.61 - 0.096, -2.92],
+                    [-3.61 - 0.096, 2.40],
+                    [-3.61 + 0.096, 2.40],
+                    [-3.61 + 0.096, -2.92]
+                ];
+                const fgLeftPostPart = this._createStencilPart(
+                    fgLeftPostPts,
+                    mats.barFgCore,
+                    mats.barFgRim,
+                    mats.barFgHalo,
+                    { subdivisions: 1, rimWidth: 0.042, haloWidth: 0.088, baseOrder: 33 }
+                );
+                rigGroup.add(fgLeftPostPart);
+
+                const leftHandCapPts = [
+                    [-1.82, 2.30], [-1.68, 2.43], [-1.44, 2.42],
+                    [-1.33, 2.26], [-1.42, 2.12], [-1.75, 2.16]
+                ];
+                rigGroup.add(this._createAnatomicalPart(leftHandCapPts, mats, {
+                    subdivisions: 3, rimWidth: 0.042, baseOrder: 30
+                }));
+
+                const rightHandCapPts = [
+                    [-0.71, 2.05], [-0.56, 2.15], [-0.36, 2.14],
+                    [-0.27, 2.00], [-0.36, 1.88], [-0.65, 1.92]
+                ];
+                rigGroup.add(this._createAnatomicalPart(rightHandCapPts, mats, {
+                    subdivisions: 3, rimWidth: 0.040, baseOrder: 30
+                }));
+
+                const bodyGroup = new THREE.Group();
+                group.add(bodyGroup);
+
+                const bodySmokeAura = this._createAuraQuad(7.8, 2.55, mats.matSmokeAura, 12, 0.15, 0.65, 0.02);
+                const bodyRedAura = this._createAuraQuad(6.8, 2.10, mats.matRedGlowAura, 13, 0.10, 0.65, 0.02);
+                group.add(bodySmokeAura, bodyRedAura);
+
+                const flTorsoCorePts = [
+                    [-2.58, 0.88], [-2.28, 0.89], [-1.92, 0.89], [-1.55, 0.87],
+                    [-1.15, 0.88], [-0.78, 0.88], [-0.55, 0.86], [-0.52, 0.45],
+                    [-0.88, 0.08], [-1.38, 0.14], [-1.82, 0.08], [-2.25, 0.12],
+                    [-2.56, 0.36], [-2.68, 0.58]
+                ];
+                bodyGroup.add(this._createAnatomicalPart(flTorsoCorePts, mats, { subdivisions: 4 }));
+
+                const supineTorsoFlap = new THREE.Group();
+                supineTorsoFlap.position.set(-1.65, 0.25, 0);
+                bodyGroup.add(supineTorsoFlap);
+                const supineTorsoLocalPts = [
+                    [-0.90, 0.12], [-0.76, -0.18], [-0.42, -0.34],
+                    [-0.06, -0.30], [0.28, -0.14], [0.70, -0.32], [0.85, 0.15]
+                ];
+                supineTorsoFlap.add(this._createAnatomicalPart(supineTorsoLocalPts, mats, { subdivisions: 3 }));
+
+                const proneTorsoFlap = new THREE.Group();
+                proneTorsoFlap.position.set(-1.55, 0.65, 0);
+                bodyGroup.add(proneTorsoFlap);
+                const proneTorsoLocalPts = [
+                    [-0.85, -0.10], [-0.65, 0.34], [-0.18, 0.42],
+                    [0.32, 0.38], [0.75, 0.32], [0.88, -0.10]
+                ];
+                proneTorsoFlap.add(this._createAnatomicalPart(proneTorsoLocalPts, mats, { subdivisions: 3 }));
+
+                const headPivot = new THREE.Group();
+                headPivot.position.set(-2.58, 0.74, 0);
+                bodyGroup.add(headPivot);
+
+                const flHeadLocalPts = [
+                    [0.22, 0.16], [0.02, 0.20], [-0.08, 0.36], [-0.24, 0.43],
+                    [-0.44, 0.40], [-0.60, 0.29], [-0.62, 0.12], [-0.60, -0.04],
+                    [-0.44, -0.15], [-0.14, -0.18], [0.18, -0.12]
+                ];
+                headPivot.add(this._createAnatomicalPart(flHeadLocalPts, mats, { subdivisions: 4 }));
+
+                const pelvisPivot = new THREE.Group();
+                pelvisPivot.position.set(-0.75, 0.52, 0);
+                bodyGroup.add(pelvisPivot);
+
+                const flPelvisCorePts = [
+                    [-0.25, 0.34], [0.32, 0.36], [0.85, 0.36], [1.45, 0.33],
+                    [2.15, 0.34], [2.22, 0.10], [2.10, -0.16], [1.38, -0.18],
+                    [0.78, -0.26], [0.22, -0.30], [-0.22, -0.24], [-0.35, -0.05]
+                ];
+                pelvisPivot.add(this._createAnatomicalPart(flPelvisCorePts, mats, { subdivisions: 3 }));
+
+                const supineShortsFlap = new THREE.Group();
+                supineShortsFlap.position.set(0.55, 0.0, 0);
+                pelvisPivot.add(supineShortsFlap);
+                const supineShortsLocalPts = [
+                    [-0.80, 0.08], [0.82, 0.05], [0.82, -0.17, 1], [0.77, -0.54, 1],
+                    [0.58, -0.54, 1], [0.51, -0.68, 1], [0.41, -0.68, 1], [0.02, -0.54, 1],
+                    [-0.46, -0.65, 1], [-0.75, -0.60, 1], [-0.85, -0.15]
+                ];
+                supineShortsFlap.add(this._createAnatomicalPart(supineShortsLocalPts, mats, { subdivisions: 3 }));
+
+                const proneShortsFlap = new THREE.Group();
+                proneShortsFlap.position.set(0.55, 0.0, 0);
+                pelvisPivot.add(proneShortsFlap);
+                const proneShortsLocalPts = [
+                    [-0.78, -0.05], [-0.72, 0.52, 1], [-0.42, 0.58, 1], [0.04, 0.50, 1],
+                    [0.42, 0.64, 1], [0.54, 0.64, 1], [0.60, 0.50, 1], [0.80, 0.50, 1],
+                    [0.84, 0.18, 1], [0.80, -0.05]
+                ];
+                proneShortsFlap.add(this._createAnatomicalPart(proneShortsLocalPts, mats, { subdivisions: 3 }));
+
+                const legsPivot = new THREE.Group();
+                legsPivot.position.set(1.95, 0.12, 0);
+                pelvisPivot.add(legsPivot);
+
+                const flLegsLocalPts = [
+                    [-0.25, 0.22], [0.35, 0.22], [1.15, 0.28], [1.65, 0.44],
+                    [2.08, 0.68], [2.36, 0.84], [2.40, 0.76], [2.38, 0.60],
+                    [2.12, 0.32], [1.92, 0.12], [1.84, -0.13], [1.66, -0.15],
+                    [1.50, -0.06], [1.12, -0.08], [0.62, -0.19], [0.28, -0.28], [-0.25, -0.28]
+                ];
+                legsPivot.add(this._createAnatomicalPart(flLegsLocalPts, mats, { subdivisions: 3 }));
+
+                const leftUpperArm = this._createSmoothLimbSegment(0.20, 0.18, 0.15, -0.022, mats);
+                const leftForearm = this._createSmoothLimbSegment(0.15, 0.14, 0.12, -0.014, mats);
+                const leftElbowCap = this._createJointCircleCap(0.155, mats);
+                const leftShoulderCap = this._createJointCircleCap(0.21, mats);
+
+                const rightUpperArm = this._createSmoothLimbSegment(0.17, 0.15, 0.13, -0.015, mats);
+                const rightForearm = this._createSmoothLimbSegment(0.13, 0.12, 0.10, -0.010, mats);
+                const rightElbowCap = this._createJointCircleCap(0.135, mats);
+                const rightShoulderCap = this._createJointCircleCap(0.18, mats);
+
+                group.add(leftUpperArm, leftForearm, leftElbowCap, leftShoulderCap);
+                group.add(rightUpperArm, rightForearm, rightElbowCap, rightShoulderCap);
+
+                const glitchPool = this._createGlitchPool(group, mats.matGlitchShard);
+                const radar = this._createRadarHelper(-0.25, 1.05, this.config.hoverRadiusWorld, mats.matRadar);
+                group.add(radar);
+
+                return {
+                    id: 'frontLever',
+                    maxFrequency: this.config.frontLeverMaxFrequency,
+                    altMaxFrequency: this.config.backLeverMaxFrequency,
+                    transitionSpeed: 0.40,
+                    group,
+                    mats,
+                    rigGroup,
+                    bodyGroup,
+                    supineTorsoFlap,
+                    proneTorsoFlap,
+                    headPivot,
+                    pelvisPivot,
+                    supineShortsFlap,
+                    proneShortsFlap,
+                    legsPivot,
+                    bodySmokeAura,
+                    bodyRedAura,
+                    leftUpperArm,
+                    leftForearm,
+                    leftElbowCap,
+                    leftShoulderCap,
+                    rightUpperArm,
+                    rightForearm,
+                    rightElbowCap,
+                    rightShoulderCap,
+                    glitchPool,
+                    radar,
+                    hoverCenterLocal: new THREE.Vector2(-0.25, 1.05),
+                    state: {
+                        mode: 'IDLE',
+                        isHovering: false,
+                        proximity: 0.0,
+                        smoothedProximity: 0.0,
+                        currentFrequency: 0.0,
+                        cyclePhase: 0.0,
+                        lagPhase: 0.0,
+                        progress: 0.0,
+                        lagProgress: 0.0,
+                        energy: 0.0,
+                        repCount: 0,
+                        altSkillTarget: 0.0,
+                        pendingSkillTarget: null,
+                        transitionMix: 0.0
+                    }
+                };
+            }
+
+            _orientLimb(limbGroup, x1, y1, x2, y2) {
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const len = Math.max(0.001, Math.hypot(dx, dy));
+                const angle = Math.atan2(dy, dx) - Math.PI * 0.5;
+                limbGroup.position.set(x1, y1, 0);
+                limbGroup.rotation.z = angle;
+                limbGroup.scale.set(1.0, len, 1.0);
+            }
+
+            _transformPoint2D(lx, ly, tx, ty, rotZ, scaleY = 1.0) {
+                const sy = ly * scaleY;
+                const c = Math.cos(rotZ);
+                const s = Math.sin(rotZ);
+                return [
+                    tx + lx * c - sy * s,
+                    ty + lx * s + sy * c
+                ];
+            }
+
+            _applyPlancheKinematics(p, lagP, energy, elapsed) {
+                const st = this.planche;
+                const m = st.state.transitionMix;
+                const phaseDiff = p - lagP;
+
+                const breath = Math.sin(elapsed * 2.64) * 0.018;
+                const microBalance = Math.cos(elapsed * 1.9) * 0.006;
+
+                const tremorAmp = (0.003 + 0.009 * p) * Math.min(1.0, energy * 1.3);
+                const tremorX = Math.sin(elapsed * 165.0) * tremorAmp;
+                const tremorY = Math.cos(elapsed * 190.0) * tremorAmp;
+
+                const barDeflect = -0.022 * p - 0.004 * breath;
+                st.barsGroup.position.y = barDeflect;
+
+                // 1. PLANCHE KINEMATICS (m = 0, shifted +0.30 right to grip near the rounded bar ends)
+                const plBodyX = 0.30 + 0.08 * p;
+                const plBodyY = -0.82 * p;
+                const plRot = -0.045 * phaseDiff + microBalance;
+                const plHeadRot = 0.095 * p - 0.025 * Math.sin(elapsed * 2.64);
+                const plPelvisRot = 0.065 * phaseDiff + 0.028 * Math.sin(p * Math.PI) + microBalance * 0.8;
+                const plLegsRot = 0.055 * phaseDiff - 0.022 * p;
+
+                // 2. DEEP HANDSTAND PUSH-UP (HSPU) KINEMATICS (m = 1)
+                const hsArc = Math.sin(p * Math.PI);
+                const hsBodyX = THREE.MathUtils.lerp(-0.46, -0.62, p) + 0.14 * hsArc;
+                const hsBodyY = THREE.MathUtils.lerp(2.38, -0.22, p);
+                const hsRot = THREE.MathUtils.lerp(-1.36, -0.98, p) - 0.035 * phaseDiff + microBalance;
+                const hsHeadRot = THREE.MathUtils.lerp(0.14, 0.28, p);
+                const hsPelvisRot = THREE.MathUtils.lerp(-0.08, -0.26, p) + 0.04 * phaseDiff;
+                const hsLegsRot = THREE.MathUtils.lerp(-0.06, -0.18, p) + 0.04 * phaseDiff;
+
+                const transArc = Math.sin(m * Math.PI);
+                const bodyDX = THREE.MathUtils.lerp(plBodyX, hsBodyX, m) - 0.14 * transArc + tremorX;
+                const bodyDY = THREE.MathUtils.lerp(plBodyY, hsBodyY, m) + 0.25 * transArc + breath + tremorY;
+                const bodyRot = THREE.MathUtils.lerp(plRot, hsRot, m);
+
+                st.bodyGroup.position.set(bodyDX, bodyDY, 0);
+                st.bodyGroup.rotation.z = bodyRot;
+                st.bodyGroup.scale.set(1, 1, 1);
+
+                st.headPivot.rotation.z = THREE.MathUtils.lerp(plHeadRot, hsHeadRot, m) + 0.09 * transArc;
+                st.pelvisPivot.rotation.z = THREE.MathUtils.lerp(plPelvisRot, hsPelvisRot, m) - 0.52 * transArc;
+                st.legsPivot.rotation.z = THREE.MathUtils.lerp(plLegsRot, hsLegsRot, m) + 0.45 * transArc;
+
+                st.backLegsPivot.rotation.z = st.legsPivot.rotation.z + 0.19 * m;
+                st.backLegsPivot.position.set(-1.68 + 0.14 * m, 0.04 + 0.08 * m, 0);
+
+                const [auraX, auraY] = this._transformPoint2D(-0.45, 1.25, bodyDX, bodyDY, bodyRot, 1.0);
+                st.bodySmokeAura.position.set(auraX, auraY, 0);
+                st.bodySmokeAura.rotation.z = bodyRot;
+                st.bodyRedAura.position.set(auraX, auraY, 0);
+                st.bodyRedAura.rotation.z = bodyRot;
+
+                st.hoverCenterLocal.set(
+                    THREE.MathUtils.lerp(-0.05, 0.25, m),
+                    THREE.MathUtils.lerp(0.85, 1.45, m)
+                );
+                st.radar.position.set(st.hoverCenterLocal.x, st.hoverCenterLocal.y, 0);
+
+                const nearWristX = 0.20, nearWristY = -0.34 + barDeflect;
+                const farWristX = 0.54, farWristY = 0.10 + barDeflect;
+
+                const [nearShoulderX, nearShoulderY] = this._transformPoint2D(
+                    THREE.MathUtils.lerp(0.94, 1.08, m),
+                    THREE.MathUtils.lerp(1.14, 1.24, m),
+                    bodyDX, bodyDY, bodyRot, 1.0
+                );
+                const [farShoulderX, farShoulderY] = this._transformPoint2D(
+                    THREE.MathUtils.lerp(1.14, 1.22, m),
+                    THREE.MathUtils.lerp(1.22, 1.38, m),
+                    bodyDX, bodyDY, bodyRot, 1.0
+                );
+
+                const hingeWeight = Math.pow(p, 0.78);
+                const plNearElbowX = THREE.MathUtils.lerp(nearWristX + (nearShoulderX - nearWristX) * 0.48, 0.38 + tremorX * 0.8, hingeWeight);
+                const plNearElbowY = THREE.MathUtils.lerp(nearWristY + (nearShoulderY - nearWristY) * 0.48, 0.16 + barDeflect, hingeWeight);
+                const plFarElbowX = THREE.MathUtils.lerp(farWristX + (farShoulderX - farWristX) * 0.48, 0.68 + tremorX * 0.8, hingeWeight);
+                const plFarElbowY = THREE.MathUtils.lerp(farWristY + (farShoulderY - farWristY) * 0.48, 0.46 + barDeflect, hingeWeight);
+
+                const hsLockNearElbowX = nearWristX + (nearShoulderX - nearWristX) * 0.50;
+                const hsLockNearElbowY = nearWristY + (nearShoulderY - nearWristY) * 0.50;
+                const hsNearElbowX = THREE.MathUtils.lerp(
+                    hsLockNearElbowX,
+                    0.42 + tremorX * 0.8,
+                    hingeWeight
+                ) - 0.10 * hsArc;
+                const hsNearElbowY = THREE.MathUtils.lerp(
+                    hsLockNearElbowY,
+                    0.44 + barDeflect,
+                    hingeWeight
+                );
+
+                const hsLockFarElbowX = farWristX + (farShoulderX - farWristX) * 0.50;
+                const hsLockFarElbowY = farWristY + (farShoulderY - farWristY) * 0.50;
+                const hsFarElbowX = THREE.MathUtils.lerp(
+                    hsLockFarElbowX,
+                    0.72 + tremorX * 0.8,
+                    hingeWeight
+                ) - 0.10 * hsArc;
+                const hsFarElbowY = THREE.MathUtils.lerp(
+                    hsLockFarElbowY,
+                    0.76 + barDeflect,
+                    hingeWeight
+                );
+
+                const nearElbowX = THREE.MathUtils.lerp(plNearElbowX, hsNearElbowX, m) + 0.14 * transArc;
+                const nearElbowY = THREE.MathUtils.lerp(plNearElbowY, hsNearElbowY, m) - 0.08 * transArc;
+                const farElbowX = THREE.MathUtils.lerp(plFarElbowX, hsFarElbowX, m) + 0.14 * transArc;
+                const farElbowY = THREE.MathUtils.lerp(plFarElbowY, hsFarElbowY, m) - 0.08 * transArc;
+
+                this._orientLimb(st.nearForearm, nearWristX, nearWristY, nearElbowX, nearElbowY);
+                this._orientLimb(st.nearUpperArm, nearElbowX, nearElbowY, nearShoulderX, nearShoulderY);
+                st.nearElbowCap.position.set(nearElbowX, nearElbowY, 0);
+                st.nearShoulderCap.position.set(nearShoulderX, nearShoulderY, 0);
+
+                this._orientLimb(st.farForearm, farWristX, farWristY, farElbowX, farElbowY);
+                this._orientLimb(st.farUpperArm, farElbowX, farElbowY, farShoulderX, farShoulderY);
+                st.farElbowCap.position.set(farElbowX, farElbowY, 0);
+                st.farShoulderCap.position.set(farShoulderX, farShoulderY, 0);
+
+                this._updateStationEffects(st, energy, elapsed);
+            }
+
+            _applyFrontLeverKinematics(t, lagT, energy, elapsed) {
+                const st = this.frontLever;
+                const m = st.state.transitionMix;
+                const phaseDiff = t - lagT;
+
+                const breath = Math.sin(elapsed * 2.64 + 1.2) * 0.018;
+                const microBalance = Math.sin(elapsed * 1.85) * 0.006;
+
+                const tremorAmp = (0.003 + 0.010 * t) * Math.min(1.0, energy * 1.3);
+                const tremorX = Math.sin(elapsed * 175.0) * tremorAmp;
+                const tremorY = Math.cos(elapsed * 185.0) * tremorAmp;
+
+                const barDeflect = -0.018 * t - 0.004 * breath;
+                st.rigGroup.position.y = barDeflect;
+
+                const tuckIn = THREE.MathUtils.smoothstep(m, 0.0, 0.28);
+                const tuckOut = 1.0 - THREE.MathUtils.smoothstep(m, 0.72, 1.0);
+                const tuckTightness = Math.pow(tuckIn * tuckOut, 0.85);
+                const rotProgress = THREE.MathUtils.smoothstep(m, 0.08, 0.92);
+
+                const flShoulderX = -1.44 - 0.34 * t;
+                const flShoulderY = 0.62 + 1.05 * t;
+                const flRot = -0.048 * phaseDiff + microBalance;
+                const flHeadRot = -0.085 * t + 0.02 * Math.sin(elapsed * 2.64);
+                const flPelvisRot = -0.072 * phaseDiff - 0.025 * Math.sin(t * Math.PI) + microBalance;
+                const flLegsRot = -0.060 * phaseDiff - 0.030 * t;
+
+                const blLift = Math.pow(t, 0.88);
+                const blShoulderX = THREE.MathUtils.lerp(-0.22, -0.52, blLift);
+                const blShoulderY = THREE.MathUtils.lerp(0.82, 1.68, blLift);
+                const blRot = Math.PI - 0.02 + 0.15 * blLift + 0.04 * phaseDiff + microBalance;
+                const blHeadRot = THREE.MathUtils.lerp(-0.12, -0.28, blLift);
+                const blPelvisRot = THREE.MathUtils.lerp(-0.02, -0.10, blLift) + 0.04 * phaseDiff;
+                const blLegsRot = THREE.MathUtils.lerp(-0.14, -0.18, blLift) + 0.03 * phaseDiff;
+
+                const shoulderWorldX = THREE.MathUtils.lerp(flShoulderX, blShoulderX, rotProgress) + tremorX;
+                const shoulderWorldY = THREE.MathUtils.lerp(flShoulderY, blShoulderY, rotProgress) - 0.12 * tuckTightness + breath + tremorY;
+                const bodyRot = THREE.MathUtils.lerp(flRot, blRot, rotProgress);
+
+                const Sx = -1.44, Sy = 0.62;
+                const cosR = Math.cos(bodyRot), sinR = Math.sin(bodyRot);
+                const bodyDX = shoulderWorldX - (Sx * cosR - Sy * sinR);
+                const bodyDY = shoulderWorldY - (Sx * sinR + Sy * cosR);
+
+                st.bodyGroup.position.set(bodyDX, bodyDY, 0);
+                st.bodyGroup.rotation.z = bodyRot;
+                st.bodyGroup.scale.set(1.0, 1.0, 1.0);
+
+                st.supineShortsFlap.scale.set(1.0, THREE.MathUtils.lerp(1.0, 0.18, rotProgress), 1.0);
+                st.proneShortsFlap.scale.set(1.0, THREE.MathUtils.lerp(0.22, 1.0, rotProgress), 1.0);
+                st.supineTorsoFlap.scale.set(1.0, THREE.MathUtils.lerp(1.0, 0.20, rotProgress), 1.0);
+                st.proneTorsoFlap.scale.set(1.0, THREE.MathUtils.lerp(0.20, 1.0, rotProgress), 1.0);
+
+                st.headPivot.rotation.z = THREE.MathUtils.lerp(flHeadRot, blHeadRot, rotProgress) + 0.42 * tuckTightness;
+                st.pelvisPivot.rotation.z = THREE.MathUtils.lerp(flPelvisRot, blPelvisRot, rotProgress) + 2.28 * tuckTightness;
+                st.pelvisPivot.scale.set(1.0 - 0.22 * tuckTightness, 1.0, 1.0);
+                st.legsPivot.rotation.z = THREE.MathUtils.lerp(flLegsRot, blLegsRot, rotProgress) - 2.68 * tuckTightness;
+                st.legsPivot.scale.set(1.0 - 0.20 * tuckTightness, 1.0, 1.0);
+
+                const localAuraX = -0.15 * (1.0 - 0.65 * tuckTightness);
+                const [auraX, auraY] = this._transformPoint2D(localAuraX, 0.52, bodyDX, bodyDY, bodyRot, 1.0);
+                st.bodySmokeAura.position.set(auraX, auraY, 0);
+                st.bodySmokeAura.rotation.z = bodyRot;
+                st.bodyRedAura.position.set(auraX, auraY, 0);
+                st.bodyRedAura.rotation.z = bodyRot;
+
+                st.hoverCenterLocal.set(
+                    THREE.MathUtils.lerp(-0.25, -0.75, rotProgress),
+                    THREE.MathUtils.lerp(1.05, 1.25, rotProgress)
+                );
+                st.radar.position.set(st.hoverCenterLocal.x, st.hoverCenterLocal.y, 0);
+
+                const lWristX = -1.56, lWristY = 2.14 + barDeflect;
+                const rWristX = -0.50, rWristY = 1.90 + barDeflect;
+
+                const flLShoulderX = shoulderWorldX - 0.48, flLShoulderY = shoulderWorldY + 0.02;
+                const flRShoulderX = shoulderWorldX + 0.46, flRShoulderY = shoulderWorldY - 0.02;
+
+                const blLShoulderX = shoulderWorldX + 0.08, blLShoulderY = shoulderWorldY + 0.18;
+                const blRShoulderX = shoulderWorldX + 0.72, blRShoulderY = shoulderWorldY + 0.14;
+
+                const lShoulderX = THREE.MathUtils.lerp(flLShoulderX, blLShoulderX, rotProgress);
+                const lShoulderY = THREE.MathUtils.lerp(flLShoulderY, blLShoulderY, rotProgress);
+                const rShoulderX = THREE.MathUtils.lerp(flRShoulderX, blRShoulderX, rotProgress);
+                const rShoulderY = THREE.MathUtils.lerp(flRShoulderY, blRShoulderY, rotProgress);
+
+                const flBend = Math.sin(t * Math.PI);
+                const flLElbowX = THREE.MathUtils.lerp(-1.92, -1.74, t) - 0.12 * flBend + tremorX * 0.7;
+                const flLElbowY = THREE.MathUtils.lerp(1.32, 1.72, t) - 0.06 * flBend + barDeflect;
+                const flRElbowX = THREE.MathUtils.lerp(-0.76, -0.62, t) - 0.08 * flBend + tremorX * 0.7;
+                const flRElbowY = THREE.MathUtils.lerp(1.24, 1.56, t) - 0.05 * flBend + barDeflect;
+
+                const blElbowDrive = Math.pow(blLift, 0.75);
+                const blLElbowX = THREE.MathUtils.lerp(-0.82, -0.78 + tremorX * 0.7, blElbowDrive);
+                const blLElbowY = THREE.MathUtils.lerp(1.54, 2.64, blElbowDrive) + barDeflect;
+
+                const blRElbowX = THREE.MathUtils.lerp(0.14, 0.18 + tremorX * 0.7, blElbowDrive);
+                const blRElbowY = THREE.MathUtils.lerp(1.38, 2.36, blElbowDrive) + barDeflect;
+
+                const lElbowX = THREE.MathUtils.lerp(flLElbowX, blLElbowX, rotProgress) - 0.08 * tuckTightness;
+                const lElbowY = THREE.MathUtils.lerp(flLElbowY, blLElbowY, rotProgress) - 0.10 * tuckTightness;
+                const rElbowX = THREE.MathUtils.lerp(flRElbowX, blRElbowX, rotProgress) + 0.08 * tuckTightness;
+                const rElbowY = THREE.MathUtils.lerp(flRElbowY, blRElbowY, rotProgress) - 0.10 * tuckTightness;
+
+                this._orientLimb(st.leftUpperArm, lShoulderX, lShoulderY, lElbowX, lElbowY);
+                this._orientLimb(st.leftForearm, lElbowX, lElbowY, lWristX, lWristY);
+                st.leftElbowCap.position.set(lElbowX, lElbowY, 0);
+                st.leftShoulderCap.position.set(lShoulderX, lShoulderY, 0);
+
+                this._orientLimb(st.rightUpperArm, rShoulderX, rShoulderY, rElbowX, rElbowY);
+                this._orientLimb(st.rightForearm, rElbowX, rElbowY, rWristX, rWristY);
+                st.rightElbowCap.position.set(rElbowX, rElbowY, 0);
+                st.rightShoulderCap.position.set(rShoulderX, rShoulderY, 0);
+
+                this._updateStationEffects(st, energy, elapsed);
+            }
+
+            _updateStationEffects(st, energy, elapsed) {
+                const drive = energy * this.config.glitchDrive;
+                const vis = this.visibilityAlpha;
+
+                st.mats.stationUniforms.uTime.value = elapsed;
+                st.mats.stationUniforms.uEnergy.value = energy;
+                st.mats.stationUniforms.uDrive.value = this.config.glitchDrive;
+
+                st.mats.matSmokeAura.opacity = 0.78 * vis;
+                st.mats.matRedGlowAura.color.copy(this._activeThemeColor);
+                st.mats.matRedGlowAura.opacity = (0.22 + Math.min(0.48, drive * 0.42)) * vis;
+                st.mats.matGlitchShard.color.copy(this._activeThemeColor);
+                st.mats.matRadar.color.copy(this._activeThemeColor);
+
+                if (drive > 0.12) {
+                    st.mats.matGlitchShard.opacity = Math.min(0.75, (drive - 0.12) * 0.85) * vis;
+                    for (let i = 0; i < st.glitchPool.length; i++) {
+                        const g = st.glitchPool[i];
+                        g.mesh.visible = true;
+                        const wave = Math.sin(elapsed * (18 + i * 5) + i * 2.1);
+                        g.mesh.position.x = g.baseX + wave * 0.35 * drive;
+                        g.mesh.position.y = g.baseY + Math.cos(elapsed * 14 + i) * 0.15;
+                        g.mesh.scale.x = g.baseW * (0.4 + 0.8 * Math.abs(wave) * drive);
+                    }
+                } else if (st.glitchPool[0].mesh.visible) {
+                    st.mats.matGlitchShard.opacity = 0.0;
+                    for (let i = 0; i < st.glitchPool.length; i++) {
+                        st.glitchPool[i].mesh.visible = false;
+                    }
+                }
+            }
+
+            /**
+             * Positions the Left (Full Planche / Handstand) station in the lower-left corner
+             * and the Right (Front Lever / Back Lever) station in the lower-right corner
+             * resting directly on top of the bottom snowbank accumulation line.
+             */
+            _updateStationLayout() {
+                const s = Math.max(0.15, this.config.globalScale);
+                const aspect = (this.camera && this.camera.aspect) ? this.camera.aspect : (window.innerWidth / window.innerHeight);
+                const fovDeg = (this.camera && this.camera.fov) ? this.camera.fov : 28;
+                const halfH = Math.tan(THREE.MathUtils.degToRad(fovDeg) * 0.5) * 20.4;
+                const aspectScale = THREE.MathUtils.clamp(aspect / (16 / 9), 0.55, 1.35);
+
+                // World X distance from center to the lower-left and lower-right corners
+                const worldCornerX = this.config.stationSpacing * aspectScale;
+                const localOffsetX = worldCornerX / s;
+
+                // Floor mat bottom in station local coords is at y ≈ -3.14; anchor it to the bottom snowbank
+                const snowbankSurfaceY = -halfH + 0.16;
+                const worldAnchorY = snowbankSurfaceY + 3.14 * s;
+                const localOffsetY = worldAnchorY / s;
+
+                // Center each station's mat footprint (-0.57 and -0.61) around ±localOffsetX
+                this.planche.group.position.set(-localOffsetX + 0.57, localOffsetY, 0);
+                this.frontLever.group.position.set(localOffsetX + 0.61, localOffsetY, 0);
+                this.rootGroup.scale.set(s, s, 1);
+            }
+
+            toggleStationSkill(stationId) {
+                const st = stationId === 'planche' ? this.planche.state : this.frontLever.state;
+                const currentGoal = st.pendingSkillTarget !== null ? st.pendingSkillTarget : st.altSkillTarget;
+                const nextGoal = currentGoal > 0.5 ? 0.0 : 1.0;
+
+                if (st.cyclePhase > 0.0001) {
+                    if (Math.abs(nextGoal - st.altSkillTarget) < 0.01) {
+                        st.pendingSkillTarget = null;
+                    } else {
+                        st.pendingSkillTarget = nextGoal;
+                    }
+                } else {
+                    st.pendingSkillTarget = null;
+                    st.altSkillTarget = nextGoal;
+                }
+                return nextGoal > 0.5;
+            }
+
+            onPointerClick(ndcX, ndcY) {
+                if (this.visibilityAlpha <= 0.01 || !this.rootGroup.visible) return null;
+                this.onPointerMove(ndcX, ndcY);
+                if (this.planche.state.isHovering) {
+                    this.toggleStationSkill('planche');
+                    return 'planche';
+                }
+                if (this.frontLever.state.isHovering) {
+                    this.toggleStationSkill('frontLever');
+                    return 'frontLever';
+                }
+                return null;
+            }
+
+            onPointerMove(ndcX, ndcY) {
+                this.pointerNDC.set(ndcX, ndcY);
+                this.raycaster.setFromCamera(this.pointerNDC, this.camera);
+                this.raycaster.ray.intersectPlane(this.zeroPlane, this.pointerWorld);
+
+                this._evaluateStationHover(this.planche);
+                this._evaluateStationHover(this.frontLever);
+            }
+
+            _evaluateStationHover(station) {
+                const s = this.config.globalScale;
+                const worldCenterX = (station.group.position.x + station.hoverCenterLocal.x) * s;
+                const worldCenterY = (station.group.position.y + station.hoverCenterLocal.y) * s;
+                const maxR = this.config.hoverRadiusWorld * s;
+
+                const dist = Math.hypot(
+                    this.pointerWorld.x - worldCenterX,
+                    this.pointerWorld.y - worldCenterY
+                );
+
+                if (dist <= maxR) {
+                    station.state.isHovering = true;
+                    const rawProx = 1.0 - Math.min(1.0, dist / maxR);
+                    station.state.proximity = Math.pow(rawProx, 1.15);
+                } else {
+                    station.state.isHovering = false;
+                    station.state.proximity = 0.0;
+                }
+            }
+
+            _computeBiomechanicalWave(phase) {
+                if (phase <= 0.0001) return 0.0;
+                const warpedPhase = phase + 0.14 * Math.sin(phase);
+                const rawWave = 0.5 * (1.0 - Math.cos(warpedPhase));
+                return Math.pow(Math.max(0.0, Math.min(1.0, rawWave)), 0.92);
+            }
+
+            _stepStationState(station, dt) {
+                const TWO_PI = Math.PI * 2.0;
+                const st = station.state;
+                const minF = this.config.minFrequency;
+                const maxF = THREE.MathUtils.lerp(
+                    station.maxFrequency,
+                    station.altMaxFrequency !== undefined ? station.altMaxFrequency : station.maxFrequency,
+                    st.transitionMix
+                );
+                const transSpeed = station.transitionSpeed || 0.42;
+
+                station.radar.visible = this.config.showRadars;
+                st.smoothedProximity += (st.proximity - st.smoothedProximity) * Math.min(1.0, dt * 12.0);
+
+                const hasQueuedTransition = st.pendingSkillTarget !== null;
+                if (st.cyclePhase > 0.0001 && (!st.isHovering || hasQueuedTransition)) {
+                    st.mode = hasQueuedTransition ? 'QUEUE TRANS' : 'FINISHING';
+                    const finishFreq = Math.min(maxF, Math.max(0.55, st.currentFrequency * 0.95));
+                    st.currentFrequency += (finishFreq - st.currentFrequency) * Math.min(1.0, dt * 8.0);
+
+                    st.cyclePhase += TWO_PI * st.currentFrequency * dt;
+                    if (st.cyclePhase >= TWO_PI) {
+                        st.cyclePhase = 0.0;
+                        st.progress = 0.0;
+                        st.currentFrequency = 0.0;
+                        st.repCount += 1;
+
+                        if (st.pendingSkillTarget !== null) {
+                            st.altSkillTarget = st.pendingSkillTarget;
+                            st.pendingSkillTarget = null;
+                        }
+                    }
+                }
+
+                const transDiff = st.altSkillTarget - st.transitionMix;
+                const isTransitioning = Math.abs(transDiff) > 0.0005;
+
+                if (isTransitioning && st.cyclePhase === 0.0) {
+                    st.mode = 'TRANSITION';
+                    st.currentFrequency = 0.0;
+                    st.cyclePhase = 0.0;
+                    st.progress = 0.0;
+
+                    const step = Math.sign(transDiff) * dt * transSpeed;
+                    if (Math.abs(step) >= Math.abs(transDiff)) {
+                        st.transitionMix = st.altSkillTarget;
+                    } else {
+                        st.transitionMix += step;
+                    }
+                } else if (!isTransitioning && st.cyclePhase === 0.0 && st.pendingSkillTarget !== null) {
+                    st.altSkillTarget = st.pendingSkillTarget;
+                    st.pendingSkillTarget = null;
+                } else if (!isTransitioning) {
+                    st.transitionMix = st.altSkillTarget;
+
+                    if (st.isHovering && !hasQueuedTransition) {
+                        st.mode = 'ACTIVE';
+                        const rawTargetFreq = minF + (maxF - minF) * st.smoothedProximity;
+                        const targetFreq = Math.max(minF, Math.min(maxF, rawTargetFreq));
+                        st.currentFrequency += (targetFreq - st.currentFrequency) * Math.min(1.0, dt * 10.0);
+                        st.currentFrequency = Math.max(minF, Math.min(maxF, st.currentFrequency));
+
+                        st.cyclePhase += TWO_PI * st.currentFrequency * dt;
+                        if (st.cyclePhase >= TWO_PI) {
+                            st.repCount += Math.floor(st.cyclePhase / TWO_PI);
+                            st.cyclePhase %= TWO_PI;
+                        }
+                    } else if (st.cyclePhase === 0.0) {
+                        st.mode = 'IDLE';
+                        st.progress = 0.0;
+                        st.currentFrequency = 0.0;
+                    }
+                }
+
+                st.progress = this._computeBiomechanicalWave(st.cyclePhase);
+
+                const lagDelayRad = Math.min(0.65, TWO_PI * st.currentFrequency * 0.065);
+                const targetLagProg = st.cyclePhase > lagDelayRad
+                    ? this._computeBiomechanicalWave(st.cyclePhase - lagDelayRad)
+                    : 0.0;
+                st.lagProgress += (targetLagProg - st.lagProgress) * Math.min(1.0, dt * 15.0);
+
+                const normSpeed = Math.min(1.0, st.currentFrequency / maxF);
+                const transBoost = (st.mode === 'TRANSITION') ? 0.45 : 0.0;
+                const targetEnergy = st.mode === 'IDLE'
+                    ? 0.06
+                    : Math.min(1.0, normSpeed * 0.75 + st.progress * 0.25 + transBoost);
+                st.energy += (targetEnergy - st.energy) * Math.min(1.0, dt * 10.0);
+            }
+
+            _updateSparks(dt, elapsed) {
+                const activeSparks = this.planche.state.energy > 0.08 || this.frontLever.state.energy > 0.08;
+                if (!activeSparks) {
+                    this.sparkPoints.visible = false;
+                    return;
+                }
+                this.sparkPoints.visible = true;
+
+                const posAttr = this.sparkPoints.geometry.attributes.position;
+                const arr = posAttr.array;
+
+                this.sparkPoints.material.color.copy(this._activeThemeColor);
+                this.sparkPoints.material.opacity = 0.75 * this.visibilityAlpha;
+
+                for (let i = 0; i < this.sparkCount; i++) {
+                    const sd = this.sparkData[i];
+                    const st = sd.stationIdx === 0 ? this.planche : this.frontLever;
+                    const stationX = st.group.position.x;
+                    const stationY = st.group.position.y;
+                    const energy = st.state.energy;
+
+                    sd.ly += sd.speedY * (0.18 + energy * 1.65) * dt;
+                    if (sd.ly > 2.85) {
+                        sd.ly = -0.35;
+                        sd.lx = (Math.random() - 0.5) * 5.2;
+                    }
+
+                    const sway = Math.sin(elapsed * 2.5 + sd.phase) * 0.08 * (0.3 + energy);
+                    arr[i * 3 + 0] = stationX + sd.lx + sway;
+                    arr[i * 3 + 1] = energy > 0.08 ? (stationY + sd.ly) : -999.0;
+                    arr[i * 3 + 2] = 0.0;
+                }
+                posAttr.needsUpdate = true;
+            }
+
+            isActiveOrTransitioning() {
+                if (!this.rootGroup.visible || this.visibilityAlpha <= 0.01) return false;
+                return (
+                    this.planche.state.mode !== 'IDLE' ||
+                    this.frontLever.state.mode !== 'IDLE'
+                );
+            }
+
+            update(dt, elapsed, currentMouseNDC) {
+                if (this.visibilityAlpha <= 0.003) {
+                    this.rootGroup.visible = false;
+                    return;
+                }
+                this.rootGroup.visible = true;
+                this.calisthenicsUniforms.uOverlayAlpha.value = this.visibilityAlpha;
+
+                // Sync theme color for aura quads, glitch shards & sparks
+                const themeMix = this.sharedUniforms.uColorTheme.value;
+                this._activeThemeColor.copy(this._redThemeColor).lerp(this._blueThemeColor, themeMix);
+
+                this.matFloorPad.opacity = 0.85 * this.visibilityAlpha;
+                this.matFloorBorder.opacity = 0.80 * this.visibilityAlpha;
+
+                // Evaluate hover in current camera view
+                this.onPointerMove(currentMouseNDC.x, currentMouseNDC.y);
+
+                const targetBlack = this.config.useBlackFill ? 1.0 : 0.0;
+                this.calisthenicsUniforms.uBlackFill.value += (targetBlack - this.calisthenicsUniforms.uBlackFill.value) * Math.min(1.0, dt * 14.0);
+
+                this._stepStationState(this.planche, dt);
+                const plSmoothMix = this.planche.state.transitionMix * this.planche.state.transitionMix * (3.0 - 2.0 * this.planche.state.transitionMix);
+                const savedPlMix = this.planche.state.transitionMix;
+                this.planche.state.transitionMix = plSmoothMix;
+                this._applyPlancheKinematics(
+                    this.planche.state.progress,
+                    this.planche.state.lagProgress,
+                    this.planche.state.energy,
+                    elapsed
+                );
+                this.planche.state.transitionMix = savedPlMix;
+
+                this._stepStationState(this.frontLever, dt);
+                const flSmoothMix = this.frontLever.state.transitionMix * this.frontLever.state.transitionMix * (3.0 - 2.0 * this.frontLever.state.transitionMix);
+                const savedFlMix = this.frontLever.state.transitionMix;
+                this.frontLever.state.transitionMix = flSmoothMix;
+                this._applyFrontLeverKinematics(
+                    this.frontLever.state.progress,
+                    this.frontLever.state.lagProgress,
+                    this.frontLever.state.energy,
+                    elapsed
+                );
+                this.frontLever.state.transitionMix = savedFlMix;
+
+                this._updateSparks(dt, elapsed);
+            }
+        }
+
+        window.CalisthenicsDualOverlay = CalisthenicsDualOverlay;
+
+        // ============================================================================
         // 2. MAIN WALLPAPER APPLICATION & UNIFIED SCENE SETUP
         // ============================================================================
         function initSceneApp() {
@@ -2788,6 +4726,9 @@
             const toggleBackdropBtn = document.getElementById('toggle-backdrop-btn');
             const backdropPulseWrap = document.getElementById('backdrop-pulse-wrap');
             const toggleBackdropPulseBtn = document.getElementById('toggle-backdrop-pulse-btn');
+            const backdropPulseSpeedWrap = document.getElementById('backdrop-pulse-speed-wrap');
+            const backdropPulseSpeedSlider = document.getElementById('backdrop-pulse-speed-slider');
+            const backdropPulseSpeedReadout = document.getElementById('backdrop-pulse-speed-readout');
             const backdropSpeedWrap = document.getElementById('backdrop-speed-wrap');
             const backdropSpeedSlider = document.getElementById('backdrop-speed-slider');
             const backdropSpeedReadout = document.getElementById('backdrop-speed-readout');
@@ -2800,6 +4741,23 @@
             const backdropGridWrap = document.getElementById('backdrop-grid-wrap');
             const backdropGridSlider = document.getElementById('backdrop-grid-slider');
             const backdropGridReadout = document.getElementById('backdrop-grid-readout');
+
+            // Calisthenics Dual Overlay DOM elements
+            const toggleCalisthenicsBtn = document.getElementById('toggle-calisthenics-btn');
+            const calisthenicsStyleWrap = document.getElementById('calisthenics-style-wrap');
+            const toggleCalisthenicsStyleBtn = document.getElementById('toggle-calisthenics-style-btn');
+            const calisthenicsSkillsWrap = document.getElementById('calisthenics-skills-wrap');
+            const calisthenicsLeftSkillBtn = document.getElementById('calisthenics-left-skill-btn');
+            const calisthenicsRightSkillBtn = document.getElementById('calisthenics-right-skill-btn');
+            const calisthenicsDriveWrap = document.getElementById('calisthenics-drive-wrap');
+            const calisthenicsDriveSlider = document.getElementById('calisthenics-drive-slider');
+            const calisthenicsDriveReadout = document.getElementById('calisthenics-drive-readout');
+            const calisthenicsSpacingWrap = document.getElementById('calisthenics-spacing-wrap');
+            const calisthenicsSpacingSlider = document.getElementById('calisthenics-spacing-slider');
+            const calisthenicsSpacingReadout = document.getElementById('calisthenics-spacing-readout');
+            const calisthenicsScaleWrap = document.getElementById('calisthenics-scale-wrap');
+            const calisthenicsScaleSlider = document.getElementById('calisthenics-scale-slider');
+            const calisthenicsScaleReadout = document.getElementById('calisthenics-scale-readout');
 
             // Snow & Tux DOM elements
             const toggleTuxBtn = document.getElementById('toggle-tux-btn');
@@ -2840,6 +4798,7 @@
 
             const renderer = new THREE.WebGLRenderer({
                 antialias: true,
+                stencil: true,
                 powerPreference: 'high-performance'
             });
 
@@ -2877,12 +4836,27 @@
             // ============================================================================
             // 3. SHARED SHADER UNIFORMS & AMBIENT BACKGROUND GLOW SHADER QUAD
             // ============================================================================
+            const logoPulseCenters = [
+                new THREE.Vector3(),
+                new THREE.Vector3(),
+                new THREE.Vector3(),
+                new THREE.Vector3()
+            ];
+            const logoPulseParams = [
+                new THREE.Vector4(0, 1, 0, 0),
+                new THREE.Vector4(0, 1, 0, 0),
+                new THREE.Vector4(0, 1, 0, 0),
+                new THREE.Vector4(0, 1, 0, 0)
+            ];
+
             const sharedUniforms = {
                 uRayOrigin: { value: new THREE.Vector3(0, 0, BASE_CAM_Z) },
                 uRayDir: { value: new THREE.Vector3(0, 0, -1) },
                 uRadius: { value: WALLPAPER_DEFAULTS.hoverWireframeRadius },
                 uSquishGlow: { value: 0.0 },
-                uColorTheme: { value: isInitialBlue ? 1.0 : 0.0 }
+                uColorTheme: { value: isInitialBlue ? 1.0 : 0.0 },
+                uPulseCenters: { value: logoPulseCenters },
+                uPulseParams: { value: logoPulseParams }
             };
 
             const bgUniforms = {
@@ -2984,11 +4958,25 @@
                 camera,
                 enabled: isBackdropEnabled,
                 theme: isInitialBlue ? 'nixos' : 'crimson',
+                pulseSpeed: WALLPAPER_DEFAULTS.backdropPulseSpeed,
                 flightSpeed: WALLPAPER_DEFAULTS.backdropFlightSpeed,
                 gridSpacing: WALLPAPER_DEFAULTS.backdropGridSpacing,
                 boreSightLock: WALLPAPER_DEFAULTS.backdropBoreSightLock,
                 gridIntensity: WALLPAPER_DEFAULTS.backdropGridIntensity,
                 wireframeRadius: WALLPAPER_DEFAULTS.hoverWireframeRadius
+            });
+
+            // ============================================================================
+            // 4B. INSTANTIATE 3D CALISTHENICS DUAL SKILL OVERLAY
+            // ============================================================================
+            let isCalisthenicsEnabled = WALLPAPER_DEFAULTS.calisthenicsEnabled !== false;
+            let currentCalisthenicsVisibility = isCalisthenicsEnabled ? 1.0 : 0.0;
+            const calisthenicsOverlay = new CalisthenicsDualOverlay(scene, camera, sharedUniforms, {
+                enabled: isCalisthenicsEnabled,
+                useBlackFill: WALLPAPER_DEFAULTS.calisthenicsUseBlackFill !== false,
+                glitchDrive: WALLPAPER_DEFAULTS.calisthenicsGlitchDrive !== undefined ? WALLPAPER_DEFAULTS.calisthenicsGlitchDrive : 1.00,
+                stationSpacing: WALLPAPER_DEFAULTS.calisthenicsSpacing !== undefined ? WALLPAPER_DEFAULTS.calisthenicsSpacing : 6.85,
+                globalScale: WALLPAPER_DEFAULTS.calisthenicsScale !== undefined ? WALLPAPER_DEFAULTS.calisthenicsScale : 0.34
             });
 
             // ============================================================================
@@ -3009,6 +4997,8 @@
                         uRadius: sharedUniforms.uRadius,
                         uSquishGlow: sharedUniforms.uSquishGlow,
                         uColorTheme: sharedUniforms.uColorTheme,
+                        uPulseCenters: sharedUniforms.uPulseCenters,
+                        uPulseParams: sharedUniforms.uPulseParams,
                         uParity: { value: parity }
                     },
                     extensions: {
@@ -3043,6 +5033,8 @@
                         uniform float uRadius;
                         uniform float uSquishGlow;
                         uniform float uColorTheme;
+                        uniform vec3 uPulseCenters[4];
+                        uniform vec4 uPulseParams[4];
                         uniform float uParity;
 
                         varying vec3 vBary;
@@ -3130,10 +5122,28 @@
                             vec3 finalColor = baseColor;
                             float dRay = distToRay(vWorldPos, uRayOrigin, uRayDir);
                             float hoverMask = 1.0 - smoothstep(uRadius * 0.18, uRadius, dRay);
+                            hoverMask = hoverMask > 0.001 ? pow(clamp(hoverMask, 0.0, 1.0), 1.35) : 0.0;
 
-                            if (hoverMask > 0.001) {
-                                hoverMask = pow(clamp(hoverMask, 0.0, 1.0), 1.35);
+                            // Subtle Radial 3D Cursor Pulse Wave propagating through the Main 3D NixOS Logo Wireframe
+                            float pulseWireMask = 0.0;
+                            for (int w = 0; w < 4; w++) {
+                                float wIntensity = uPulseParams[w].z;
+                                if (wIntensity > 0.005) {
+                                    vec3 pd = vWorldPos - uPulseCenters[w];
+                                    pd.z *= 0.55;
+                                    float dist = length(pd);
+                                    float ringDiff = abs(dist - uPulseParams[w].x);
+                                    float bandW = uPulseParams[w].y;
+                                    if (ringDiff < bandW) {
+                                        float ringProfile = 1.0 - ringDiff / bandW;
+                                        pulseWireMask = max(pulseWireMask, ringProfile * ringProfile * wIntensity * 0.52);
+                                    }
+                                }
+                            }
 
+                            float totalWireMask = clamp(max(hoverMask, pulseWireMask), 0.0, 1.0);
+
+                            if (totalWireMask > 0.001) {
                                 vec3 dBary = fwidth(vBary);
                                 vec3 edgeSmooth = smoothstep(vec3(0.0), dBary * 1.35, vBary);
                                 float wireLine = 1.0 - min(min(edgeSmooth.x, edgeSmooth.y), edgeSmooth.z);
@@ -3142,10 +5152,13 @@
                                 float wireHalo = 1.0 - min(min(glowSmooth.x, glowSmooth.y), glowSmooth.z);
 
                                 vec3 wireColor = mix(vec3(1.0, 0.14, 0.08), vec3(0.46, 0.86, 1.0), uColorTheme);
+                                vec3 pulseHotCore = mix(vec3(1.0, 0.42, 0.30), vec3(0.66, 0.90, 1.0), uColorTheme);
+                                wireColor = mix(wireColor, pulseHotCore, clamp(pulseWireMask * 0.25, 0.0, 1.0));
+
                                 vec3 haloColor = mix(vec3(0.75, 0.04, 0.02), vec3(0.10, 0.45, 0.88), uColorTheme);
 
-                                finalColor += haloColor * wireHalo * hoverMask * 0.52;
-                                finalColor = mix(finalColor, wireColor, wireLine * hoverMask * 0.95);
+                                finalColor += haloColor * wireHalo * totalWireMask * 0.46;
+                                finalColor = mix(finalColor, wireColor, wireLine * totalWireMask * 0.90);
                             }
 
                             gl_FragColor = vec4(finalColor, 1.0);
@@ -4679,6 +6692,12 @@
                 syncAllHudState();
             }
 
+            function triggerSetBackdropPulseSpeed(val) {
+                wakeFromIdle();
+                mathLayer.pulseSpeed = THREE.MathUtils.clamp(parseFloat(val), 6.0, 60.0);
+                syncAllHudState();
+            }
+
             function triggerSetBackdropSpeed(val) {
                 wakeFromIdle();
                 mathLayer.flightSpeed = THREE.MathUtils.clamp(parseFloat(val), 0.000, 0.100);
@@ -4815,6 +6834,53 @@
                 syncAllHudState();
             }
 
+            // --- Calisthenics Dual Overlay Action Handlers ---
+            function triggerToggleCalisthenics() {
+                wakeFromIdle();
+                isCalisthenicsEnabled = !isCalisthenicsEnabled;
+                syncAllHudState();
+            }
+
+            function triggerToggleCalisthenicsStyle() {
+                wakeFromIdle();
+                calisthenicsOverlay.config.useBlackFill = !calisthenicsOverlay.config.useBlackFill;
+                syncAllHudState();
+            }
+
+            function triggerToggleCalisthenicsLeftSkill() {
+                wakeFromIdle();
+                if (!isCalisthenicsEnabled) isCalisthenicsEnabled = true;
+                calisthenicsOverlay.toggleStationSkill('planche');
+                syncAllHudState();
+            }
+
+            function triggerToggleCalisthenicsRightSkill() {
+                wakeFromIdle();
+                if (!isCalisthenicsEnabled) isCalisthenicsEnabled = true;
+                calisthenicsOverlay.toggleStationSkill('frontLever');
+                syncAllHudState();
+            }
+
+            function triggerSetCalisthenicsDrive(val) {
+                wakeFromIdle();
+                calisthenicsOverlay.config.glitchDrive = THREE.MathUtils.clamp(parseFloat(val), 0.20, 1.80);
+                syncAllHudState();
+            }
+
+            function triggerSetCalisthenicsSpacing(val) {
+                wakeFromIdle();
+                calisthenicsOverlay.config.stationSpacing = THREE.MathUtils.clamp(parseFloat(val), 3.00, 9.00);
+                calisthenicsOverlay._updateStationLayout();
+                syncAllHudState();
+            }
+
+            function triggerSetCalisthenicsScale(val) {
+                wakeFromIdle();
+                calisthenicsOverlay.config.globalScale = THREE.MathUtils.clamp(parseFloat(val), 0.18, 0.85);
+                calisthenicsOverlay._updateStationLayout();
+                syncAllHudState();
+            }
+
             // Bind dropdown menu controls
             toggleMainLogoBtn.addEventListener('click', triggerToggleMainLogo);
             toggleThemeBtn.addEventListener('click', triggerToggleTheme);
@@ -4824,10 +6890,19 @@
 
             toggleBackdropBtn.addEventListener('click', triggerToggleBackdrop);
             toggleBackdropPulseBtn.addEventListener('click', triggerToggleBackdropPulseOnClick);
+            backdropPulseSpeedSlider.addEventListener('input', (e) => triggerSetBackdropPulseSpeed(e.target.value));
             backdropSpeedSlider.addEventListener('input', (e) => triggerSetBackdropSpeed(e.target.value));
             backdropSpacingSlider.addEventListener('input', (e) => triggerSetBackdropSpacing(e.target.value));
             backdropBoresightSlider.addEventListener('input', (e) => triggerSetBackdropBoresight(e.target.value));
             backdropGridSlider.addEventListener('input', (e) => triggerSetBackdropGrid(e.target.value));
+
+            toggleCalisthenicsBtn.addEventListener('click', triggerToggleCalisthenics);
+            toggleCalisthenicsStyleBtn.addEventListener('click', triggerToggleCalisthenicsStyle);
+            calisthenicsLeftSkillBtn.addEventListener('click', triggerToggleCalisthenicsLeftSkill);
+            calisthenicsRightSkillBtn.addEventListener('click', triggerToggleCalisthenicsRightSkill);
+            calisthenicsDriveSlider.addEventListener('input', (e) => triggerSetCalisthenicsDrive(e.target.value));
+            calisthenicsSpacingSlider.addEventListener('input', (e) => triggerSetCalisthenicsSpacing(e.target.value));
+            calisthenicsScaleSlider.addEventListener('input', (e) => triggerSetCalisthenicsScale(e.target.value));
 
             toggleSnowBtn.addEventListener('click', triggerToggleSnow);
             snowIntensitySlider.addEventListener('input', (e) => triggerSetSnowIntensity(e.target.value));
@@ -4885,6 +6960,19 @@
                         btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
                         btn.addEventListener('click', triggerToggleBackdropPulseOnClick);
                         wrap.appendChild(btn);
+                    } else if (pinId === 'backdropPulseSpeed') {
+                        const lbl = document.createElement('span');
+                        lbl.textContent = 'PulseSpd';
+                        const input = document.createElement('input');
+                        input.type = 'range';
+                        input.min = '6.0';
+                        input.max = '60.0';
+                        input.step = '1.0';
+                        input.value = mathLayer.pulseSpeed;
+                        input.dataset.pinnedWidget = 'backdrop-pulse-speed-slider';
+                        input.className = 'hud-slider w-12 cursor-pointer';
+                        input.addEventListener('input', (e) => triggerSetBackdropPulseSpeed(e.target.value));
+                        wrap.append(lbl, input);
                     } else if (pinId === 'backdropSpeed') {
                         const lbl = document.createElement('span');
                         lbl.textContent = 'Drift';
@@ -4936,6 +7024,67 @@
                         input.dataset.pinnedWidget = 'backdrop-grid-slider';
                         input.className = 'hud-slider w-12 cursor-pointer';
                         input.addEventListener('input', (e) => triggerSetBackdropGrid(e.target.value));
+                        wrap.append(lbl, input);
+                    } else if (pinId === 'calisthenicsToggle') {
+                        const btn = document.createElement('button');
+                        btn.dataset.pinnedWidget = 'calisthenicsToggle';
+                        btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                        btn.addEventListener('click', triggerToggleCalisthenics);
+                        wrap.appendChild(btn);
+                    } else if (pinId === 'calisthenicsStyle') {
+                        const btn = document.createElement('button');
+                        btn.dataset.pinnedWidget = 'calisthenicsStyle';
+                        btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                        btn.addEventListener('click', triggerToggleCalisthenicsStyle);
+                        wrap.appendChild(btn);
+                    } else if (pinId === 'calisthenicsSkills') {
+                        const bL = document.createElement('button');
+                        bL.dataset.pinnedWidget = 'calisthenicsLeftSkill';
+                        bL.className = 'mode-btn';
+                        bL.addEventListener('click', triggerToggleCalisthenicsLeftSkill);
+                        const bR = document.createElement('button');
+                        bR.dataset.pinnedWidget = 'calisthenicsRightSkill';
+                        bR.className = 'mode-btn';
+                        bR.addEventListener('click', triggerToggleCalisthenicsRightSkill);
+                        wrap.append(bL, bR);
+                    } else if (pinId === 'calisthenicsDrive') {
+                        const lbl = document.createElement('span');
+                        lbl.textContent = 'Rim';
+                        const input = document.createElement('input');
+                        input.type = 'range';
+                        input.min = '0.20';
+                        input.max = '1.80';
+                        input.step = '0.05';
+                        input.value = calisthenicsOverlay.config.glitchDrive;
+                        input.dataset.pinnedWidget = 'calisthenics-drive-slider';
+                        input.className = 'hud-slider w-12 cursor-pointer';
+                        input.addEventListener('input', (e) => triggerSetCalisthenicsDrive(e.target.value));
+                        wrap.append(lbl, input);
+                    } else if (pinId === 'calisthenicsSpacing') {
+                        const lbl = document.createElement('span');
+                        lbl.textContent = 'Span';
+                        const input = document.createElement('input');
+                        input.type = 'range';
+                        input.min = '3.00';
+                        input.max = '9.00';
+                        input.step = '0.05';
+                        input.value = calisthenicsOverlay.config.stationSpacing;
+                        input.dataset.pinnedWidget = 'calisthenics-spacing-slider';
+                        input.className = 'hud-slider w-12 cursor-pointer';
+                        input.addEventListener('input', (e) => triggerSetCalisthenicsSpacing(e.target.value));
+                        wrap.append(lbl, input);
+                    } else if (pinId === 'calisthenicsScale') {
+                        const lbl = document.createElement('span');
+                        lbl.textContent = 'Size';
+                        const input = document.createElement('input');
+                        input.type = 'range';
+                        input.min = '0.18';
+                        input.max = '0.85';
+                        input.step = '0.01';
+                        input.value = calisthenicsOverlay.config.globalScale;
+                        input.dataset.pinnedWidget = 'calisthenics-scale-slider';
+                        input.className = 'hud-slider w-12 cursor-pointer';
+                        input.addEventListener('input', (e) => triggerSetCalisthenicsScale(e.target.value));
                         wrap.append(lbl, input);
                     } else if (pinId === 'theme') {
                         const btn = document.createElement('button');
@@ -5122,7 +7271,8 @@
                     : 'mode-btn text-neutral-500';
 
                 const backdropRowOpacity = isBackdropEnabled ? '1' : '0.45';
-                backdropPulseWrap.style.opacity = backdropRowOpacity;
+                backdropPulseWrap.style.opacity = '1';
+                backdropPulseSpeedWrap.style.opacity = isBackdropPulseOnClick ? '1' : '0.45';
                 backdropSpeedWrap.style.opacity = backdropRowOpacity;
                 backdropSpacingWrap.style.opacity = backdropRowOpacity;
                 backdropBoresightWrap.style.opacity = backdropRowOpacity;
@@ -5132,6 +7282,10 @@
                 toggleBackdropPulseBtn.className = isBackdropPulseOnClick
                     ? 'mode-btn text-amber-300 font-medium'
                     : 'mode-btn text-neutral-500';
+
+                backdropPulseSpeedSlider.value = mathLayer.pulseSpeed;
+                backdropPulseSpeedReadout.textContent = mathLayer.pulseSpeed.toFixed(1);
+                backdropPulseSpeedReadout.className = `mono font-medium w-8 text-right ${softAccentClass}`;
 
                 backdropSpeedSlider.value = mathLayer.flightSpeed;
                 backdropSpeedReadout.textContent = mathLayer.flightSpeed.toFixed(3);
@@ -5148,6 +7302,49 @@
                 backdropGridSlider.value = mathLayer.gridIntensity;
                 backdropGridReadout.textContent = mathLayer.gridIntensity.toFixed(2);
                 backdropGridReadout.className = `mono font-medium w-8 text-right ${softAccentClass}`;
+
+                // Calisthenics Dual Overlay controls in dropdown
+                toggleCalisthenicsBtn.textContent = isCalisthenicsEnabled ? '🤸 Calisthenics: ON' : '🤸 Calisthenics: OFF';
+                toggleCalisthenicsBtn.className = isCalisthenicsEnabled
+                    ? `mode-btn ${accentClass} font-medium`
+                    : 'mode-btn text-neutral-500';
+
+                const caliRowOpacity = isCalisthenicsEnabled ? '1' : '0.45';
+                calisthenicsStyleWrap.style.opacity = caliRowOpacity;
+                calisthenicsSkillsWrap.style.opacity = caliRowOpacity;
+                calisthenicsDriveWrap.style.opacity = caliRowOpacity;
+                calisthenicsSpacingWrap.style.opacity = caliRowOpacity;
+                calisthenicsScaleWrap.style.opacity = caliRowOpacity;
+
+                const caliStyleLabel = calisthenicsOverlay.config.useBlackFill ? 'Look: Silhouette' : 'Look: Hologram';
+                toggleCalisthenicsStyleBtn.textContent = caliStyleLabel;
+                toggleCalisthenicsStyleBtn.className = `mode-btn ${softAccentClass} font-medium`;
+
+                const plGoal = calisthenicsOverlay.planche.state.pendingSkillTarget !== null
+                    ? calisthenicsOverlay.planche.state.pendingSkillTarget
+                    : calisthenicsOverlay.planche.state.altSkillTarget;
+                const flGoal = calisthenicsOverlay.frontLever.state.pendingSkillTarget !== null
+                    ? calisthenicsOverlay.frontLever.state.pendingSkillTarget
+                    : calisthenicsOverlay.frontLever.state.altSkillTarget;
+
+                const leftSkillLabel = plGoal > 0.5 ? 'L: Handstand' : 'L: Planche';
+                const rightSkillLabel = flGoal > 0.5 ? 'R: Back Lever' : 'R: Front Lever';
+                calisthenicsLeftSkillBtn.textContent = leftSkillLabel;
+                calisthenicsRightSkillBtn.textContent = rightSkillLabel;
+                calisthenicsLeftSkillBtn.className = `mode-btn ${softAccentClass} font-medium`;
+                calisthenicsRightSkillBtn.className = `mode-btn ${softAccentClass} font-medium`;
+
+                calisthenicsDriveSlider.value = calisthenicsOverlay.config.glitchDrive;
+                calisthenicsDriveReadout.textContent = calisthenicsOverlay.config.glitchDrive.toFixed(2);
+                calisthenicsDriveReadout.className = `mono font-medium w-8 text-right ${softAccentClass}`;
+
+                calisthenicsSpacingSlider.value = calisthenicsOverlay.config.stationSpacing;
+                calisthenicsSpacingReadout.textContent = calisthenicsOverlay.config.stationSpacing.toFixed(2);
+                calisthenicsSpacingReadout.className = `mono font-medium w-8 text-right ${softAccentClass}`;
+
+                calisthenicsScaleSlider.value = calisthenicsOverlay.config.globalScale;
+                calisthenicsScaleReadout.textContent = calisthenicsOverlay.config.globalScale.toFixed(2);
+                calisthenicsScaleReadout.className = `mono font-medium w-8 text-right ${softAccentClass}`;
 
                 // Snow controls in dropdown
                 toggleSnowBtn.textContent = isSnowEnabled ? '❄ Snow: ON' : '❄ Snow: OFF';
@@ -5232,6 +7429,8 @@
                         ? 'hover:text-white transition cursor-pointer text-amber-300 font-medium px-1'
                         : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
                 }
+                const pBackPulseSpd = pinnedBarContainer.querySelector('[data-pinned-widget="backdrop-pulse-speed-slider"]');
+                if (pBackPulseSpd) pBackPulseSpd.value = mathLayer.pulseSpeed;
                 const pBackSpeed = pinnedBarContainer.querySelector('[data-pinned-widget="backdrop-speed-slider"]');
                 if (pBackSpeed) pBackSpeed.value = mathLayer.flightSpeed;
                 const pBackSpacing = pinnedBarContainer.querySelector('[data-pinned-widget="backdrop-spacing-slider"]');
@@ -5240,6 +7439,29 @@
                 if (pBackBore) pBackBore.value = mathLayer.boreSightLock;
                 const pBackGrid = pinnedBarContainer.querySelector('[data-pinned-widget="backdrop-grid-slider"]');
                 if (pBackGrid) pBackGrid.value = mathLayer.gridIntensity;
+
+                const pCaliToggle = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenicsToggle"]');
+                if (pCaliToggle) {
+                    pCaliToggle.textContent = isCalisthenicsEnabled ? '🤸 Calisthenics: ON' : '🤸 Calisthenics: OFF';
+                    pCaliToggle.className = isCalisthenicsEnabled
+                        ? `hover:text-white transition cursor-pointer ${accentClass} font-medium px-1`
+                        : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
+                }
+                const pCaliStyle = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenicsStyle"]');
+                if (pCaliStyle) {
+                    pCaliStyle.textContent = caliStyleLabel;
+                    pCaliStyle.className = `hover:text-white transition cursor-pointer ${softAccentClass} font-medium px-1`;
+                }
+                const pCaliLeft = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenicsLeftSkill"]');
+                if (pCaliLeft) pCaliLeft.textContent = leftSkillLabel;
+                const pCaliRight = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenicsRightSkill"]');
+                if (pCaliRight) pCaliRight.textContent = rightSkillLabel;
+                const pCaliDrive = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenics-drive-slider"]');
+                if (pCaliDrive) pCaliDrive.value = calisthenicsOverlay.config.glitchDrive;
+                const pCaliSpacing = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenics-spacing-slider"]');
+                if (pCaliSpacing) pCaliSpacing.value = calisthenicsOverlay.config.stationSpacing;
+                const pCaliScale = pinnedBarContainer.querySelector('[data-pinned-widget="calisthenics-scale-slider"]');
+                if (pCaliScale) pCaliScale.value = calisthenicsOverlay.config.globalScale;
 
                 const pTheme = pinnedBarContainer.querySelector('[data-pinned-widget="theme"]');
                 if (pTheme) {
@@ -5386,17 +7608,31 @@
                     isDraggingOrbit = true;
                     prevPointer.x = e.clientX;
                     prevPointer.y = e.clientY;
-                } else if (isCursorInsideHexagon()) {
-                    clickLatchedInHex = !clickLatchedInHex;
-                    if (clickLatchedInHex) {
-                        clickPulseTimer = 0.55;
-                        discreteState.isGlitchingNow = true;
-                        discreteState.burstIntensity = 0.95;
-                        discreteState.nextSwitchTime = clock.getElapsedTime() + 0.18 + Math.random() * 0.16;
+                } else {
+                    // 1. Check if clicking a Calisthenics Athlete Station to transition skills
+                    const clickedAthlete = isCalisthenicsEnabled
+                        ? calisthenicsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y)
+                        : null;
+
+                    // 2. Check if clicking inside the central Tux Hexagon
+                    if (!clickedAthlete && isCursorInsideHexagon()) {
+                        clickLatchedInHex = !clickLatchedInHex;
+                        if (clickLatchedInHex) {
+                            clickPulseTimer = 0.55;
+                            discreteState.isGlitchingNow = true;
+                            discreteState.burstIntensity = 0.95;
+                            discreteState.nextSwitchTime = clock.getElapsedTime() + 0.18 + Math.random() * 0.16;
+                        }
                     }
-                } else if (isBackdropEnabled && isBackdropPulseOnClick) {
-                    // Emit a radial 3D formula pulse wave outward from the cursor click position!
-                    mathLayer.triggerPulseWave(mouseNDC);
+
+                    // 3. Emit a radial 3D pulse wave from the cursor through the Main Logo Wireframe & Math Backdrop!
+                    if (isBackdropPulseOnClick && (isMainLogoEnabled || isBackdropEnabled || isCalisthenicsEnabled)) {
+                        mathLayer.triggerPulseWave(mouseNDC);
+                    }
+
+                    if (clickedAthlete) {
+                        syncAllHudState();
+                    }
                 }
             });
 
@@ -5420,7 +7656,11 @@
                     isDraggingOrbit = true;
 
                     if (currentViewMode !== 'blender') {
-                        if (isCursorInsideHexagon()) {
+                        const clickedAthlete = isCalisthenicsEnabled
+                            ? calisthenicsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y)
+                            : null;
+
+                        if (!clickedAthlete && isCursorInsideHexagon()) {
                             clickLatchedInHex = !clickLatchedInHex;
                             if (clickLatchedInHex) {
                                 clickPulseTimer = 0.55;
@@ -5428,8 +7668,14 @@
                                 discreteState.burstIntensity = 0.95;
                                 discreteState.nextSwitchTime = clock.getElapsedTime() + 0.18 + Math.random() * 0.16;
                             }
-                        } else if (isBackdropEnabled && isBackdropPulseOnClick) {
+                        }
+
+                        if (isBackdropPulseOnClick && (isMainLogoEnabled || isBackdropEnabled || isCalisthenicsEnabled)) {
                             mathLayer.triggerPulseWave(mouseNDC);
+                        }
+
+                        if (clickedAthlete) {
+                            syncAllHudState();
                         }
                     }
                 }
@@ -5464,9 +7710,8 @@
             window.addEventListener('keydown', (e) => {
                 if (e.code === 'Space') {
                     e.preventDefault();
-                    if (isBackdropEnabled) {
-                        mathLayer.triggerPulseWave(mouseNDC);
-                    }
+                    wakeFromIdle();
+                    mathLayer.triggerPulseWave(mouseNDC);
                 } else if (e.key === 'h' || e.key === 'H') {
                     wakeFromIdle();
                     setSettingsMenuOpen(!isSettingsMenuOpen);
@@ -5499,6 +7744,9 @@
                     bgGlowIntensity = THREE.MathUtils.clamp(bgGlowIntensity + dir * 0.08, 0.00, 2.00);
                     bgUniforms.uBgGlowIntensity.value = bgGlowIntensity;
                 }
+                if (wheelControlledSliders.has('backdropPulseSpeed')) {
+                    mathLayer.pulseSpeed = THREE.MathUtils.clamp(mathLayer.pulseSpeed + dir * 2.0, 6.0, 60.0);
+                }
                 if (wheelControlledSliders.has('backdropSpeed')) {
                     mathLayer.flightSpeed = THREE.MathUtils.clamp(mathLayer.flightSpeed + dir * 0.004, 0.000, 0.100);
                 }
@@ -5518,6 +7766,17 @@
                 if (wheelControlledSliders.has('snowForcefield')) {
                     snowForcefieldRadius = THREE.MathUtils.clamp(snowForcefieldRadius + dir * 0.20, 0.00, 6.00);
                 }
+                if (wheelControlledSliders.has('calisthenicsDrive')) {
+                    calisthenicsOverlay.config.glitchDrive = THREE.MathUtils.clamp(calisthenicsOverlay.config.glitchDrive + dir * 0.08, 0.20, 1.80);
+                }
+                if (wheelControlledSliders.has('calisthenicsSpacing')) {
+                    calisthenicsOverlay.config.stationSpacing = THREE.MathUtils.clamp(calisthenicsOverlay.config.stationSpacing + dir * 0.15, 3.00, 9.00);
+                    calisthenicsOverlay._updateStationLayout();
+                }
+                if (wheelControlledSliders.has('calisthenicsScale')) {
+                    calisthenicsOverlay.config.globalScale = THREE.MathUtils.clamp(calisthenicsOverlay.config.globalScale + dir * 0.02, 0.18, 0.85);
+                    calisthenicsOverlay._updateStationLayout();
+                }
                 syncAllHudState();
             }, { passive: false });
 
@@ -5526,6 +7785,7 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 bgUniforms.uAspect.value = camera.aspect;
+                calisthenicsOverlay._updateStationLayout();
                 renderer.setPixelRatio(getOptimalPixelRatio());
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
@@ -5556,9 +7816,11 @@
                     return;
                 }
 
-                // Throttle to ~22 FPS only when Snow & Backdrop drift are inactive and physics have settled > 2s
-                const isBackdropDrifting = isBackdropEnabled && (mathLayer.flightSpeed > 0.001 || mathLayer.pulseWaves.length > 0);
-                if (!isSnowEnabled && !isBackdropDrifting && idleSettledTime > 2.0 && (nowMs - lastRenderTimeMs) < IDLE_FRAME_INTERVAL_MS) {
+                // Throttle to ~22 FPS only when Snow, Backdrop drift, Pulse waves & Calisthenics reps are inactive and physics have settled > 2s
+                const hasActivePulses = mathLayer.pulseWaves.length > 0;
+                const isBackdropDrifting = isBackdropEnabled && mathLayer.flightSpeed > 0.001;
+                const isCalisthenicsBusy = isCalisthenicsEnabled && calisthenicsOverlay.isActiveOrTransitioning();
+                if (!isSnowEnabled && !isBackdropDrifting && !hasActivePulses && !isCalisthenicsBusy && idleSettledTime > 2.0 && (nowMs - lastRenderTimeMs) < IDLE_FRAME_INTERVAL_MS) {
                     return;
                 }
                 lastRenderTimeMs = nowMs;
@@ -5592,6 +7854,7 @@
                     currentCamFov = THREE.MathUtils.lerp(currentCamFov, targetFov, damp * 1.4);
                     camera.fov = currentCamFov;
                     camera.updateProjectionMatrix();
+                    calisthenicsOverlay._updateStationLayout();
                 }
 
                 const mouseRadialDist = Math.min(1.35, smoothedMouse.length());
@@ -5632,6 +7895,9 @@
                 sharedUniforms.uRayOrigin.value.copy(raycaster.ray.origin);
                 sharedUniforms.uRayDir.value.copy(raycaster.ray.direction);
 
+                // --- 0. Advance Radial 3D Cursor Pulse Waves & sync GPU uniforms for Logo + Backdrop + Calisthenics ---
+                mathLayer.updatePulseWaves(dt, logoPulseCenters, logoPulseParams);
+
                 // --- 1. Update 3D Math Matrix Backdrop Layer (if enabled or fading out) ---
                 const targetBackdropVis = (isBackdropEnabled && currentViewMode !== 'blender') ? 1.0 : 0.0;
                 currentBackdropVisibility = THREE.MathUtils.lerp(
@@ -5652,6 +7918,21 @@
                     );
                 } else if (mathLayer.rootGroup.visible) {
                     mathLayer.rootGroup.visible = false;
+                }
+
+                // --- 1B. Update 3D Calisthenics Dual Skill Overlay (if enabled or fading out) ---
+                const targetCalisthenicsVis = (isCalisthenicsEnabled && currentViewMode !== 'blender') ? 1.0 : 0.0;
+                currentCalisthenicsVisibility = THREE.MathUtils.lerp(
+                    currentCalisthenicsVisibility,
+                    targetCalisthenicsVis,
+                    Math.min(1.0, dt * 6.0)
+                );
+                calisthenicsOverlay.visibilityAlpha = currentCalisthenicsVisibility;
+
+                if (currentCalisthenicsVisibility > 0.002) {
+                    calisthenicsOverlay.update(dt, elapsed, mouseNDC);
+                } else if (calisthenicsOverlay.rootGroup.visible) {
+                    calisthenicsOverlay.rootGroup.visible = false;
                 }
 
                 // --- 2. Update Main 3D NixOS Logo + Tux Centerpiece (Skipped completely when OFF) ---
