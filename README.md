@@ -3,6 +3,11 @@ Interactive NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
 
 ## [Try it out by clicking here](https://richardscharf.github.io/NixOS-Tux-Interactive3DWallpaper/nixos_tux_interactive_3d_wallpaper.html)
 
+### Usage
+- you can interact with it using mouse movements, clicks and the scoll wheel.
+- you can also toggle the different wallpapers / overlays at the top (pinned hud)
+- settings gives you more granular control over the different styles, pins and bindings
+
 <img width="3840" height="2160" alt="Screenshot" src="https://github.com/user-attachments/assets/8a6058ec-98d1-4d67-970f-f35a19572095" />
 
 
