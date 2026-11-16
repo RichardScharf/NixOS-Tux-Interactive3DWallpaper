@@ -5646,17 +5646,18 @@
                     return { minCoverH: 0.0, maxCapH: defaultMaxHeight, stationWeight: 0.0 };
                 }
 
-                // Left station (Planche) mat local X bounds: [-3.96, +2.82]
+                // Tight exact bounds of Left station (Planche) mat local X: [-3.92, +2.78]
                 const plOriginX = this.planche.group.position.x * s;
-                const plMinX = plOriginX - 4.05 * s;
-                const plMaxX = plOriginX + 2.92 * s;
+                const plMinX = plOriginX - 3.92 * s;
+                const plMaxX = plOriginX + 2.78 * s;
 
-                // Right station (Front Lever) mat local X bounds: [-3.82, +2.60]
+                // Tight exact bounds of Right station (Front Lever) mat local X: [-3.78, +2.56]
                 const flOriginX = this.frontLever.group.position.x * s;
-                const flMinX = flOriginX - 3.92 * s;
-                const flMaxX = flOriginX + 2.70 * s;
+                const flMinX = flOriginX - 3.78 * s;
+                const flMaxX = flOriginX + 2.56 * s;
 
-                const feather = 1.15;
+                // Very small edge feather (0.14 world units instead of 1.15) so there is no wide buffer zone in front of the mats
+                const feather = 0.14;
                 let weightL = 0.0;
                 if (worldX >= plMinX - feather && worldX <= plMaxX + feather) {
                     if (worldX >= plMinX && worldX <= plMaxX) {
@@ -7462,6 +7463,7 @@
 
             const pileHeights = new Float32Array(NUM_PILE_BINS);
             const pileTempHeights = new Float32Array(NUM_PILE_BINS);
+            const stationMinCoverH = new Float32Array(NUM_PILE_BINS);
             const stationMaxCapH = new Float32Array(NUM_PILE_BINS);
             const stationIsAthleteSpot = new Uint8Array(NUM_PILE_BINS);
 
@@ -7501,20 +7503,40 @@
                 return { halfW, halfH };
             }
 
-            // Pre-computes per-bin station snow height caps & athlete-spot flags only when layout/visibility changes
-            function refreshStationSnowCaps() {
+            // Pre-computes per-bin station snow height caps & athlete-spot flags only when layout/visibility changes.
+            // When `restoreMatCover` is true (e.g. re-enabling Calisthenics), restores snow height to cover the gray floor mats.
+            function refreshStationSnowCaps(restoreMatCover = false) {
                 const pileBounds = getVisibleBoundsAtZ(SNOW_BASE_Z);
                 const spanW = pileBounds.halfW * 1.05;
+                const bottomY = -pileBounds.halfH;
                 const defaultMaxH = pileBounds.halfH * 0.40;
                 for (let b = 0; b < NUM_PILE_BINS; b++) {
                     if (isCalisthenicsEnabled) {
                         const binWorldX = ((b / (NUM_PILE_BINS - 1)) * 2.0 - 1.0) * spanW;
                         const profile = calisthenicsOverlay.getStationSnowProfileAtWorldX(binWorldX, defaultMaxH, true);
+                        stationMinCoverH[b] = profile.minCoverH;
                         stationMaxCapH[b] = profile.maxCapH;
-                        stationIsAthleteSpot[b] = profile.stationWeight > 0.18 ? 1 : 0;
+                        // Only mark bins that sit directly on the gray floor mat itself (stationWeight >= 0.75)
+                        stationIsAthleteSpot[b] = profile.stationWeight >= 0.75 ? 1 : 0;
+                        if (restoreMatCover && isSnowPileEnabled) {
+                            pileHeights[b] = Math.min(profile.maxCapH, Math.max(pileHeights[b], profile.minCoverH));
+                        }
                     } else {
+                        stationMinCoverH[b] = 0.0;
                         stationMaxCapH[b] = defaultMaxH;
                         stationIsAthleteSpot[b] = 0;
+                    }
+                }
+                if (restoreMatCover && isSnowPileEnabled) {
+                    // Keep any resting shards aligned with the restored snowbank surface
+                    for (let s = 0; s < MAX_SHARDS; s++) {
+                        const idx4 = s * 4;
+                        if (instRotArray[idx4 + 3] > 0.002 && shardVelY[s] === 0.0) {
+                            const bIdx = shardBinIndex[s];
+                            if (bIdx >= 0 && bIdx < NUM_PILE_BINS) {
+                                instPosArray[idx4 + 1] = bottomY + pileHeights[bIdx] + shardEmbedOffset[s];
+                            }
+                        }
                     }
                 }
             }
@@ -8010,31 +8032,6 @@
 
                         const surfaceY = bottomY + pileHeights[bIdx] + shardEmbedOffset[s];
 
-                        shardVelY[s] -= 3.2 * dt;
-                        shardVelX[s] *= Math.max(0.0, 1.0 - dt * 2.6);
-
-                        if (sy <= surfaceY) {
-                            sy = surfaceY;
-                            // Tiny elastic secondary micro-bounce on first landing after the splash pop
-                            if (shardVelY[s] < -0.32) {
-                                shardVelY[s] = -shardVelY[s] * 0.22;
-                                shardVelX[s] *= 0.72;
-                                shardSpinZ[s] *= 0.65;
-                            } else {
-                                shardVelY[s] = 0.0;
-                                shardVelX[s] *= Math.max(0.0, 1.0 - dt * 8.5);
-                                shardSpinZ[s] *= Math.max(0.0, 1.0 - dt * 7.5);
-                            }
-                            // Smoothly flatten 3D tilt (rotX, rotY) as the lambda settles onto the snowbank
-                            const flatDamp = Math.max(0.0, 1.0 - dt * 9.0);
-                            instRotArray[idx4 + 1] *= flatDamp;
-                            instRotArray[idx4 + 2] *= flatDamp;
-                        } else {
-                            const airTiltDamp = Math.max(0.0, 1.0 - dt * 3.0);
-                            instRotArray[idx4 + 1] *= airTiltDamp;
-                            instRotArray[idx4 + 2] *= airTiltDamp;
-                        }
-
                         const cdx = sx - cursorSnowWorld.x;
                         const cdy = sy - cursorSnowWorld.y;
                         const cDistSq = cdx * cdx + cdy * cdy;
@@ -8047,16 +8044,45 @@
                             shardSpinZ[s] += (Math.random() - 0.5) * 3.0 * kick;
                         }
 
+                        // Fast path for settled shards resting on the pile (skips gravity/damping when already at rest)
+                        if (sy <= surfaceY && Math.abs(shardVelY[s]) < 0.001 && Math.abs(shardVelX[s]) < 0.001 && Math.abs(shardSpinZ[s]) < 0.001) {
+                            sy = surfaceY;
+                        } else {
+                            shardVelY[s] -= 3.2 * dt;
+                            shardVelX[s] *= Math.max(0.0, 1.0 - dt * 2.6);
+
+                            if (sy <= surfaceY) {
+                                sy = surfaceY;
+                                // Tiny elastic secondary micro-bounce on first landing after the splash pop
+                                if (shardVelY[s] < -0.32) {
+                                    shardVelY[s] = -shardVelY[s] * 0.22;
+                                    shardVelX[s] *= 0.72;
+                                    shardSpinZ[s] *= 0.65;
+                                } else {
+                                    shardVelY[s] = 0.0;
+                                    shardVelX[s] *= Math.max(0.0, 1.0 - dt * 8.5);
+                                    shardSpinZ[s] *= Math.max(0.0, 1.0 - dt * 7.5);
+                                }
+                                // Smoothly flatten 3D tilt (rotX, rotY) as the lambda settles onto the snowbank
+                                const flatDamp = Math.max(0.0, 1.0 - dt * 9.0);
+                                instRotArray[idx4 + 1] *= flatDamp;
+                                instRotArray[idx4 + 2] *= flatDamp;
+                            } else {
+                                const airTiltDamp = Math.max(0.0, 1.0 - dt * 3.0);
+                                instRotArray[idx4 + 1] *= airTiltDamp;
+                                instRotArray[idx4 + 2] *= airTiltDamp;
+                            }
+                            instRotArray[idx4 + 0] += shardSpinZ[s] * dt;
+                        }
+
                         instPosArray[idx4 + 0] = sx;
                         instPosArray[idx4 + 1] = sy;
-                        instRotArray[idx4 + 0] += shardSpinZ[s] * dt;
 
                         if (isPersist) {
-                            // Two-stage melt for pronounced pile-cover λs:
-                            // 1) Initial Splash Settle (0.0 -> 0.08): settles from 100% into a pronounced ~84% state
-                            //    (scale = 0.85x, alpha = 0.86) so settled λs are clearly visible across the pile.
+                            // Two-stage melt for pronounced pile-cover λs (pow-free algebraic curve):
+                            // 1) Initial Splash Settle (0.0 -> 0.08): settles from 100% into a pronounced ~85% state.
                             // 2) Long, Gradual Melt (0.08 -> 1.0): stays near ~80% for a long plateau and then
-                            //    smoothly melts down to 0% opacity and 35% scale!
+                            //    smoothly melts down to 0% opacity and 34% scale!
                             const settleEnd = 0.08;
                             if (lifeRatio < settleEnd) {
                                 const u = lifeRatio / settleEnd;
@@ -8064,17 +8090,17 @@
                                 instPosArray[idx4 + 3] = shardInitScale[s] * (1.0 - 0.15 * su);
                                 instRotArray[idx4 + 3] = 0.98 - 0.12 * su;
                             } else {
-                                const meltProg = (lifeRatio - settleEnd) / (1.0 - settleEnd);
-                                // Concave persistence curve: holds ~80% visibility through mid-life, then smoothly tapers to 0
-                                const holdCurve = Math.pow(Math.max(0.0, 1.0 - meltProg * meltProg), 0.75);
-                                const scaleCurve = 1.0 - Math.pow(meltProg, 1.45);
+                                const meltProg = (lifeRatio - settleEnd) * 1.0869565; // 1.0 / (1.0 - 0.08)
+                                const mp2 = meltProg * meltProg;
+                                const holdCurve = Math.max(0.0, 1.0 - mp2 * (0.75 + 0.25 * mp2));
+                                const scaleCurve = Math.max(0.0, 1.0 - meltProg * Math.sqrt(meltProg));
                                 instPosArray[idx4 + 3] = shardInitScale[s] * (0.34 + 0.51 * scaleCurve);
                                 instRotArray[idx4 + 3] = 0.86 * holdCurve;
                             }
                         } else {
                             // Transient splash shards & athlete-station shards: quick pop then smooth fade
                             const holdFrac = 0.25;
-                            const meltT = Math.max(0.0, (lifeRatio - holdFrac) / (1.0 - holdFrac));
+                            const meltT = Math.max(0.0, (lifeRatio - holdFrac) * 1.3333333);
                             const smoothMelt = 1.0 - meltT * meltT * (3.0 - 2.0 * meltT);
                             instPosArray[idx4 + 3] = shardInitScale[s] * (0.30 + 0.70 * smoothMelt);
                             instRotArray[idx4 + 3] = 0.94 * smoothMelt * smoothMelt;
@@ -8577,7 +8603,8 @@
             function triggerToggleCalisthenics() {
                 wakeFromIdle();
                 isCalisthenicsEnabled = !isCalisthenicsEnabled;
-                refreshStationSnowCaps();
+                refreshStationSnowCaps(isCalisthenicsEnabled);
+                snowbankDirtyCounter = 99;
                 syncAllHudState();
             }
 
@@ -8612,7 +8639,8 @@
                 wakeFromIdle();
                 calisthenicsOverlay.config.stationSpacing = THREE.MathUtils.clamp(parseFloat(val), 3.00, 9.00);
                 calisthenicsOverlay._updateStationLayout();
-                refreshStationSnowCaps();
+                refreshStationSnowCaps(true);
+                snowbankDirtyCounter = 99;
                 syncAllHudState();
             }
 
@@ -8620,7 +8648,8 @@
                 wakeFromIdle();
                 calisthenicsOverlay.config.globalScale = THREE.MathUtils.clamp(parseFloat(val), 0.18, 0.85);
                 calisthenicsOverlay._updateStationLayout();
-                refreshStationSnowCaps();
+                refreshStationSnowCaps(true);
+                snowbankDirtyCounter = 99;
                 syncAllHudState();
             }
 
