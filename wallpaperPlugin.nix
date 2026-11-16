@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  defaultWallpaperUrl = "file:///home/richard/Videos/RedNixPromptgram/red_nixos_tux_3d_interactive_scene.html";
+  defaultWallpaperUrl = "file:///PATH/TO/YOUR/WALLPAPER.html";
 
   # Offline Three.js r128 fallback in /nix/store
   threeJsLib = builtins.fetchurl {
@@ -11,7 +11,7 @@ let
 
   declarativeWebWallpaperPlugin = pkgs.stdenv.mkDerivation {
     pname = "plasma6-webwallpaper-declarative";
-    version = "2.5.0";
+    version = "2.6.0";
 
     dontUnpack = true;
     dontConfigure = true;
@@ -56,6 +56,7 @@ let
       #include <QCoreApplication>
       #include <QWindow>
       #include <QScreen>
+      #include <QQuickItem>
       #include <QEvent>
       #include <QMouseEvent>
       #include <QHoverEvent>
@@ -65,6 +66,12 @@ let
       #include <QFileSystemWatcher>
       #include <QUrl>
       #include <QFileInfo>
+      #include <QDir>
+      #include <QFile>
+      #include <QStandardPaths>
+      #include <QCryptographicHash>
+      #include <QImage>
+      #include <QVariant>
       #include <QVariantMap>
       #include <QDBusVariant>
       #include <QtMath>
@@ -74,9 +81,10 @@ let
       #include <QDBusPendingReply>
       #include <QQmlExtensionPlugin>
       #include <qqml.h>
+      #include <thread>
 
       // Singleton hub managing:
-      // 1. Ref-counted KWin Wayland cursor script (auto-unloads when all screens are paused!)
+      // 1. Ref-counted KWin Wayland cursor script (auto-unloads when all screens are paused)
       // 2. System Power-Save state (UPower / power-profiles-daemon)
       // 3. Session Lock / ScreenSaver state (org.freedesktop.ScreenSaver)
       class KWinCursorReceiver : public QObject {
@@ -142,7 +150,6 @@ let
               sbus.registerService(QStringLiteral("org.nixos.WallpaperInput"));
               sbus.registerObject(QStringLiteral("/CursorBridge"), this, QDBusConnection::ExportScriptableSlots);
 
-              // Subscribe to KDE Screen Locker (Meta+L / DPMS lock)
               sbus.connect(
                   QStringLiteral("org.freedesktop.ScreenSaver"),
                   QStringLiteral("/ScreenSaver"),
@@ -152,7 +159,6 @@ let
                   SLOT(onScreenSaverActiveChanged(bool))
               );
 
-              // Subscribe to Power Profiles on system bus
               auto sysBus = QDBusConnection::systemBus();
               sysBus.connect(
                   QStringLiteral("org.freedesktop.UPower.PowerProfiles"),
@@ -201,7 +207,7 @@ let
               sbus.asyncCall(unloadMsg);
 
               if (!shouldBeLoaded) {
-                  return; // Completely unloaded from KWin while all monitors are paused!
+                  return;
               }
 
               QDBusMessage loadMsg = QDBusMessage::createMethodCall(
@@ -276,10 +282,11 @@ let
           QString m_scriptPath;
       };
 
-      // Per-monitor input, geometry, hot-reload, and power-state bridge
+      // Per-monitor input, native QHoverEvent delivery, screenshot cache, and power-state bridge
       class WallpaperInputBridge : public QObject {
           Q_OBJECT
           Q_PROPERTY(QWindow* targetWindow READ targetWindow WRITE setTargetWindow NOTIFY targetWindowChanged)
+          Q_PROPERTY(QQuickItem* webView READ webView WRITE setWebView NOTIFY webViewChanged)
           Q_PROPERTY(QRect windowScreenGeometry READ windowScreenGeometry NOTIFY windowScreenGeometryChanged)
           Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
           Q_PROPERTY(bool trackOverWindows READ trackOverWindows WRITE setTrackOverWindows NOTIFY trackOverWindowsChanged)
@@ -290,6 +297,7 @@ let
           Q_PROPERTY(bool screenLocked READ screenLocked NOTIFY screenLockedChanged)
           Q_PROPERTY(QString watchedFileUrl READ watchedFileUrl WRITE setWatchedFileUrl NOTIFY watchedFileUrlChanged)
           Q_PROPERTY(bool watchFileChanges READ watchFileChanges WRITE setWatchFileChanges NOTIFY watchFileChangesChanged)
+          Q_PROPERTY(QString snapshotUrl READ snapshotUrl NOTIFY snapshotUrlChanged)
           Q_PROPERTY(QString kwinScriptPath READ kwinScriptPath WRITE setKwinScriptPath NOTIFY kwinScriptPathChanged)
 
       public:
@@ -329,10 +337,17 @@ let
                   if (!m_active) return;
 
                   if (isInside) {
+                      // Optimization #3: Mutually exclusive desktop vs KWin tracking.
+                      // If the cursor is directly hovering the unobstructed desktop QWindow,
+                      // ignore duplicate KWin DBus packets!
+                      if (m_desktopHasDirectHover) {
+                          return;
+                      }
                       if (m_trackOverWindows) {
-                          queueCursor(gx - sRect.x(), gy - sRect.y());
+                          queueCursor(gx - sRect.x(), gy - sRect.y(), false);
                       }
                   } else {
+                      m_desktopHasDirectHover = false;
                       if (m_wasInsideForReset) {
                           m_wasInsideForReset = false;
                           if (m_resetMouseOnLeave) {
@@ -340,12 +355,14 @@ let
                               m_coalesceTimer.stop();
                               m_lastX = -99999.0;
                               m_lastY = -99999.0;
+                              const QRectF r = effectiveScreenRect();
+                              deliverNativeHover(r.width() * 0.5, r.height() * 0.5);
                               Q_EMIT cursorResetToCenter();
                               return;
                           }
                       }
                       if (!m_independentScreenMouse && m_trackOverWindows) {
-                          queueCursor(gx - sRect.x(), gy - sRect.y());
+                          queueCursor(gx - sRect.x(), gy - sRect.y(), false);
                       }
                   }
               });
@@ -374,6 +391,15 @@ let
                   bindScreen(nullptr);
               }
               Q_EMIT targetWindowChanged();
+          }
+
+          QQuickItem* webView() const { return m_webView; }
+          void setWebView(QQuickItem *item) {
+              if (m_webView == item) return;
+              m_webView = item;
+              m_nativeHoverVerified = false;
+              m_sentHoverEnter = false;
+              Q_EMIT webViewChanged();
           }
 
           QRect windowScreenGeometry() const { return m_windowScreenGeometry; }
@@ -409,6 +435,7 @@ let
           void setResetMouseOnLeave(bool r) {
               if (m_resetMouseOnLeave == r) return;
               m_resetMouseOnLeave = r;
+              syncKWinNeed();
               Q_EMIT resetMouseOnLeaveChanged();
           }
 
@@ -426,7 +453,10 @@ let
           void setWatchedFileUrl(const QString &urlStr) {
               if (m_watchedFileUrl == urlStr) return;
               m_watchedFileUrl = urlStr;
+              m_nativeHoverVerified = false;
+              m_sentHoverEnter = false;
               rewatchLocalFile();
+              updateSnapshotCachePath();
               Q_EMIT watchedFileUrlChanged();
           }
 
@@ -438,6 +468,13 @@ let
               Q_EMIT watchFileChangesChanged();
           }
 
+          QString snapshotUrl() const {
+              if (!m_snapshotFilePath.isEmpty() && QFileInfo::exists(m_snapshotFilePath) && QFileInfo(m_snapshotFilePath).size() > 0) {
+                  return QStringLiteral("file://") + m_snapshotFilePath;
+              }
+              return QString();
+          }
+
           QString kwinScriptPath() const { return m_kwinScriptPath; }
           void setKwinScriptPath(const QString &p) {
               if (m_kwinScriptPath == p) return;
@@ -447,8 +484,60 @@ let
               Q_EMIT kwinScriptPathChanged();
           }
 
+          // Called by QML once Blink confirms it received trusted C++ QHoverEvents
+          Q_INVOKABLE void confirmNativeHoverWorking() {
+              m_nativeHoverVerified = true;
+          }
+
+          Q_INVOKABLE void resetNativeHoverState() {
+              m_nativeHoverVerified = false;
+              m_sentHoverEnter = false;
+          }
+
+          // Asynchronous non-blocking screenshot saver with black-frame sanity check
+          Q_INVOKABLE void saveSnapshotAsync(const QVariant &imageVariant) {
+              if (m_snapshotFilePath.isEmpty() || m_savingSnapshot) return;
+              QImage img = imageVariant.value<QImage>();
+              if (img.isNull() || img.width() < 64 || img.height() < 64) return;
+
+              // Quick 16x16 grid scan to guarantee we never overwrite the cache with an uninitialized black frame
+              bool hasVisibleContent = false;
+              const int w = img.width();
+              const int h = img.height();
+              for (int gy = 1; gy <= 16 && !hasVisibleContent; ++gy) {
+                  const int py = (h * gy) / 17;
+                  for (int gx = 1; gx <= 16; ++gx) {
+                      const int px = (w * gx) / 17;
+                      const QRgb rgb = img.pixel(px, py);
+                      if (qRed(rgb) > 6 || qGreen(rgb) > 6 || qBlue(rgb) > 6) {
+                          hasVisibleContent = true;
+                          break;
+                      }
+                  }
+              }
+              if (!hasVisibleContent) return;
+
+              m_savingSnapshot = true;
+              const QString targetPath = m_snapshotFilePath;
+
+              std::thread([this, img, targetPath]() {
+                  QFileInfo fi(targetPath);
+                  QDir().mkpath(fi.absolutePath());
+                  const QString tmpPath = targetPath + QStringLiteral(".tmp.jpg");
+                  if (img.save(tmpPath, "JPG", 92)) {
+                      QFile::remove(targetPath);
+                      QFile::rename(tmpPath, targetPath);
+                  }
+                  QMetaObject::invokeMethod(this, [this]() {
+                      m_savingSnapshot = false;
+                      Q_EMIT snapshotUrlChanged();
+                  }, Qt::QueuedConnection);
+              }).detach();
+          }
+
       Q_SIGNALS:
           void targetWindowChanged();
+          void webViewChanged();
           void windowScreenGeometryChanged();
           void activeChanged();
           void trackOverWindowsChanged();
@@ -460,9 +549,11 @@ let
           void watchedFileUrlChanged();
           void watchFileChangesChanged();
           void watchedFileModified();
+          void snapshotUrlChanged();
           void kwinScriptPathChanged();
 
           void cursorMoved(qreal x, qreal y);
+          void probeNativeHover();
           void cursorResetToCenter();
           void mousePressed(qreal x, qreal y);
           void mouseReleased(qreal x, qreal y);
@@ -475,35 +566,46 @@ let
               }
 
               switch (event->type()) {
+                  case QEvent::HoverEnter: {
+                      m_desktopHasDirectHover = true;
+                      setCursorInsideScreen(true);
+                      break;
+                  }
                   case QEvent::MouseMove: {
                       auto *me = static_cast<QMouseEvent *>(event);
                       const QPointF p = me->position();
+                      m_desktopHasDirectHover = true;
                       setCursorInsideScreen(true);
-                      if (m_active) queueCursor(p.x(), p.y());
+                      if (m_active) queueCursor(p.x(), p.y(), true);
                       break;
                   }
                   case QEvent::HoverMove: {
                       auto *he = static_cast<QHoverEvent *>(event);
                       const QPointF p = he->position();
+                      m_desktopHasDirectHover = true;
                       setCursorInsideScreen(true);
-                      if (m_active) queueCursor(p.x(), p.y());
+                      if (m_active) queueCursor(p.x(), p.y(), true);
                       break;
                   }
                   case QEvent::DragEnter:
                   case QEvent::DragMove: {
                       auto *de = static_cast<QDragMoveEvent *>(event);
                       const QPointF p = de->position();
+                      m_desktopHasDirectHover = true;
                       setCursorInsideScreen(true);
-                      if (m_active) queueCursor(p.x(), p.y());
+                      if (m_active) queueCursor(p.x(), p.y(), true);
                       break;
                   }
                   case QEvent::Leave:
                   case QEvent::HoverLeave: {
+                      m_desktopHasDirectHover = false;
                       if (!m_trackOverWindows) {
                           setCursorInsideScreen(false);
                           if (m_resetMouseOnLeave && m_active) {
                               m_hasPendingMove = false;
                               m_coalesceTimer.stop();
+                              const QRectF r = effectiveScreenRect();
+                              deliverNativeHover(r.width() * 0.5, r.height() * 0.5);
                               Q_EMIT cursorResetToCenter();
                           }
                       }
@@ -512,8 +614,10 @@ let
                   case QEvent::MouseButtonPress: {
                       auto *me = static_cast<QMouseEvent *>(event);
                       const QPointF p = me->position();
+                      m_desktopHasDirectHover = true;
                       setCursorInsideScreen(true);
                       if (m_active && me->button() == Qt::LeftButton) {
+                          m_isLeftButtonDown = true;
                           Q_EMIT mousePressed(qRound(p.x()), qRound(p.y()));
                       }
                       break;
@@ -521,8 +625,11 @@ let
                   case QEvent::MouseButtonRelease: {
                       auto *me = static_cast<QMouseEvent *>(event);
                       const QPointF p = me->position();
-                      if (m_active && me->button() == Qt::LeftButton) {
-                          Q_EMIT mouseReleased(qRound(p.x()), qRound(p.y()));
+                      if (me->button() == Qt::LeftButton) {
+                          m_isLeftButtonDown = false;
+                          if (m_active) {
+                              Q_EMIT mouseReleased(qRound(p.x()), qRound(p.y()));
+                          }
                       }
                       break;
                   }
@@ -543,6 +650,52 @@ let
           }
 
       private:
+          QQuickItem* findRenderDelegate() const {
+              if (!m_webView) return nullptr;
+              const auto children = m_webView->childItems();
+              for (QQuickItem *child : children) {
+                  if (child && child->isVisible() && child->width() > 0 && child->height() > 0) {
+                      return child;
+                  }
+              }
+              return nullptr;
+          }
+
+          bool deliverNativeHover(qreal lx, qreal ly) {
+              QQuickItem *delegate = findRenderDelegate();
+              if (!delegate) return false;
+
+              const QPointF pos(lx, ly);
+              const QPointF globalPos = effectiveScreenRect().topLeft() + pos;
+
+              if (!m_sentHoverEnter) {
+                  m_sentHoverEnter = true;
+                  QHoverEvent enterEv(QEvent::HoverEnter, pos, globalPos, QPointF(-1, -1));
+                  QCoreApplication::sendEvent(delegate, &enterEv);
+              }
+
+              QHoverEvent moveEv(QEvent::HoverMove, pos, globalPos, m_lastNativePos);
+              m_lastNativePos = pos;
+              return QCoreApplication::sendEvent(delegate, &moveEv);
+          }
+
+          void updateSnapshotCachePath() {
+              const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)
+                                       + QStringLiteral("/nixos-webgl-wallpaper");
+              const QString screenTag = m_boundScreen
+                  ? m_boundScreen->name()
+                  : QStringLiteral("%1x%2").arg(m_windowScreenGeometry.width()).arg(m_windowScreenGeometry.height());
+              const QByteArray key = (m_watchedFileUrl + QStringLiteral("|") + screenTag).toUtf8();
+              const QString hash = QString::fromLatin1(
+                  QCryptographicHash::hash(key, QCryptographicHash::Sha256).toHex().left(16)
+              );
+              const QString nextPath = cacheDir + QStringLiteral("/snap_") + hash + QStringLiteral(".jpg");
+              if (m_snapshotFilePath != nextPath) {
+                  m_snapshotFilePath = nextPath;
+                  Q_EMIT snapshotUrlChanged();
+              }
+          }
+
           void setCursorInsideScreen(bool inside) {
               if (inside) {
                   m_wasInsideForReset = true;
@@ -554,8 +707,7 @@ let
           }
 
           void syncKWinNeed() {
-              // Keep KWin cursor hook active if we need window-drag tracking OR cross-monitor enter/leave detection
-              const bool needKWin = !m_kwinScriptPath.isEmpty() && (m_active || m_resetMouseOnLeave);
+              const bool needKWin = !m_kwinScriptPath.isEmpty() && m_active && (m_trackOverWindows || m_resetMouseOnLeave);
               updateKWinSubscription(needKWin);
           }
 
@@ -594,11 +746,12 @@ let
               const QRect nextRect = m_boundScreen ? m_boundScreen->geometry() : QRect();
               if (m_windowScreenGeometry != nextRect) {
                   m_windowScreenGeometry = nextRect;
+                  updateSnapshotCachePath();
                   Q_EMIT windowScreenGeometryChanged();
               }
           }
 
-          void queueCursor(qreal lx, qreal ly) {
+          void queueCursor(qreal lx, qreal ly, bool fromDirectDesktop) {
               const qreal rx = qRound(lx);
               const qreal ry = qRound(ly);
               if (qAbs(rx - m_lastX) < 1.0 && qAbs(ry - m_lastY) < 1.0) {
@@ -606,6 +759,7 @@ let
               }
               m_pendingX = rx;
               m_pendingY = ry;
+              m_pendingFromDesktop = fromDirectDesktop;
               m_hasPendingMove = true;
               if (!m_coalesceTimer.isActive()) {
                   flushPendingCursor();
@@ -621,7 +775,21 @@ let
               m_hasPendingMove = false;
               m_lastX = m_pendingX;
               m_lastY = m_pendingY;
+
+              // Optimization #1: Deliver native C++ QHoverEvent directly to WebEngineView's render delegate
+              const bool sentNative = deliverNativeHover(m_lastX, m_lastY);
+
+              // If native C++ delivery is verified & active on desktop (and we aren't dragging a range slider),
+              // skip QML runJavaScript completely!
+              if (sentNative && m_nativeHoverVerified && m_pendingFromDesktop && !m_isLeftButtonDown) {
+                  return;
+              }
+
               Q_EMIT cursorMoved(m_lastX, m_lastY);
+
+              if (sentNative && !m_nativeHoverVerified && m_pendingFromDesktop && (++m_probeCounter % 8 == 1)) {
+                  Q_EMIT probeNativeHover();
+              }
           }
 
           QRectF effectiveScreenRect() const {
@@ -635,21 +803,31 @@ let
           }
 
           QWindow *m_targetWindow = nullptr;
+          QQuickItem *m_webView = nullptr;
           QScreen *m_boundScreen = nullptr;
           QRect m_windowScreenGeometry;
           QTimer m_coalesceTimer;
           QTimer m_reloadDebounceTimer;
           QFileSystemWatcher m_fileWatcher;
+          QPointF m_lastNativePos{0.0, 0.0};
+          int m_probeCounter = 0;
           bool m_active = true;
           bool m_trackOverWindows = true;
           bool m_independentScreenMouse = true;
           bool m_resetMouseOnLeave = true;
           bool m_cursorInsideScreen = true;
           bool m_wasInsideForReset = true;
+          bool m_desktopHasDirectHover = false;
+          bool m_isLeftButtonDown = false;
+          bool m_nativeHoverVerified = false;
+          bool m_sentHoverEnter = false;
           bool m_watchFileChanges = true;
           bool m_subscribedToKWin = false;
           bool m_hasPendingMove = false;
+          bool m_pendingFromDesktop = false;
+          bool m_savingSnapshot = false;
           QString m_watchedFileUrl;
+          QString m_snapshotFilePath;
           QString m_kwinScriptPath;
           qreal m_pendingX = 0.0;
           qreal m_pendingY = 0.0;
@@ -734,7 +912,7 @@ let
             }
           ],
           "Category": "Wallpaper",
-          "Description": "Hardware-accelerated HTML5/WebGL Wallpaper with Pareto Smart Pause, Power-Save & Multi-Monitor Interactivity",
+          "Description": "Hardware-accelerated HTML5/WebGL Wallpaper with Static Snapshot Cache, Native C++ Input & Smart Pause",
           "Icon": "preferences-desktop-wallpaper",
           "Id": "org.nixos.webglwallpaper",
           "License": "GPL-3.0-or-later",
@@ -742,7 +920,7 @@ let
           "ServiceTypes": [
             "Plasma/Wallpaper"
           ],
-          "Version": "2.5.0"
+          "Version": "2.6.0"
         },
         "X-KDE-ParentApp": "org.kde.plasmashell",
         "X-Plasma-API-Minimum-Version": "6.0",
@@ -799,6 +977,10 @@ let
             <label>Freeze rendering 2s after cursor leaves monitor (wakes instantly on return)</label>
             <default>false</default>
           </entry>
+          <entry name="UseSnapshotCache" type="Bool">
+            <label>Show cached static screenshot during boot and reload (prevents black screen)</label>
+            <default>true</default>
+          </entry>
           <entry name="AutoHideHud" type="Bool">
             <label>Auto-hide top-right HTML HUD pill (reveal on top-right hover)</label>
             <default>false</default>
@@ -832,6 +1014,7 @@ let
           property bool cfg_IndependentScreenMouse
           property bool cfg_ResetMouseOnLeave
           property bool cfg_FreezeInactiveMonitor
+          property bool cfg_UseSnapshotCache
           property bool cfg_AutoHideHud
           property bool cfg_AutoReloadOnModify
 
@@ -917,7 +1100,13 @@ let
           }
 
           QQC2.CheckBox {
-              Kirigami.FormData.label: "UI & Live Dev:"
+              Kirigami.FormData.label: "Boot Cache & Live Dev:"
+              text: "Show cached static screenshot during boot and reload (zero black screen)"
+              checked: configRoot.cfg_UseSnapshotCache
+              onToggled: configRoot.cfg_UseSnapshotCache = checked
+          }
+
+          QQC2.CheckBox {
               text: "Auto-hide top-right HTML HUD pill (reveal only when hovering top-right corner)"
               checked: configRoot.cfg_AutoHideHud
               onToggled: configRoot.cfg_AutoHideHud = checked
@@ -963,12 +1152,21 @@ let
           readonly property bool independentScreenMouse: root.configuration.IndependentScreenMouse !== undefined ? root.configuration.IndependentScreenMouse : true
           readonly property bool resetMouseOnLeave: root.configuration.ResetMouseOnLeave !== undefined ? root.configuration.ResetMouseOnLeave : true
           readonly property bool freezeInactiveMonitor: root.configuration.FreezeInactiveMonitor !== undefined ? root.configuration.FreezeInactiveMonitor : false
+          readonly property bool useSnapshotCache: root.configuration.UseSnapshotCache !== undefined ? root.configuration.UseSnapshotCache : true
           readonly property bool autoHideHud: root.configuration.AutoHideHud !== undefined ? root.configuration.AutoHideHud : false
           readonly property bool autoReloadOnModify: root.configuration.AutoReloadOnModify !== undefined ? root.configuration.AutoReloadOnModify : true
 
           property bool isPaused: false
           property bool inactiveMonitorSettled: false
           property bool pageReady: false
+          property bool webviewPainted: false
+          property double lastSnapshotTime: 0
+
+          onConfiguredUrlChanged: {
+              root.webviewPainted = false;
+              root.pageReady = false;
+              inputBridge.resetNativeHoverState();
+          }
 
           onPauseOnPowerSaveChanged: pauseEvalTimer.restart()
           onSmartPauseEnabledChanged: pauseEvalTimer.restart()
@@ -992,7 +1190,35 @@ let
               );
           }
 
-          // Settles for 1.8s after cursor leaves monitor so center-reset spring animation finishes cleanly before freezing
+          function captureDiskSnapshot(forceNow) {
+              if (!root.useSnapshotCache || !root.pageReady || !root.webviewPainted) return;
+              const now = Date.now();
+              if (!forceNow && (now - root.lastSnapshotTime < 30000)) return;
+              root.lastSnapshotTime = now;
+              webview.grabToImage(function(result) {
+                  if (result && result.image) {
+                      inputBridge.saveSnapshotAsync(result.image);
+                  }
+              });
+          }
+
+          Timer {
+              id: firstFrameRevealTimer
+              interval: 180
+              repeat: false
+              onTriggered: {
+                  root.webviewPainted = true;
+                  snapshotCaptureTimer.restart();
+              }
+          }
+
+          Timer {
+              id: snapshotCaptureTimer
+              interval: 1400
+              repeat: false
+              onTriggered: root.captureDiskSnapshot(true)
+          }
+
           Timer {
               id: inactiveMonitorSettleTimer
               interval: 1800
@@ -1005,6 +1231,7 @@ let
               }
           }
 
+          // Optimization #2: Role-filtered TasksModel signals (ignores window title, icon, and audio updates)
           TaskManager.TasksModel {
               id: tasksModel
               filterByScreen: true
@@ -1012,10 +1239,18 @@ let
               filterByActivity: true
               filterByVirtualDesktop: true
 
-              onDataChanged: pauseEvalTimer.restart()
+              onDataChanged: function(topLeft, bottomRight, roles) {
+                  if (!roles || roles.length === 0 ||
+                      roles.indexOf(TaskManager.AbstractTasksModel.IsFullScreen) !== -1 ||
+                      roles.indexOf(TaskManager.AbstractTasksModel.IsMaximized) !== -1 ||
+                      roles.indexOf(TaskManager.AbstractTasksModel.IsMinimized) !== -1 ||
+                      roles.indexOf(TaskManager.AbstractTasksModel.IsHidden) !== -1 ||
+                      roles.indexOf(TaskManager.AbstractTasksModel.Geometry) !== -1) {
+                      pauseEvalTimer.restart();
+                  }
+              }
               onRowsInserted: pauseEvalTimer.restart()
               onRowsRemoved: pauseEvalTimer.restart()
-              onActiveTaskChanged: pauseEvalTimer.restart()
           }
 
           TaskManager.VirtualDesktopInfo {
@@ -1035,7 +1270,6 @@ let
               onTriggered: root.evaluateSmartPause()
           }
 
-          // Fast 12x8 coarse grid occlusion test (<0.05ms) to check if tiled/floating windows cover >=90% of this screen
           function isScreenCoveredByTiledWindows(rects, sRect) {
               if (!sRect || sRect.width <= 0 || sRect.height <= 0 || rects.length === 0) {
                   return false;
@@ -1064,19 +1298,16 @@ let
           }
 
           function evaluateSmartPause() {
-              // 1. Check Screen Lock (Meta+L) or Power Save mode
               if (inputBridge.screenLocked || (root.pauseOnPowerSave && inputBridge.powerSaverActive)) {
                   root.setWallpaperPaused(true);
                   return;
               }
 
-              // 2. Check Inactive Monitor Deep Freeze
               if (root.freezeInactiveMonitor && root.inactiveMonitorSettled && !inputBridge.cursorInsideScreen) {
                   root.setWallpaperPaused(true);
                   return;
               }
 
-              // 3. Check Per-Monitor Fullscreen, Maximized, or Tiled Coverage
               if (!root.smartPauseEnabled) {
                   root.setWallpaperPaused(false);
                   return;
@@ -1124,6 +1355,7 @@ let
               root.isPaused = pauseState;
 
               if (pauseState) {
+                  root.captureDiskSnapshot(false);
                   webview.runJavaScript("if (window.__wallpaperSetPaused) window.__wallpaperSetPaused(true);");
                   freezeDelayTimer.restart();
               } else {
@@ -1162,7 +1394,9 @@ let
               }
 
               onLoadingChanged: function(loadRequest) {
-                  if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
+                  if (loadRequest.status === WebEngineView.LoadStartedStatus) {
+                      inputBridge.resetNativeHoverState();
+                  } else if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
                       webview.runJavaScript(`
                           (function() {
                               if (window.__nixosWallpaperBridgeInstalled) return;
@@ -1178,7 +1412,6 @@ let
                                   document.head.appendChild(s);
                               }
 
-                              // Optional Top-Right HUD Auto-Hide style
                               const hudStyle = document.createElement('style');
                               hudStyle.id = 'nixos-hud-autohide-style';
                               document.head.appendChild(hudStyle);
@@ -1188,6 +1421,18 @@ let
                                       ? '.hud-pill { opacity: 0; transition: opacity 0.25s ease; } .hud-pill:hover, body.hud-corner-hover .hud-pill { opacity: 1; }'
                                       : '';
                               };
+
+                              // Track trusted C++ QHoverEvent mousemove delivery
+                              window.__lastTrustedMove = 0;
+                              window.addEventListener('mousemove', function(e) {
+                                  if (e.isTrusted) {
+                                      window.__lastTrustedMove = performance.now();
+                                      if (window.__autoHideHudActive) {
+                                          const inTopRight = (e.clientX > window.innerWidth - 520) && (e.clientY < 72);
+                                          document.body.classList.toggle('hud-corner-hover', inTopRight);
+                                      }
+                                  }
+                              }, { capture: true, passive: true });
 
                               window.__rawRAF = window.requestAnimationFrame.bind(window);
                               window.__pausedCallbacks = [];
@@ -1227,7 +1472,6 @@ let
                                   slider.dispatchEvent(new Event('change', { bubbles: true }));
                               }
 
-                              // Compact fast-path move handler (__wM)
                               window.__wM = function(x, y) {
                                   if (window.__universalPaused) return;
                                   if (window.__activeRangeSlider) {
@@ -1235,6 +1479,8 @@ let
                                   }
                                   const inTopRight = (x > window.innerWidth - 520) && (y < 72);
                                   document.body.classList.toggle('hud-corner-hover', inTopRight);
+                                  // Skip synthetic JS dispatch if native C++ QHoverEvent already delivered this frame
+                                  if (performance.now() - window.__lastTrustedMove < 24) return;
                                   window.dispatchEvent(new MouseEvent('mousemove', {
                                       clientX: x,
                                       clientY: y,
@@ -1300,6 +1546,28 @@ let
                       root.pageReady = true;
                       root.syncHudVisibilityMode();
                       root.evaluateSmartPause();
+                      firstFrameRevealTimer.restart();
+                  }
+              }
+          }
+
+          // Zero-Black-Screen Static Screenshot Overlay (renders on Frame 0 during boot & hot-reload,
+          // then fades out and sets visible: false so it uses 0% GPU during normal operation)
+          Image {
+              id: snapshotPlaceholder
+              anchors.fill: parent
+              z: 10
+              source: root.useSnapshotCache ? inputBridge.snapshotUrl : ""
+              cache: false
+              asynchronous: false
+              fillMode: Image.PreserveAspectCrop
+              opacity: (root.useSnapshotCache && !root.webviewPainted && status === Image.Ready) ? 1.0 : 0.0
+              visible: opacity > 0.005
+
+              Behavior on opacity {
+                  NumberAnimation {
+                      duration: 240
+                      easing.type: Easing.OutCubic
                   }
               }
           }
@@ -1307,6 +1575,7 @@ let
           WallpaperInputBridge {
               id: inputBridge
               targetWindow: root.Window.window
+              webView: webview
               active: root.interactiveMouse && !root.isPaused && root.pageReady
               trackOverWindows: root.trackOverWindows
               independentScreenMouse: root.independentScreenMouse
@@ -1320,7 +1589,18 @@ let
               onScreenLockedChanged: pauseEvalTimer.restart()
 
               onWatchedFileModified: {
-                  webview.reload();
+                  if (root.useSnapshotCache && root.pageReady && root.webviewPainted) {
+                      webview.grabToImage(function(result) {
+                          if (result && result.image) {
+                              inputBridge.saveSnapshotAsync(result.image);
+                          }
+                          root.webviewPainted = false;
+                          webview.reload();
+                      });
+                  } else {
+                      root.webviewPainted = false;
+                      webview.reload();
+                  }
               }
 
               onCursorInsideScreenChanged: {
@@ -1333,6 +1613,14 @@ let
                   } else if (root.freezeInactiveMonitor) {
                       inactiveMonitorSettleTimer.restart();
                   }
+              }
+
+              onProbeNativeHover: {
+                  webview.runJavaScript("Boolean(window.__lastTrustedMove && window.__lastTrustedMove > 0)", function(verified) {
+                      if (verified) {
+                          inputBridge.confirmNativeHoverWorking();
+                      }
+                  });
               }
 
               onCursorMoved: function(x, y) {
