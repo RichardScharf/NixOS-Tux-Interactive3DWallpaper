@@ -1,20 +1,17 @@
 { config, pkgs, lib, ... }:
 
 let
+  defaultWallpaperUrl = "file:///home/richard/Videos/RedNixPromptgram/red_nixos_tux_3d_interactive_scene.html";
+
   # Offline Three.js r128 fallback in /nix/store
   threeJsLib = builtins.fetchurl {
     url = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-    sha256 = "1qhw5j590xf1q2z9j1dagvxqrakmqwqmsavkdii6hqfrr37bnx4j";
+    sha256 = "023nm6423f25f37f53c8824c686ef1929f7a811f66211d3a2f2bc2a6d87d7677";
   };
-  tuxSvgFile = builtins.fetchurl {
-     url = "https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg";
-     sha256 = "0hwpvgblznav95mnkzvld1d1gcibi5xzb74mky3g4vz123akll6d";
-   };
-   defaultWallpaperUrl = "file:///home/YOURUSERNAME/PATH/TO/FILE/nixos_tux_interactive_3d_wallpaper.html?three=file://${threeJsLib}&tux=file://${tuxSvgFile}";
 
   declarativeWebWallpaperPlugin = pkgs.stdenv.mkDerivation {
     pname = "plasma6-webwallpaper-declarative";
-    version = "2.4.0";
+    version = "2.5.0";
 
     dontUnpack = true;
     dontConfigure = true;
@@ -65,6 +62,9 @@ let
       #include <QWheelEvent>
       #include <QDragMoveEvent>
       #include <QTimer>
+      #include <QFileSystemWatcher>
+      #include <QUrl>
+      #include <QFileInfo>
       #include <QVariantMap>
       #include <QDBusVariant>
       #include <QtMath>
@@ -75,9 +75,10 @@ let
       #include <QQmlExtensionPlugin>
       #include <qqml.h>
 
-      // Singleton hub for:
-      // 1. KWin Wayland global cursor positions (workspace.cursorPosChanged)
-      // 2. System Power-Save profile state (org.freedesktop.UPower.PowerProfiles / net.hadess.PowerProfiles)
+      // Singleton hub managing:
+      // 1. Ref-counted KWin Wayland cursor script (auto-unloads when all screens are paused!)
+      // 2. System Power-Save state (UPower / power-profiles-daemon)
+      // 3. Session Lock / ScreenSaver state (org.freedesktop.ScreenSaver)
       class KWinCursorReceiver : public QObject {
           Q_OBJECT
           Q_CLASSINFO("D-Bus Interface", "org.nixos.WallpaperInput")
@@ -89,67 +90,18 @@ let
           }
 
           bool powerSaverActive() const { return m_powerSaverActive; }
+          bool screenLocked() const { return m_screenLocked; }
 
-          void ensureKWinScriptLoadedAsync(const QString &scriptPath) {
-              if (!m_powerSubscribed) {
-                  m_powerSubscribed = true;
-                  initPowerProfileWatcherAsync();
+          void setScriptPath(const QString &scriptPath) {
+              if (!scriptPath.isEmpty()) {
+                  m_scriptPath = scriptPath;
               }
+              initWatchersOnce();
+          }
 
-              if (m_scriptLoaded || scriptPath.isEmpty()) return;
-              m_scriptLoaded = true;
-              m_scriptPath = scriptPath;
-
-              auto bus = QDBusConnection::sessionBus();
-              bus.registerService(QStringLiteral("org.nixos.WallpaperInput"));
-              bus.registerObject(QStringLiteral("/CursorBridge"), this, QDBusConnection::ExportScriptableSlots);
-
-              QTimer::singleShot(1500, this, [this]() {
-                  auto sbus = QDBusConnection::sessionBus();
-
-                  QDBusMessage unloadMsg = QDBusMessage::createMethodCall(
-                      QStringLiteral("org.kde.KWin"),
-                      QStringLiteral("/Scripting"),
-                      QStringLiteral("org.kde.kwin.Scripting"),
-                      QStringLiteral("unloadScript")
-                  );
-                  unloadMsg << QStringLiteral("nixos_webgl_cursor_bridge");
-                  sbus.asyncCall(unloadMsg);
-
-                  QDBusMessage loadMsg = QDBusMessage::createMethodCall(
-                      QStringLiteral("org.kde.KWin"),
-                      QStringLiteral("/Scripting"),
-                      QStringLiteral("org.kde.kwin.Scripting"),
-                      QStringLiteral("loadScript")
-                  );
-                  loadMsg << m_scriptPath << QStringLiteral("nixos_webgl_cursor_bridge");
-
-                  QDBusPendingCall pending = sbus.asyncCall(loadMsg);
-                  auto *watcher = new QDBusPendingCallWatcher(pending, this);
-                  connect(watcher, &QDBusPendingCallWatcher::finished, this, [sbus](QDBusPendingCallWatcher *w) {
-                      w->deleteLater();
-                      QDBusPendingReply<int> reply = *w;
-
-                      QDBusMessage startMsg = QDBusMessage::createMethodCall(
-                          QStringLiteral("org.kde.KWin"),
-                          QStringLiteral("/Scripting"),
-                          QStringLiteral("org.kde.kwin.Scripting"),
-                          QStringLiteral("start")
-                      );
-                      sbus.asyncCall(startMsg);
-
-                      if (reply.isValid()) {
-                          int id = reply.value();
-                          QDBusMessage runMsg = QDBusMessage::createMethodCall(
-                              QStringLiteral("org.kde.KWin"),
-                              QStringLiteral("/Scripting/Script%1").arg(id),
-                              QStringLiteral("org.kde.kwin.Script"),
-                              QStringLiteral("run")
-                          );
-                          sbus.asyncCall(runMsg);
-                      }
-                  });
-              });
+          void updateKWinConsumerCount(int delta) {
+              m_activeConsumers = qMax(0, m_activeConsumers + delta);
+              m_kwinToggleDebounce.start(300);
           }
 
       public Q_SLOTS:
@@ -164,17 +116,44 @@ let
               }
           }
 
+          void onScreenSaverActiveChanged(bool locked) {
+              if (m_screenLocked != locked) {
+                  m_screenLocked = locked;
+                  Q_EMIT screenLockedChanged(m_screenLocked);
+              }
+          }
+
       Q_SIGNALS:
           void kwinCursorMoved(qreal globalX, qreal globalY);
           void powerSaverActiveChanged(bool active);
+          void screenLockedChanged(bool locked);
 
       private:
-          KWinCursorReceiver() = default;
+          KWinCursorReceiver() {
+              m_kwinToggleDebounce.setSingleShot(true);
+              connect(&m_kwinToggleDebounce, &QTimer::timeout, this, &KWinCursorReceiver::syncKWinScriptStateAsync);
+          }
 
-          void initPowerProfileWatcherAsync() {
+          void initWatchersOnce() {
+              if (m_watchersInitialized) return;
+              m_watchersInitialized = true;
+
+              auto sbus = QDBusConnection::sessionBus();
+              sbus.registerService(QStringLiteral("org.nixos.WallpaperInput"));
+              sbus.registerObject(QStringLiteral("/CursorBridge"), this, QDBusConnection::ExportScriptableSlots);
+
+              // Subscribe to KDE Screen Locker (Meta+L / DPMS lock)
+              sbus.connect(
+                  QStringLiteral("org.freedesktop.ScreenSaver"),
+                  QStringLiteral("/ScreenSaver"),
+                  QStringLiteral("org.freedesktop.ScreenSaver"),
+                  QStringLiteral("ActiveChanged"),
+                  this,
+                  SLOT(onScreenSaverActiveChanged(bool))
+              );
+
+              // Subscribe to Power Profiles on system bus
               auto sysBus = QDBusConnection::systemBus();
-
-              // Listen for live profile switches from KDE Battery / Power Devil
               sysBus.connect(
                   QStringLiteral("org.freedesktop.UPower.PowerProfiles"),
                   QStringLiteral("/org/freedesktop/UPower/PowerProfiles"),
@@ -202,6 +181,62 @@ let
                   QStringLiteral("/net/hadess/PowerProfiles"),
                   QStringLiteral("net.hadess.PowerProfiles")
               );
+          }
+
+          void syncKWinScriptStateAsync() {
+              if (m_scriptPath.isEmpty()) return;
+              const bool shouldBeLoaded = (m_activeConsumers > 0);
+              if (m_scriptLoaded == shouldBeLoaded) return;
+              m_scriptLoaded = shouldBeLoaded;
+
+              auto sbus = QDBusConnection::sessionBus();
+
+              QDBusMessage unloadMsg = QDBusMessage::createMethodCall(
+                  QStringLiteral("org.kde.KWin"),
+                  QStringLiteral("/Scripting"),
+                  QStringLiteral("org.kde.kwin.Scripting"),
+                  QStringLiteral("unloadScript")
+              );
+              unloadMsg << QStringLiteral("nixos_webgl_cursor_bridge");
+              sbus.asyncCall(unloadMsg);
+
+              if (!shouldBeLoaded) {
+                  return; // Completely unloaded from KWin while all monitors are paused!
+              }
+
+              QDBusMessage loadMsg = QDBusMessage::createMethodCall(
+                  QStringLiteral("org.kde.KWin"),
+                  QStringLiteral("/Scripting"),
+                  QStringLiteral("org.kde.kwin.Scripting"),
+                  QStringLiteral("loadScript")
+              );
+              loadMsg << m_scriptPath << QStringLiteral("nixos_webgl_cursor_bridge");
+
+              QDBusPendingCall pending = sbus.asyncCall(loadMsg);
+              auto *watcher = new QDBusPendingCallWatcher(pending, this);
+              connect(watcher, &QDBusPendingCallWatcher::finished, this, [sbus](QDBusPendingCallWatcher *w) {
+                  w->deleteLater();
+                  QDBusPendingReply<int> reply = *w;
+
+                  QDBusMessage startMsg = QDBusMessage::createMethodCall(
+                      QStringLiteral("org.kde.KWin"),
+                      QStringLiteral("/Scripting"),
+                      QStringLiteral("org.kde.kwin.Scripting"),
+                      QStringLiteral("start")
+                  );
+                  sbus.asyncCall(startMsg);
+
+                  if (reply.isValid()) {
+                      int id = reply.value();
+                      QDBusMessage runMsg = QDBusMessage::createMethodCall(
+                          QStringLiteral("org.kde.KWin"),
+                          QStringLiteral("/Scripting/Script%1").arg(id),
+                          QStringLiteral("org.kde.kwin.Script"),
+                          QStringLiteral("run")
+                      );
+                      sbus.asyncCall(runMsg);
+                  }
+              });
           }
 
           void queryActiveProfileAsync(const QString &service, const QString &path, const QString &iface) {
@@ -232,13 +267,16 @@ let
               }
           }
 
+          QTimer m_kwinToggleDebounce;
+          int m_activeConsumers = 0;
+          bool m_watchersInitialized = false;
           bool m_scriptLoaded = false;
-          bool m_powerSubscribed = false;
           bool m_powerSaverActive = false;
+          bool m_screenLocked = false;
           QString m_scriptPath;
       };
 
-      // Per-monitor input, screen-geometry, and power-state bridge
+      // Per-monitor input, geometry, hot-reload, and power-state bridge
       class WallpaperInputBridge : public QObject {
           Q_OBJECT
           Q_PROPERTY(QWindow* targetWindow READ targetWindow WRITE setTargetWindow NOTIFY targetWindowChanged)
@@ -247,14 +285,30 @@ let
           Q_PROPERTY(bool trackOverWindows READ trackOverWindows WRITE setTrackOverWindows NOTIFY trackOverWindowsChanged)
           Q_PROPERTY(bool independentScreenMouse READ independentScreenMouse WRITE setIndependentScreenMouse NOTIFY independentScreenMouseChanged)
           Q_PROPERTY(bool resetMouseOnLeave READ resetMouseOnLeave WRITE setResetMouseOnLeave NOTIFY resetMouseOnLeaveChanged)
+          Q_PROPERTY(bool cursorInsideScreen READ cursorInsideScreen NOTIFY cursorInsideScreenChanged)
           Q_PROPERTY(bool powerSaverActive READ powerSaverActive NOTIFY powerSaverActiveChanged)
+          Q_PROPERTY(bool screenLocked READ screenLocked NOTIFY screenLockedChanged)
+          Q_PROPERTY(QString watchedFileUrl READ watchedFileUrl WRITE setWatchedFileUrl NOTIFY watchedFileUrlChanged)
+          Q_PROPERTY(bool watchFileChanges READ watchFileChanges WRITE setWatchFileChanges NOTIFY watchFileChangesChanged)
           Q_PROPERTY(QString kwinScriptPath READ kwinScriptPath WRITE setKwinScriptPath NOTIFY kwinScriptPathChanged)
 
       public:
           explicit WallpaperInputBridge(QObject *parent = nullptr) : QObject(parent) {
-              // 60Hz (16ms) coalescing timer so 1000Hz+ mice don't flood QtWebEngine IPC
               m_coalesceTimer.setInterval(16);
               connect(&m_coalesceTimer, &QTimer::timeout, this, &WallpaperInputBridge::flushPendingCursor);
+
+              m_reloadDebounceTimer.setSingleShot(true);
+              m_reloadDebounceTimer.setInterval(250);
+              connect(&m_reloadDebounceTimer, &QTimer::timeout, this, [this]() {
+                  rewatchLocalFile();
+                  if (m_watchFileChanges) {
+                      Q_EMIT watchedFileModified();
+                  }
+              });
+
+              connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, [this](const QString &) {
+                  m_reloadDebounceTimer.start();
+              });
 
               auto *hub = KWinCursorReceiver::instance();
 
@@ -262,21 +316,25 @@ let
                   Q_EMIT powerSaverActiveChanged();
               });
 
-              connect(hub, &KWinCursorReceiver::kwinCursorMoved, this, [this](qreal gx, qreal gy) {
-                  if (!m_active) return;
+              connect(hub, &KWinCursorReceiver::screenLockedChanged, this, [this](bool) {
+                  Q_EMIT screenLockedChanged();
+              });
 
+              connect(hub, &KWinCursorReceiver::kwinCursorMoved, this, [this](qreal gx, qreal gy) {
                   const QRectF sRect = effectiveScreenRect();
                   const bool isInside = sRect.contains(gx, gy);
 
+                  setCursorInsideScreen(isInside);
+
+                  if (!m_active) return;
+
                   if (isInside) {
-                      m_cursorInsideScreen = true;
                       if (m_trackOverWindows) {
                           queueCursor(gx - sRect.x(), gy - sRect.y());
                       }
                   } else {
-                      // Cursor is on another monitor!
-                      if (m_cursorInsideScreen) {
-                          m_cursorInsideScreen = false;
+                      if (m_wasInsideForReset) {
+                          m_wasInsideForReset = false;
                           if (m_resetMouseOnLeave) {
                               m_hasPendingMove = false;
                               m_coalesceTimer.stop();
@@ -286,7 +344,6 @@ let
                               return;
                           }
                       }
-                      // Only forward out-of-monitor coordinates if independent mode is disabled
                       if (!m_independentScreenMouse && m_trackOverWindows) {
                           queueCursor(gx - sRect.x(), gy - sRect.y());
                       }
@@ -295,6 +352,7 @@ let
           }
 
           ~WallpaperInputBridge() override {
+              updateKWinSubscription(false);
               if (m_targetWindow) {
                   m_targetWindow->removeEventFilter(this);
               }
@@ -328,6 +386,7 @@ let
                   m_coalesceTimer.stop();
                   m_hasPendingMove = false;
               }
+              syncKWinNeed();
               Q_EMIT activeChanged();
           }
 
@@ -335,6 +394,7 @@ let
           void setTrackOverWindows(bool t) {
               if (m_trackOverWindows == t) return;
               m_trackOverWindows = t;
+              syncKWinNeed();
               Q_EMIT trackOverWindowsChanged();
           }
 
@@ -352,15 +412,38 @@ let
               Q_EMIT resetMouseOnLeaveChanged();
           }
 
+          bool cursorInsideScreen() const { return m_cursorInsideScreen; }
+
           bool powerSaverActive() const {
               return KWinCursorReceiver::instance()->powerSaverActive();
+          }
+
+          bool screenLocked() const {
+              return KWinCursorReceiver::instance()->screenLocked();
+          }
+
+          QString watchedFileUrl() const { return m_watchedFileUrl; }
+          void setWatchedFileUrl(const QString &urlStr) {
+              if (m_watchedFileUrl == urlStr) return;
+              m_watchedFileUrl = urlStr;
+              rewatchLocalFile();
+              Q_EMIT watchedFileUrlChanged();
+          }
+
+          bool watchFileChanges() const { return m_watchFileChanges; }
+          void setWatchFileChanges(bool w) {
+              if (m_watchFileChanges == w) return;
+              m_watchFileChanges = w;
+              rewatchLocalFile();
+              Q_EMIT watchFileChangesChanged();
           }
 
           QString kwinScriptPath() const { return m_kwinScriptPath; }
           void setKwinScriptPath(const QString &p) {
               if (m_kwinScriptPath == p) return;
               m_kwinScriptPath = p;
-              KWinCursorReceiver::instance()->ensureKWinScriptLoadedAsync(p);
+              KWinCursorReceiver::instance()->setScriptPath(p);
+              syncKWinNeed();
               Q_EMIT kwinScriptPathChanged();
           }
 
@@ -371,7 +454,12 @@ let
           void trackOverWindowsChanged();
           void independentScreenMouseChanged();
           void resetMouseOnLeaveChanged();
+          void cursorInsideScreenChanged();
           void powerSaverActiveChanged();
+          void screenLockedChanged();
+          void watchedFileUrlChanged();
+          void watchFileChangesChanged();
+          void watchedFileModified();
           void kwinScriptPathChanged();
 
           void cursorMoved(qreal x, qreal y);
@@ -382,7 +470,7 @@ let
 
       protected:
           bool eventFilter(QObject *watched, QEvent *event) override {
-              if (!m_active || watched != m_targetWindow) {
+              if (watched != m_targetWindow) {
                   return false;
               }
 
@@ -390,42 +478,42 @@ let
                   case QEvent::MouseMove: {
                       auto *me = static_cast<QMouseEvent *>(event);
                       const QPointF p = me->position();
-                      m_cursorInsideScreen = true;
-                      queueCursor(p.x(), p.y());
+                      setCursorInsideScreen(true);
+                      if (m_active) queueCursor(p.x(), p.y());
                       break;
                   }
                   case QEvent::HoverMove: {
                       auto *he = static_cast<QHoverEvent *>(event);
                       const QPointF p = he->position();
-                      m_cursorInsideScreen = true;
-                      queueCursor(p.x(), p.y());
+                      setCursorInsideScreen(true);
+                      if (m_active) queueCursor(p.x(), p.y());
                       break;
                   }
                   case QEvent::DragEnter:
                   case QEvent::DragMove: {
                       auto *de = static_cast<QDragMoveEvent *>(event);
                       const QPointF p = de->position();
-                      m_cursorInsideScreen = true;
-                      queueCursor(p.x(), p.y());
+                      setCursorInsideScreen(true);
+                      if (m_active) queueCursor(p.x(), p.y());
                       break;
                   }
                   case QEvent::Leave:
                   case QEvent::HoverLeave: {
-                      // If window-tracking is disabled and cursor leaves the desktop surface,
-                      // reset to center if requested
-                      if (!m_trackOverWindows && m_resetMouseOnLeave) {
-                          m_cursorInsideScreen = false;
-                          m_hasPendingMove = false;
-                          m_coalesceTimer.stop();
-                          Q_EMIT cursorResetToCenter();
+                      if (!m_trackOverWindows) {
+                          setCursorInsideScreen(false);
+                          if (m_resetMouseOnLeave && m_active) {
+                              m_hasPendingMove = false;
+                              m_coalesceTimer.stop();
+                              Q_EMIT cursorResetToCenter();
+                          }
                       }
                       break;
                   }
                   case QEvent::MouseButtonPress: {
                       auto *me = static_cast<QMouseEvent *>(event);
                       const QPointF p = me->position();
-                      m_cursorInsideScreen = true;
-                      if (me->button() == Qt::LeftButton) {
+                      setCursorInsideScreen(true);
+                      if (m_active && me->button() == Qt::LeftButton) {
                           Q_EMIT mousePressed(qRound(p.x()), qRound(p.y()));
                       }
                       break;
@@ -433,7 +521,7 @@ let
                   case QEvent::MouseButtonRelease: {
                       auto *me = static_cast<QMouseEvent *>(event);
                       const QPointF p = me->position();
-                      if (me->button() == Qt::LeftButton) {
+                      if (m_active && me->button() == Qt::LeftButton) {
                           Q_EMIT mouseReleased(qRound(p.x()), qRound(p.y()));
                       }
                       break;
@@ -442,7 +530,7 @@ let
                       auto *we = static_cast<QWheelEvent *>(event);
                       const QPointF p = we->position();
                       const QPoint delta = we->angleDelta();
-                      if (!delta.isNull()) {
+                      if (m_active && !delta.isNull()) {
                           Q_EMIT wheelScrolled(qRound(p.x()), qRound(p.y()), delta.x(), delta.y());
                       }
                       break;
@@ -455,6 +543,42 @@ let
           }
 
       private:
+          void setCursorInsideScreen(bool inside) {
+              if (inside) {
+                  m_wasInsideForReset = true;
+              }
+              if (m_cursorInsideScreen != inside) {
+                  m_cursorInsideScreen = inside;
+                  Q_EMIT cursorInsideScreenChanged();
+              }
+          }
+
+          void syncKWinNeed() {
+              // Keep KWin cursor hook active if we need window-drag tracking OR cross-monitor enter/leave detection
+              const bool needKWin = !m_kwinScriptPath.isEmpty() && (m_active || m_resetMouseOnLeave);
+              updateKWinSubscription(needKWin);
+          }
+
+          void updateKWinSubscription(bool subscribe) {
+              if (m_subscribedToKWin == subscribe) return;
+              m_subscribedToKWin = subscribe;
+              KWinCursorReceiver::instance()->updateKWinConsumerCount(subscribe ? 1 : -1);
+          }
+
+          void rewatchLocalFile() {
+              const QStringList current = m_fileWatcher.files();
+              if (!current.isEmpty()) {
+                  m_fileWatcher.removePaths(current);
+              }
+              if (!m_watchFileChanges || m_watchedFileUrl.isEmpty()) return;
+
+              QUrl url(m_watchedFileUrl);
+              const QString localPath = url.isLocalFile() ? url.toLocalFile() : m_watchedFileUrl;
+              if (QFileInfo::exists(localPath)) {
+                  m_fileWatcher.addPath(localPath);
+              }
+          }
+
           void bindScreen(QScreen *scr) {
               if (m_boundScreen) {
                   disconnect(m_boundScreen, nullptr, this, nullptr);
@@ -514,12 +638,18 @@ let
           QScreen *m_boundScreen = nullptr;
           QRect m_windowScreenGeometry;
           QTimer m_coalesceTimer;
+          QTimer m_reloadDebounceTimer;
+          QFileSystemWatcher m_fileWatcher;
           bool m_active = true;
           bool m_trackOverWindows = true;
           bool m_independentScreenMouse = true;
           bool m_resetMouseOnLeave = true;
           bool m_cursorInsideScreen = true;
+          bool m_wasInsideForReset = true;
+          bool m_watchFileChanges = true;
+          bool m_subscribedToKWin = false;
           bool m_hasPendingMove = false;
+          QString m_watchedFileUrl;
           QString m_kwinScriptPath;
           qreal m_pendingX = 0.0;
           qreal m_pendingY = 0.0;
@@ -604,7 +734,7 @@ let
             }
           ],
           "Category": "Wallpaper",
-          "Description": "Hardware-accelerated HTML5/WebGL Wallpaper with Per-Monitor Smart Pause, Power-Save & Mouse Interactivity",
+          "Description": "Hardware-accelerated HTML5/WebGL Wallpaper with Pareto Smart Pause, Power-Save & Multi-Monitor Interactivity",
           "Icon": "preferences-desktop-wallpaper",
           "Id": "org.nixos.webglwallpaper",
           "License": "GPL-3.0-or-later",
@@ -612,7 +742,7 @@ let
           "ServiceTypes": [
             "Plasma/Wallpaper"
           ],
-          "Version": "2.4.0"
+          "Version": "2.5.0"
         },
         "X-KDE-ParentApp": "org.kde.plasmashell",
         "X-Plasma-API-Minimum-Version": "6.0",
@@ -641,8 +771,12 @@ let
             <label>Also pause when a window is maximized</label>
             <default>true</default>
           </entry>
+          <entry name="PauseOnTiledCoverage" type="Bool">
+            <label>Also pause when tiled/floating windows cover >=90% of this monitor</label>
+            <default>true</default>
+          </entry>
           <entry name="PauseOnPowerSave" type="Bool">
-            <label>Auto-pause when system Power Save mode is enabled</label>
+            <label>Auto-pause when system Power Save mode or Screen Lock is active</label>
             <default>true</default>
           </entry>
           <entry name="InteractiveMouse" type="Bool">
@@ -659,6 +793,18 @@ let
           </entry>
           <entry name="ResetMouseOnLeave" type="Bool">
             <label>Reset wallpaper mouse to center when cursor moves to another monitor</label>
+            <default>true</default>
+          </entry>
+          <entry name="FreezeInactiveMonitor" type="Bool">
+            <label>Freeze rendering 2s after cursor leaves monitor (wakes instantly on return)</label>
+            <default>false</default>
+          </entry>
+          <entry name="AutoHideHud" type="Bool">
+            <label>Auto-hide top-right HTML HUD pill (reveal on top-right hover)</label>
+            <default>false</default>
+          </entry>
+          <entry name="AutoReloadOnModify" type="Bool">
+            <label>Automatically hot-reload wallpaper when the local HTML file is saved</label>
             <default>true</default>
           </entry>
         </group>
@@ -679,11 +825,15 @@ let
           property string cfg_Url
           property bool cfg_SmartPause
           property bool cfg_PauseOnMaximized
+          property bool cfg_PauseOnTiledCoverage
           property bool cfg_PauseOnPowerSave
           property bool cfg_InteractiveMouse
           property bool cfg_TrackOverWindows
           property bool cfg_IndependentScreenMouse
           property bool cfg_ResetMouseOnLeave
+          property bool cfg_FreezeInactiveMonitor
+          property bool cfg_AutoHideHud
+          property bool cfg_AutoReloadOnModify
 
           RowLayout {
               Kirigami.FormData.label: "Wallpaper URL / HTML:"
@@ -718,7 +868,14 @@ let
           }
 
           QQC2.CheckBox {
-              text: "Auto-pause when system Power Save mode is enabled"
+              text: "Also freeze when tiled/floating windows cover ≥90% of this monitor"
+              enabled: configRoot.cfg_SmartPause
+              checked: configRoot.cfg_PauseOnTiledCoverage
+              onToggled: configRoot.cfg_PauseOnTiledCoverage = checked
+          }
+
+          QQC2.CheckBox {
+              text: "Auto-pause on system Power Save mode or Screen Lock (Meta+L)"
               checked: configRoot.cfg_PauseOnPowerSave
               onToggled: configRoot.cfg_PauseOnPowerSave = checked
           }
@@ -752,6 +909,26 @@ let
               onToggled: configRoot.cfg_ResetMouseOnLeave = checked
           }
 
+          QQC2.CheckBox {
+              text: "Deep-freeze monitor 2s after cursor leaves (wakes instantly on cursor return)"
+              enabled: configRoot.cfg_InteractiveMouse && configRoot.cfg_IndependentScreenMouse
+              checked: configRoot.cfg_FreezeInactiveMonitor
+              onToggled: configRoot.cfg_FreezeInactiveMonitor = checked
+          }
+
+          QQC2.CheckBox {
+              Kirigami.FormData.label: "UI & Live Dev:"
+              text: "Auto-hide top-right HTML HUD pill (reveal only when hovering top-right corner)"
+              checked: configRoot.cfg_AutoHideHud
+              onToggled: configRoot.cfg_AutoHideHud = checked
+          }
+
+          QQC2.CheckBox {
+              text: "Live hot-reload wallpaper automatically when the local .html file is saved"
+              checked: configRoot.cfg_AutoReloadOnModify
+              onToggled: configRoot.cfg_AutoReloadOnModify = checked
+          }
+
           FileDialog {
               id: fileDialog
               title: "Select HTML/WebGL Wallpaper File"
@@ -779,20 +956,55 @@ let
           readonly property string configuredUrl: root.configuration.Url || "${defaultWallpaperUrl}"
           readonly property bool smartPauseEnabled: root.configuration.SmartPause !== undefined ? root.configuration.SmartPause : true
           readonly property bool pauseOnMaximized: root.configuration.PauseOnMaximized !== undefined ? root.configuration.PauseOnMaximized : true
+          readonly property bool pauseOnTiledCoverage: root.configuration.PauseOnTiledCoverage !== undefined ? root.configuration.PauseOnTiledCoverage : true
           readonly property bool pauseOnPowerSave: root.configuration.PauseOnPowerSave !== undefined ? root.configuration.PauseOnPowerSave : true
           readonly property bool interactiveMouse: root.configuration.InteractiveMouse !== undefined ? root.configuration.InteractiveMouse : true
           readonly property bool trackOverWindows: root.configuration.TrackOverWindows !== undefined ? root.configuration.TrackOverWindows : true
           readonly property bool independentScreenMouse: root.configuration.IndependentScreenMouse !== undefined ? root.configuration.IndependentScreenMouse : true
           readonly property bool resetMouseOnLeave: root.configuration.ResetMouseOnLeave !== undefined ? root.configuration.ResetMouseOnLeave : true
+          readonly property bool freezeInactiveMonitor: root.configuration.FreezeInactiveMonitor !== undefined ? root.configuration.FreezeInactiveMonitor : false
+          readonly property bool autoHideHud: root.configuration.AutoHideHud !== undefined ? root.configuration.AutoHideHud : false
+          readonly property bool autoReloadOnModify: root.configuration.AutoReloadOnModify !== undefined ? root.configuration.AutoReloadOnModify : true
 
           property bool isPaused: false
+          property bool inactiveMonitorSettled: false
           property bool pageReady: false
 
           onPauseOnPowerSaveChanged: pauseEvalTimer.restart()
           onSmartPauseEnabledChanged: pauseEvalTimer.restart()
           onPauseOnMaximizedChanged: pauseEvalTimer.restart()
+          onPauseOnTiledCoverageChanged: pauseEvalTimer.restart()
+          onFreezeInactiveMonitorChanged: {
+              if (!root.freezeInactiveMonitor) {
+                  inactiveMonitorSettleTimer.stop();
+                  root.inactiveMonitorSettled = false;
+              } else if (!inputBridge.cursorInsideScreen) {
+                  inactiveMonitorSettleTimer.restart();
+              }
+              pauseEvalTimer.restart();
+          }
+          onAutoHideHudChanged: root.syncHudVisibilityMode()
 
-          // Strictly per-monitor TasksModel using the true QScreen geometry of this DesktopView window
+          function syncHudVisibilityMode() {
+              if (!root.pageReady) return;
+              webview.runJavaScript(
+                  "if (window.__setHudAutoHide) window.__setHudAutoHide(" + (root.autoHideHud ? "true" : "false") + ");"
+              );
+          }
+
+          // Settles for 1.8s after cursor leaves monitor so center-reset spring animation finishes cleanly before freezing
+          Timer {
+              id: inactiveMonitorSettleTimer
+              interval: 1800
+              repeat: false
+              onTriggered: {
+                  if (root.freezeInactiveMonitor && !inputBridge.cursorInsideScreen) {
+                      root.inactiveMonitorSettled = true;
+                      root.evaluateSmartPause();
+                  }
+              }
+          }
+
           TaskManager.TasksModel {
               id: tasksModel
               filterByScreen: true
@@ -818,19 +1030,53 @@ let
 
           Timer {
               id: pauseEvalTimer
-              interval: 120
+              interval: 100
               repeat: false
               onTriggered: root.evaluateSmartPause()
           }
 
+          // Fast 12x8 coarse grid occlusion test (<0.05ms) to check if tiled/floating windows cover >=90% of this screen
+          function isScreenCoveredByTiledWindows(rects, sRect) {
+              if (!sRect || sRect.width <= 0 || sRect.height <= 0 || rects.length === 0) {
+                  return false;
+              }
+              const cols = 12;
+              const rows = 8;
+              const totalCells = cols * rows;
+              const cellW = sRect.width / cols;
+              const cellH = sRect.height / rows;
+              let coveredCells = 0;
+
+              for (let r = 0; r < rows; r++) {
+                  const cy = sRect.y + (r + 0.5) * cellH;
+                  for (let c = 0; c < cols; c++) {
+                      const cx = sRect.x + (c + 0.5) * cellW;
+                      for (let i = 0; i < rects.length; i++) {
+                          const w = rects[i];
+                          if (cx >= w.x && cx <= (w.x + w.width) && cy >= w.y && cy <= (w.y + w.height)) {
+                              coveredCells++;
+                              break;
+                          }
+                      }
+                  }
+              }
+              return (coveredCells / totalCells) >= 0.90;
+          }
+
           function evaluateSmartPause() {
-              // 1. Check Power Save mode first
-              if (root.pauseOnPowerSave && inputBridge.powerSaverActive) {
+              // 1. Check Screen Lock (Meta+L) or Power Save mode
+              if (inputBridge.screenLocked || (root.pauseOnPowerSave && inputBridge.powerSaverActive)) {
                   root.setWallpaperPaused(true);
                   return;
               }
 
-              // 2. Check Per-Monitor Fullscreen / Maximized windows
+              // 2. Check Inactive Monitor Deep Freeze
+              if (root.freezeInactiveMonitor && root.inactiveMonitorSettled && !inputBridge.cursorInsideScreen) {
+                  root.setWallpaperPaused(true);
+                  return;
+              }
+
+              // 3. Check Per-Monitor Fullscreen, Maximized, or Tiled Coverage
               if (!root.smartPauseEnabled) {
                   root.setWallpaperPaused(false);
                   return;
@@ -838,6 +1084,7 @@ let
 
               let shouldPause = false;
               const count = tasksModel.count;
+              const visibleRects = [];
 
               for (let i = 0; i < count; i++) {
                   const idx = tasksModel.index(i, 0);
@@ -854,6 +1101,17 @@ let
                       shouldPause = true;
                       break;
                   }
+
+                  if (root.pauseOnTiledCoverage) {
+                      const geom = tasksModel.data(idx, TaskManager.AbstractTasksModel.Geometry);
+                      if (geom && geom.width > 0 && geom.height > 0) {
+                          visibleRects.push(geom);
+                      }
+                  }
+              }
+
+              if (!shouldPause && root.pauseOnTiledCoverage && visibleRects.length >= 2) {
+                  shouldPause = root.isScreenCoveredByTiledWindows(visibleRects, inputBridge.windowScreenGeometry);
               }
 
               root.setWallpaperPaused(shouldPause);
@@ -889,18 +1147,14 @@ let
           WebEngineView {
               id: webview
               anchors.fill: parent
-              url: {
-                  const base = root.configuredUrl;
-                  if (base.indexOf("three=") !== -1) return base;
-                  const sep = base.indexOf("?") === -1 ? "?" : "&";
-                  return base + sep + "three=file://${threeJsLib}&tux=file://${tuxSvgFile}";
-              }
+              url: root.configuredUrl
               backgroundColor: "transparent"
 
               settings.accelerated2dCanvasEnabled: true
               settings.webGLEnabled: true
               settings.localContentCanAccessRemoteUrls: true
               settings.localContentCanAccessFileUrls: true
+              settings.localStorageEnabled: true
               settings.showScrollBars: false
 
               onContextMenuRequested: function(request) {
@@ -911,10 +1165,6 @@ let
                   if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
                       webview.runJavaScript(`
                           (function() {
-                              window.__NIXOS_LOCAL_TUX_SVG = "file://${tuxSvgFile}";
-                              if (window.__applyNixLocalTux) {
-                                  window.__applyNixLocalTux(window.__NIXOS_LOCAL_TUX_SVG);
-                              }
                               if (window.__nixosWallpaperBridgeInstalled) return;
                               window.__nixosWallpaperBridgeInstalled = true;
 
@@ -927,6 +1177,17 @@ let
                                   };
                                   document.head.appendChild(s);
                               }
+
+                              // Optional Top-Right HUD Auto-Hide style
+                              const hudStyle = document.createElement('style');
+                              hudStyle.id = 'nixos-hud-autohide-style';
+                              document.head.appendChild(hudStyle);
+
+                              window.__setHudAutoHide = function(enabled) {
+                                  hudStyle.textContent = enabled
+                                      ? '.hud-pill { opacity: 0; transition: opacity 0.25s ease; } .hud-pill:hover, body.hud-corner-hover .hud-pill { opacity: 1; }'
+                                      : '';
+                              };
 
                               window.__rawRAF = window.requestAnimationFrame.bind(window);
                               window.__pausedCallbacks = [];
@@ -966,20 +1227,29 @@ let
                                   slider.dispatchEvent(new Event('change', { bubbles: true }));
                               }
 
+                              // Compact fast-path move handler (__wM)
+                              window.__wM = function(x, y) {
+                                  if (window.__universalPaused) return;
+                                  if (window.__activeRangeSlider) {
+                                      updateSliderAt(window.__activeRangeSlider, x);
+                                  }
+                                  const inTopRight = (x > window.innerWidth - 520) && (y < 72);
+                                  document.body.classList.toggle('hud-corner-hover', inTopRight);
+                                  window.dispatchEvent(new MouseEvent('mousemove', {
+                                      clientX: x,
+                                      clientY: y,
+                                      bubbles: true
+                                  }));
+                              };
+
                               window.__wallpaperInput = function(type, x, y, dx, dy) {
                                   if (window.__universalPaused) return;
 
                                   if (type === 'move') {
-                                      if (window.__activeRangeSlider) {
-                                          updateSliderAt(window.__activeRangeSlider, x);
-                                      }
-                                      window.dispatchEvent(new MouseEvent('mousemove', {
-                                          clientX: x,
-                                          clientY: y,
-                                          bubbles: true
-                                      }));
+                                      window.__wM(x, y);
                                   } else if (type === 'center') {
                                       window.__activeRangeSlider = null;
+                                      document.body.classList.remove('hud-corner-hover');
                                       window.dispatchEvent(new MouseEvent('mousemove', {
                                           clientX: window.innerWidth * 0.5,
                                           clientY: window.innerHeight * 0.5,
@@ -1028,6 +1298,7 @@ let
                           })();
                       `);
                       root.pageReady = true;
+                      root.syncHudVisibilityMode();
                       root.evaluateSmartPause();
                   }
               }
@@ -1040,29 +1311,48 @@ let
               trackOverWindows: root.trackOverWindows
               independentScreenMouse: root.independentScreenMouse
               resetMouseOnLeave: root.resetMouseOnLeave
+              watchedFileUrl: root.configuredUrl
+              watchFileChanges: root.autoReloadOnModify
               kwinScriptPath: "/run/current-system/sw/share/plasma/wallpapers/org.nixos.webglwallpaper/contents/code/kwin-cursor-bridge.js"
 
               onWindowScreenGeometryChanged: pauseEvalTimer.restart()
               onPowerSaverActiveChanged: pauseEvalTimer.restart()
+              onScreenLockedChanged: pauseEvalTimer.restart()
+
+              onWatchedFileModified: {
+                  webview.reload();
+              }
+
+              onCursorInsideScreenChanged: {
+                  if (inputBridge.cursorInsideScreen) {
+                      inactiveMonitorSettleTimer.stop();
+                      if (root.inactiveMonitorSettled) {
+                          root.inactiveMonitorSettled = false;
+                          root.evaluateSmartPause();
+                      }
+                  } else if (root.freezeInactiveMonitor) {
+                      inactiveMonitorSettleTimer.restart();
+                  }
+              }
 
               onCursorMoved: function(x, y) {
-                  webview.runJavaScript("if (window.__wallpaperInput) window.__wallpaperInput('move'," + x + "," + y + ",0,0);");
+                  webview.runJavaScript("window.__wM&&__wM(" + x + "," + y + ");");
               }
 
               onCursorResetToCenter: function() {
-                  webview.runJavaScript("if (window.__wallpaperInput) window.__wallpaperInput('center',0,0,0,0);");
+                  webview.runJavaScript("window.__wallpaperInput&&__wallpaperInput('center',0,0,0,0);");
               }
 
               onMousePressed: function(x, y) {
-                  webview.runJavaScript("if (window.__wallpaperInput) window.__wallpaperInput('down'," + x + "," + y + ",0,0);");
+                  webview.runJavaScript("window.__wallpaperInput&&__wallpaperInput('down'," + x + "," + y + ",0,0);");
               }
 
               onMouseReleased: function(x, y) {
-                  webview.runJavaScript("if (window.__wallpaperInput) window.__wallpaperInput('up'," + x + "," + y + ",0,0);");
+                  webview.runJavaScript("window.__wallpaperInput&&__wallpaperInput('up'," + x + "," + y + ",0,0);");
               }
 
               onWheelScrolled: function(x, y, dx, dy) {
-                  webview.runJavaScript("if (window.__wallpaperInput) window.__wallpaperInput('wheel'," + x + "," + y + "," + dx + "," + dy + ");");
+                  webview.runJavaScript("window.__wallpaperInput&&__wallpaperInput('wheel'," + x + "," + y + "," + dx + "," + dy + ");");
               }
           }
       }
