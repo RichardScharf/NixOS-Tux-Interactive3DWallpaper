@@ -1,5 +1,5 @@
 # NixOS-Tux-Interactive3DWallpaper
-Interactive NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
+Interactive (4 in 1) NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
 
 ## [Try it out by clicking here](https://richardscharf.github.io/NixOS-Tux-Interactive3DWallpaper/nixos_tux_interactive_3d_wallpaper.html)
 
@@ -11,11 +11,39 @@ Interactive NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
 <img width="3840" height="2160" alt="Screenshot" src="https://github.com/user-attachments/assets/8a6058ec-98d1-4d67-970f-f35a19572095" />
 
 
-## Features:
+## Plugin Features:
 - Interact with your wallpaper using your mouse and scroll wheel
 - Battery sensitive pause/resume logic settings
-<img width="880" height="762" alt="image" src="https://github.com/user-attachments/assets/c096d2a4-1c75-4252-9309-c386095677f1" />
+<img width="794" height="730" alt="image" src="https://github.com/user-attachments/assets/76982e43-29e3-42d2-a816-06a62476f5a4" />
 
+## default interactive wallpaper.html features:
+Toggleable *4 in 1* Wallpapers with configureable settings
+<img width="2519" height="1720" alt="image" src="https://github.com/user-attachments/assets/fddb9aee-4c8c-4521-92f1-c6eabe69607b" />
+
+
+
+
+Default Interactions:
+- Main Logo:
+  - click
+    - Glitch effect on tux logo
+    - pulsewave glow effect
+  - scrollwheel
+      - adjusts mouse hover glow radius 
+- Math Backdrop:
+  - click
+      - pulsewave glow effect
+   - Scrollwheel
+      - adjusts mouse hover glow radius
+- Calisthenics
+  - mouse proximity driven rep speed
+  - click
+    - transition (into/from handstand/backlever)
+  - Scrollwheel
+    - adjusts mouse hover glow radius
+- Snow:
+  - scrollwheel
+    - adjusts forcefield (push) radius
 
 ## How to install:
 If you're on NixOS you can just place it in the same folder as your main configuration.nix file (usually /etc/nixos) and then import it like this:
@@ -31,4 +59,4 @@ then run `sudo nixos-rebuild switch`, reboot into the new configuration and then
 There you can paste the path to the nixos_tux_interactive_3d_wallpaper.html file. For example:
 
 
-file:///home/YOURUSERNAME/Downloads/red_nixos_tux_3d_interactive_scene.html
+file:///home/YOURUSERNAME/Downloads/nixos_tux_interactive_3d_wallpaper.html
