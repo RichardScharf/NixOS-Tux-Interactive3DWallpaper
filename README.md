@@ -18,7 +18,8 @@ Interactive (4 in 1) NixOS Wallpaper I promptgrammed to enhance my KDE Plasma De
 
 ## default interactive wallpaper.html features:
 Toggleable *4 in 1* Wallpapers with configureable settings
-<img width="2519" height="1720" alt="image" src="https://github.com/user-attachments/assets/fddb9aee-4c8c-4521-92f1-c6eabe69607b" />
+<img width="2519" height="1720" alt="image" src="https://github.com/user-attachments/assets/e62d9b36-343a-42b9-bda2-a8cdf7480bdb" />
+
 
 
 
