@@ -1,11 +1,11 @@
 # NixOS-Tux-Interactive3DWallpaper
-Interactive (4 in 1) NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
+Interactive (composable 4 in 1) NixOS Wallpaper I promptgrammed to enhance my KDE Plasma Desktop.
 
 ## [Try it out by clicking here](https://richardscharf.github.io/NixOS-Tux-Interactive3DWallpaper/nixos_tux_interactive_3d_wallpaper.html)
 
 ### Usage
-- you can interact with it using mouse movements, clicks and the scoll wheel.
-- you can also toggle the different wallpapers / overlays at the top (pinned hud)
+- you can interact with it using mouse movements, clicks and the scroll wheel.
+- you can also toggle the different wallpapers / overlays at the top (pinned HUD)
 - settings gives you more granular control over the different styles, pins and bindings
 
 <img width="3840" height="2160" alt="Screenshot" src="https://github.com/user-attachments/assets/8a6058ec-98d1-4d67-970f-f35a19572095" />
@@ -17,7 +17,7 @@ Interactive (4 in 1) NixOS Wallpaper I promptgrammed to enhance my KDE Plasma De
 <img width="794" height="730" alt="image" src="https://github.com/user-attachments/assets/76982e43-29e3-42d2-a816-06a62476f5a4" />
 
 ## default interactive wallpaper.html features:
-Toggleable *4 in 1* Wallpapers with configureable settings
+Toggle-able *4 in 1* Wallpapers with configurable settings
 <img width="2519" height="1720" alt="image" src="https://github.com/user-attachments/assets/e62d9b36-343a-42b9-bda2-a8cdf7480bdb" />
 
 
@@ -28,26 +28,26 @@ Default Interactions:
 - Main Logo:
   - click
     - Glitch effect on tux logo
-    - pulsewave glow effect
-  - scrollwheel
+    - pulse-wave glow effect
+  - scroll wheel
       - adjusts mouse hover glow radius 
 - Math Backdrop:
   - click
-      - pulsewave glow effect
-   - Scrollwheel
+      - pulse-wave glow effect
+   - Scroll wheel
       - adjusts mouse hover glow radius
 - Calisthenics
   - mouse proximity driven rep speed
   - click
-    - transition (into/from handstand/backlever)
-  - Scrollwheel
+    - transition (into/from handstand/back-lever)
+  - Scroll-wheel
     - adjusts mouse hover glow radius
 - Snow:
-  - scrollwheel
-    - adjusts forcefield (push) radius
+  - scroll-wheel
+    - adjusts force field (push) radius
 
 ## How to install:
-If you're on NixOS you can just place it in the same folder as your main configuration.nix file (usually /etc/nixos) and then import it like this:
+If you're on Nix OS you can just place it in the same folder as your main configuration.nix file (usually /etc/nixos) and then import it like this:
 
 _(place this line inside configuration.nix file:)_
 
