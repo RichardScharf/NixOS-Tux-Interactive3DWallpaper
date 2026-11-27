@@ -889,16 +889,15 @@
                         </div>
                     </div>
 
-                    <!-- Subtle Info Note when 'Dissolve' is selected -->
-                    <div id="snow-dissolve-note" class="hidden text-[10px] text-neutral-500 px-1 pt-0.5">
-                        Flakes dissolve directly into the snowbank (scaled by Pile Contribution above).
+                    <div id="snow-dissolve-note" class="hidden text-[10px] text-neutral-500 pt-0.5">
+                        Flakes softly dissolve directly into the snowbank on contact.
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION 3.5: CALISTHENICS DUAL SKILL OVERLAY -->
+            <!-- SECTION 3.5: CALISTHENICS SKILL OVERLAY -->
             <div class="flex flex-col gap-2 border-t border-white/10 pt-2.5">
-                <div class="text-[10px] font-semibold uppercase tracking-wider text-emerald-300">🤸 Calisthenics Dual Overlay</div>
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-emerald-300">🤸 Calisthenics Skill Overlay</div>
 
                 <!-- Calisthenics Master Visibility Toggle -->
                 <div class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
@@ -906,6 +905,15 @@
                     <div class="flex items-center gap-1.5">
                         <button id="toggle-calisthenics-btn" class="mode-btn text-sky-400 font-medium">🤸 Calisthenics: ON</button>
                         <button data-pin="calisthenicsToggle" class="pin-btn" title="Pin/Unpin Calisthenics Toggle">📌</button>
+                    </div>
+                </div>
+
+                <!-- Ceiling Rings Athlete Toggle -->
+                <div id="calisthenics-rings-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
+                    <span class="text-neutral-300">Ceiling Rings Athlete</span>
+                    <div class="flex items-center gap-1.5">
+                        <button id="toggle-calisthenics-rings-btn" class="mode-btn text-sky-300 font-medium">◎ Rings: ON</button>
+                        <button data-pin="calisthenicsRingsToggle" class="pin-btn" title="Pin/Unpin Ceiling Rings Toggle">📌</button>
                     </div>
                 </div>
 
@@ -918,13 +926,16 @@
                     </div>
                 </div>
 
-                <!-- Skill Transitions (Left: Planche <-> HSPU | Right: Front Lever <-> Hefesto) -->
-                <div id="calisthenics-skills-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
-                    <span class="text-neutral-300">Skill Transitions</span>
-                    <div class="flex items-center gap-1">
-                        <button id="calisthenics-left-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Left Athlete: Full Planche Push-Ups ⟷ Deep Handstand Push-Ups">L: Planche</button>
-                        <button id="calisthenics-right-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Right Athlete: Front Lever Pull-Ups ⟷ Back Lever + Hefesto">R: Front Lever</button>
+                <!-- Skill Transitions (Left: Planche <-> HSPU | Top: Rings 4-Skill Cycle | Right: Front Lever <-> Back Lever) -->
+                <div id="calisthenics-skills-wrap" class="flex flex-col gap-1.5 bg-white/[0.03] rounded-lg px-2.5 py-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-neutral-300">Skill Transitions</span>
                         <button data-pin="calisthenicsSkills" class="pin-btn" title="Pin/Unpin Skill Transition Buttons">📌</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1 pt-0.5">
+                        <button id="calisthenics-left-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Left Athlete: Full Planche Push-Ups ⟷ Deep Handstand Push-Ups">L: Planche</button>
+                        <button id="calisthenics-rings-skill-btn" class="mode-btn text-sky-300 font-medium" title="Cycle Top Rings Athlete: Iron Cross → Maltese → Inverted Cross → Victorian">T: Iron Cross</button>
+                        <button id="calisthenics-right-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Right Athlete: Front Lever Pull-Ups ⟷ Back Lever">R: Front Lever</button>
                     </div>
                 </div>
 
@@ -1017,7 +1028,8 @@
             mainLogoEnabled: true,          // true | false (Show 3D NixOS 6-Lambda Ring + Tux centerpiece)
             backdropEnabled: true,          // true | false (Show 3D Coaxial Math Matrix Backdrop layer)
             snowEnabled: true,              // true | false (Enable winter NixOS lambda snowfall)
-            calisthenicsEnabled: true,      // true | false (Enable 3D Calisthenics Dual Skill Overlay)
+            calisthenicsEnabled: true,      // true | false (Enable 3D Calisthenics Skill Overlays)
+            calisthenicsRingsEnabled: true, // true | false (Enable Top Ceiling Rings Athlete over NixOS logo)
 
             // --- Scene & Centerpiece Defaults ---
             colorTheme: 'blue',             // 'red' | 'blue' (Synchronizes Main Logo, Backdrop & Background)
@@ -1082,7 +1094,7 @@
             // 'graphicsQuality', 'perfMonitor', 'hudVisibility',
             // 'mainLogoToggle', 'backdropToggle', 'backdropPulse', 'backdropPulseSpeed', 'backdropSpeed',
             // 'backdropSpacing', 'backdropBoresight', 'backdropGrid',
-            // 'calisthenicsToggle', 'calisthenicsStyle', 'calisthenicsSkills',
+            // 'calisthenicsToggle', 'calisthenicsRingsToggle', 'calisthenicsStyle', 'calisthenicsSkills',
             // 'calisthenicsDrive', 'calisthenicsSpacing', 'calisthenicsScale',
             // 'theme', 'tightness', 'radius', 'bgGlow', 'viewMode',
             // 'snowToggle', 'snowIntensity', 'snowForcefield', 'snowColor', 'snowRotation', 'snow3DDepth',
@@ -6292,6 +6304,1402 @@
         window.CalisthenicsDualOverlay = CalisthenicsDualOverlay;
 
         // ============================================================================
+        // 1E. CALISTHENICS CEILING RINGS OVERLAY (Theme-Adaptive GPU-Skinned Athlete)
+        // ============================================================================
+        class CalisthenicsRingsOverlay {
+            constructor(scene, camera, sharedUniforms, options = {}) {
+                this.scene = scene;
+                this.camera = camera;
+                this.sharedUniforms = sharedUniforms;
+                this.qualityLevel = 'high';
+
+                this.config = Object.assign({
+                    position: new THREE.Vector3(0, 3.25, 0),
+                    globalScale: 0.34,
+                    minFrequency: 0.10,
+                    maxFrequencies: [0.46, 0.38, 0.42, 0.50], // Iron Cross, Maltese, Inv. Cross, Victorian
+                    hoverRadiusWorld: 3.95,
+                    useBlackFill: true,
+                    glitchDrive: 1.00,
+                    manualMode: false,
+                    manualProgress: 0.0
+                }, options);
+
+                this.visibilityAlpha = options.enabled !== false ? 1.0 : 0.0;
+                this.skillNames = ['Iron Cross', 'Maltese', 'Inv. Cross', 'Victorian'];
+
+                // 23 2D affine bones:
+                //  0:LStrap  1:RStrap  2:LRing  3:RRing
+                //  4:LArm    5:RArm    6:LShld  7:RShld  8:LFist  9:RFist
+                // 10:ICTors 11:ICHead 12:ICLegs
+                // 13:MalBdy 14:MalLegs
+                // 15:InvTors 16:InvHead 17:InvLegs
+                // 18:VicTors
+                // 19:FGSweepLegs (FG stencil tier for Inv -> Vic forward flip)
+                // 20:FGVicFeet   (FG stencil tier for Caruso socked feet with heel fade)
+                // 21:FGLGrip 22:FGRGrip (FG stencil tier for unified overhand grip in Victorian)
+                this.BONE_COUNT = 23;
+                this.boneTR = Array.from({ length: this.BONE_COUNT }, () => new THREE.Vector4(0, 0, 1, 0));
+                this.boneSV = Array.from({ length: this.BONE_COUNT }, () => new THREE.Vector4(1, 1, 0, 0));
+
+                // Shared uniforms linked to Main Scene ray, wireframe radius, pulse waves, and color theme
+                this.uniforms = {
+                    uBoneTR:       { value: this.boneTR },
+                    uBoneSV:       { value: this.boneSV },
+                    uRayOrigin:    sharedUniforms.uRayOrigin,
+                    uRayDir:       sharedUniforms.uRayDir,
+                    uStrokeRadius: sharedUniforms.uRadius,
+                    uColorTheme:   sharedUniforms.uColorTheme,
+                    uHasPulses:    sharedUniforms.uHasPulses,
+                    uPulseCenters: sharedUniforms.uPulseCenters,
+                    uPulseParams:  sharedUniforms.uPulseParams,
+                    uBlackFill:    { value: this.config.useBlackFill ? 1.0 : 0.0 },
+                    uOverlayAlpha: { value: this.visibilityAlpha },
+                    uTime:         { value: 0.0 },
+                    uEnergy:       { value: 0.0 },
+                    uDrive:        { value: this.config.glitchDrive },
+                    uFaceAlpha:    { value: 0.0 },
+                    // Frame-constant palette uniforms (matching CalisthenicsDualOverlay)
+                    uCoreDeep:     { value: new THREE.Color() },
+                    uCorePlasma:   { value: new THREE.Color() },
+                    uCoreScan:     { value: new THREE.Color() },
+                    uRimBaseIdle:  { value: new THREE.Color() },
+                    uRimHot:       { value: new THREE.Color() },
+                    uRimPeak:      { value: new THREE.Color() },
+                    uRimBaseAlpha: { value: 0.65 },
+                    uHaloBase:     { value: new THREE.Color() },
+                    uHaloHot:      { value: new THREE.Color() },
+                    uHaloBaseAlpha:{ value: 0.08 },
+                    uFaceAccent:   { value: new THREE.Color(1.0, 0.13, 0.10) }
+                };
+
+                this._paletteTmpA = new THREE.Color();
+                this._paletteTmpB = new THREE.Color();
+                this._lastPaletteTheme = -1.0;
+                this._lastPaletteBlack = -1.0;
+                this._redThemeColor = new THREE.Color(0xff2828);
+                this._blueThemeColor = new THREE.Color(0x4db8ff);
+                this._activeThemeColor = new THREE.Color();
+
+                this.rootGroup = new THREE.Group();
+                this.rootGroup.name = 'CalisthenicsRingsOverlayGroup';
+                this.rootGroup.visible = options.enabled !== false;
+                this.scene.add(this.rootGroup);
+
+                this._disposables = [];
+                this._raycaster = new THREE.Raycaster();
+                this._zeroPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+                this._pointerNDC = new THREE.Vector2(-99, -99);
+                this._lastPointerNDC = new THREE.Vector2(-999, -999);
+                this._pointerWorld = new THREE.Vector3(-999, -999, 0);
+                this._idleKinematicsAccum = 0.0;
+
+                // Longer base strap (7.0) so ceiling extension keeps the buckle unstretched and reaches past top parallax
+                this.STRAP_BASE_LEN = 7.00;
+                this.ARM_BASE_LEN = 1.42;
+                this.RING_OUTER_R = 0.36;
+                this.RING_INNER_R = 0.255;
+                this._ringsInFront = false;
+                this._ceilingExtendY = 8.40;
+
+                this.state = {
+                    mode: 'IDLE',
+                    isHovering: false,
+                    proximity: 0.0,
+                    smoothedProximity: 0.0,
+                    currentFrequency: 0.0,
+                    cyclePhase: 0.0,
+                    lagPhase: 0.0,
+                    energy: 0.0,
+                    transitionMix: 0.0,
+                    altSkillTarget: 0.0,
+                    pendingSkillTarget: null
+                };
+
+                this.isBuilt = false;
+                if (options.enabled !== false) {
+                    this.ensureBuilt();
+                }
+            }
+
+            ensureBuilt() {
+                if (this.isBuilt) return;
+                this.isBuilt = true;
+
+                this._buildBatchedMeshes();
+                this._updateLayout();
+                this._syncPaletteUniforms(
+                    this.sharedUniforms.uColorTheme.value,
+                    this.uniforms.uBlackFill.value
+                );
+                this._applyKinematics(0.0, 0.0, 0.0, 0.0);
+                this.applyQualityPreset(this.qualityLevel);
+            }
+
+            _syncPaletteUniforms(themeMix, blackFill) {
+                if (
+                    Math.abs(themeMix - this._lastPaletteTheme) < 0.0002 &&
+                    Math.abs(blackFill - this._lastPaletteBlack) < 0.0002
+                ) {
+                    return;
+                }
+                this._lastPaletteTheme = themeMix;
+                this._lastPaletteBlack = blackFill;
+
+                const u = this.uniforms;
+                const tmpA = this._paletteTmpA;
+                const tmpB = this._paletteTmpB;
+                const lerpRGB = (out, r0, g0, b0, r1, g1, b1, t) => {
+                    out.setRGB(r0 + (r1 - r0) * t, g0 + (g1 - g0) * t, b0 + (b1 - b0) * t);
+                };
+
+                // Hologram Core Palette (Red -> NixOS Blue)
+                lerpRGB(u.uCoreDeep.value,   0.09, 0.010, 0.014,  0.012, 0.036, 0.085, themeMix);
+                lerpRGB(u.uCorePlasma.value, 0.36, 0.025, 0.030,  0.100, 0.280, 0.560, themeMix);
+                lerpRGB(u.uCoreScan.value,   0.18, 0.018, 0.020,  0.160, 0.420, 0.720, themeMix);
+
+                // Rim Palette (Red -> NixOS Blue, plus Hologram -> Silhouette idle blend)
+                lerpRGB(tmpA, 0.86, 0.09, 0.08,  0.42, 0.72, 0.94, themeMix);
+                lerpRGB(tmpB, 0.50, 0.05, 0.055, 0.26, 0.46, 0.78, themeMix);
+                u.uRimBaseIdle.value.copy(tmpA).lerp(tmpB, blackFill);
+                lerpRGB(u.uRimHot.value,  1.00, 0.18, 0.09,  0.49, 0.80, 0.98, themeMix);
+                lerpRGB(u.uRimPeak.value, 1.00, 0.55, 0.30,  0.86, 0.97, 1.00, themeMix);
+                u.uRimBaseAlpha.value = 0.90 + (0.65 - 0.90) * blackFill;
+
+                // Halo Palette
+                lerpRGB(u.uHaloBase.value, 0.68, 0.03, 0.03,  0.14, 0.36, 0.76, themeMix);
+                lerpRGB(u.uHaloHot.value,  1.00, 0.12, 0.05,  0.45, 0.80, 1.00, themeMix);
+                u.uHaloBaseAlpha.value = 0.16 + (0.08 - 0.16) * blackFill;
+
+                // Maltese Face Accent Outline (Crimson Red -> NixOS Cyan)
+                lerpRGB(u.uFaceAccent.value, 1.00, 0.13, 0.10,  0.45, 0.82, 1.00, themeMix);
+            }
+
+            applyQualityPreset(level) {
+                this.qualityLevel = level;
+                if (!this.isBuilt) return;
+                const showOuterHalo = (level === 'high');
+                const showAura = !this.config.useBlackFill && (level === 'high');
+
+                this.rootGroup.traverse((obj) => {
+                    if (obj.userData && obj.userData.isHaloPass) {
+                        obj.visible = showOuterHalo;
+                    }
+                });
+                if (this.auraMesh) {
+                    this.auraMesh.visible = showAura;
+                }
+            }
+
+            getSkillLabel() {
+                const goal = this.state.pendingSkillTarget !== null
+                    ? this.state.pendingSkillTarget
+                    : this.state.altSkillTarget;
+                const idx = ((Math.round(goal) % 4) + 4) % 4;
+                return `T: ${this.skillNames[idx]}`;
+            }
+
+            isActiveOrTransitioning() {
+                if (!this.isBuilt || !this.rootGroup.visible || this.visibilityAlpha <= 0.01) return false;
+                return this.state.mode !== 'IDLE';
+            }
+
+            onPointerMove(ndcX, ndcY, sharedRay = null) {
+                if (!this.isBuilt || !this.rootGroup.visible || this.visibilityAlpha <= 0.01) return;
+                let ray = sharedRay;
+                if (!ray) {
+                    this._pointerNDC.set(ndcX, ndcY);
+                    this._raycaster.setFromCamera(this._pointerNDC, this.camera);
+                    ray = this._raycaster.ray;
+                }
+
+                if (ray.intersectPlane(this._zeroPlane, this._pointerWorld)) {
+                    const invS = 1.0 / Math.max(0.15, this.config.globalScale);
+                    const lx = (this._pointerWorld.x - this.config.position.x) * invS;
+                    const ly = (this._pointerWorld.y - this.config.position.y) * invS;
+                    const dist = Math.hypot(lx, ly - 0.85);
+                    const s = this.state;
+                    if (dist <= this.config.hoverRadiusWorld) {
+                        s.isHovering = true;
+                        s.proximity = Math.pow(1.0 - Math.min(1.0, dist / this.config.hoverRadiusWorld), 1.15);
+                    } else {
+                        s.isHovering = false;
+                        s.proximity = 0.0;
+                    }
+                }
+            }
+
+            onPointerClick(ndcX, ndcY, sharedRay = null) {
+                if (!this.isBuilt || this.visibilityAlpha <= 0.01 || !this.rootGroup.visible) return null;
+                this.onPointerMove(ndcX, ndcY, sharedRay);
+                if (this.state.isHovering) {
+                    this.cycleSkill();
+                    return 'rings';
+                }
+                return null;
+            }
+
+            cycleSkill(explicitIdx = null) {
+                this.ensureBuilt();
+                const s = this.state;
+                const cur = ((Math.round(s.altSkillTarget) % 4) + 4) % 4;
+                let next;
+                if (explicitIdx !== null && explicitIdx >= 0 && explicitIdx < 4) {
+                    if (explicitIdx === cur && s.pendingSkillTarget === null) return;
+                    const delta = (explicitIdx - cur + 4) % 4 || 4;
+                    next = Math.round(s.altSkillTarget) + delta;
+                } else {
+                    const base = s.pendingSkillTarget !== null ? s.pendingSkillTarget : Math.round(s.altSkillTarget);
+                    next = base + 1;
+                }
+
+                if (s.cyclePhase > 0.001 && !this.config.manualMode) {
+                    s.pendingSkillTarget = next;
+                    s.mode = 'QUEUE';
+                } else {
+                    s.altSkillTarget = next;
+                    s.pendingSkillTarget = null;
+                    s.mode = 'TRANS';
+                }
+            }
+
+            /**
+             * Anchors the Rings athlete to hang from the top edge (ceiling) of the viewport
+             * directly centered over the floating NixOS main logo across all FOV modes and scales.
+             */
+            _updateLayout() {
+                if (!this.isBuilt) return;
+                const s = Math.max(0.15, this.config.globalScale);
+                const fovDeg = (this.camera && this.camera.fov) ? this.camera.fov : 28;
+                const refCamZ = fovDeg <= 24 ? 25.2 : (fovDeg >= 32 ? 16.5 : 20.4);
+                const halfH = Math.tan(THREE.MathUtils.degToRad(fovDeg) * 0.5) * refCamZ;
+
+                // Anchor so local y ≈ 5.35 sits flush with the ceiling:
+                // Inverted Cross feet (5.24) remain cleanly inside the screen, while Iron Cross hangs over the NixOS logo.
+                this.config.position.set(0.0, halfH - 5.35 * s, 0.0);
+                // Extend visual straps far past the top edge so vertical mouse parallax never exposes strap ends
+                this._ceilingExtendY = Math.max(8.2, 5.35 + (1.8 / s));
+
+                this.rootGroup.position.copy(this.config.position);
+                this.rootGroup.scale.set(s, s, 1);
+            }
+
+            _smoothPoly(pts, iterations = 1) {
+                let cur = pts.map(p => [p[0], p[1], p[2] || 0]);
+                for (let it = 0; it < iterations; it++) {
+                    const next = [];
+                    const n = cur.length;
+                    for (let i = 0; i < n; i++) {
+                        const a = cur[i], b = cur[(i + 1) % n];
+                        next.push(a[2] === 1 ? [a[0], a[1], 1] : [0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1], 0]);
+                        if (b[2] !== 1) next.push([0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1], 0]);
+                    }
+                    cur = next;
+                }
+                return cur.map(p => [p[0], p[1]]);
+            }
+
+            _offsetPoly(pts, offset) {
+                if (Math.abs(offset) < 1e-5) return pts;
+                const n = pts.length;
+                let area = 0;
+                for (let i = 0; i < n; i++) {
+                    const a = pts[i], b = pts[(i + 1) % n];
+                    area += a[0] * b[1] - b[0] * a[1];
+                }
+                const wind = area >= 0 ? 1 : -1;
+                const out = [];
+
+                for (let i = 0; i < n; i++) {
+                    const prev = pts[(i - 1 + n) % n], curr = pts[i], next = pts[(i + 1) % n];
+                    let dx1 = curr[0] - prev[0], dy1 = curr[1] - prev[1];
+                    const l1 = Math.hypot(dx1, dy1) || 1e-6; dx1 /= l1; dy1 /= l1;
+                    let dx2 = next[0] - curr[0], dy2 = next[1] - curr[1];
+                    const l2 = Math.hypot(dx2, dy2) || 1e-6; dx2 /= l2; dy2 /= l2;
+
+                    const nx1 = dy1 * wind, ny1 = -dx1 * wind;
+                    const nx2 = dy2 * wind, ny2 = -dx2 * wind;
+                    const cross = dx1 * dy2 - dy1 * dx2;
+                    const dotN = nx1 * nx2 + ny1 * ny2;
+
+                    if (offset > 0 && cross * wind > 0 && dotN < 0.72) {
+                        out.push([curr[0] + nx1 * offset, curr[1] + ny1 * offset]);
+                        out.push([curr[0] + nx2 * offset, curr[1] + ny2 * offset]);
+                    } else {
+                        let bx = nx1 + nx2, by = ny1 + ny2;
+                        const bLen = Math.hypot(bx, by);
+                        if (bLen < 1e-4) {
+                            out.push([curr[0] + nx1 * offset, curr[1] + ny1 * offset]);
+                        } else {
+                            bx /= bLen; by /= bLen;
+                            const miter = Math.min(offset * 1.18, offset / Math.max(0.55, nx1 * bx + ny1 * by));
+                            out.push([curr[0] + bx * miter, curr[1] + by * miter]);
+                        }
+                    }
+                }
+                return out;
+            }
+
+            _shapeGeo(pts) {
+                const s = new THREE.Shape();
+                s.moveTo(pts[0][0], pts[0][1]);
+                for (let i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
+                s.closePath();
+                return new THREE.ShapeGeometry(s);
+            }
+
+            _annulusGeo(rOut, rIn, segs = 32) {
+                const s = new THREE.Shape();
+                s.absarc(0, 0, rOut, 0, Math.PI * 2, false);
+                const hole = new THREE.Path();
+                hole.absarc(0, 0, Math.max(0.02, rIn), 0, Math.PI * 2, true);
+                s.holes.push(hole);
+                return new THREE.ShapeGeometry(s, segs);
+            }
+
+            _mergeSkinned(items, withColor = false) {
+                const nonIdx = [];
+                let totalVerts = 0;
+                for (let i = 0; i < items.length; i++) {
+                    const src = items[i].geo;
+                    const g = src.index ? src.toNonIndexed() : src;
+                    if (g !== src) src.dispose();
+                    const count = g.attributes.position.count;
+                    totalVerts += count;
+                    nonIdx.push({ g, count, bone: items[i].bone, color: items[i].color });
+                }
+
+                const pos = new Float32Array(totalVerts * 3);
+                const boneIdx = new Float32Array(totalVerts);
+                const colors = withColor ? new Float32Array(totalVerts * 3) : null;
+
+                let offset = 0;
+                for (let i = 0; i < nonIdx.length; i++) {
+                    const { g, count, bone, color } = nonIdx[i];
+                    pos.set(g.attributes.position.array, offset * 3);
+                    boneIdx.fill(bone, offset, offset + count);
+                    if (withColor) {
+                        const r = color[0], gr = color[1], b = color[2];
+                        for (let k = 0; k < count; k++) {
+                            const j = (offset + k) * 3;
+                            colors[j] = r; colors[j + 1] = gr; colors[j + 2] = b;
+                        }
+                    }
+                    offset += count;
+                    g.dispose();
+                }
+
+                const merged = new THREE.BufferGeometry();
+                merged.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                merged.setAttribute('aBoneIndex', new THREE.BufferAttribute(boneIdx, 1));
+                if (withColor) merged.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+                this._disposables.push(merged);
+                return merged;
+            }
+
+            _makeTierMaterials(refCore, refRim, refHalo, baseAlpha) {
+                const skinHeader = `
+                    #define BONE_COUNT ${this.BONE_COUNT}
+                    attribute float aBoneIndex;
+                    uniform vec4 uBoneTR[BONE_COUNT];
+                    uniform vec4 uBoneSV[BONE_COUNT];
+                `;
+                const skinTransform = `
+                    int b = int(aBoneIndex + 0.5);
+                    vec4 tr = uBoneTR[b];
+                    vec4 sv = uBoneSV[b];
+                    if (sv.z <= 0.001) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+                    vec2 p = position.xy * sv.xy;
+                    vec2 lp = vec2(p.x * tr.z - p.y * tr.w, p.x * tr.w + p.y * tr.z) + tr.xy;
+                    vec4 wp = modelMatrix * vec4(lp, 0.0, 1.0);
+                    gl_Position = projectionMatrix * viewMatrix * wp;
+                `;
+                const rayAndPulseProximity = `
+                    vec3 op = wp.xyz - uRayOrigin;
+                    float dRay = length(wp.xyz - (uRayOrigin + uRayDir * dot(op, uRayDir)));
+                    float hm = 1.0 - smoothstep(uStrokeRadius * 0.16, uStrokeRadius * 1.35, dRay);
+                    hm = hm > 0.001 ? pow(clamp(hm, 0.0, 1.0), 1.35) : 0.0;
+                    float pulseBoost = 0.0;
+                    if (uHasPulses > 0.5) {
+                        for (int w = 0; w < 4; w++) {
+                            float wIntensity = uPulseParams[w].z;
+                            if (wIntensity > 0.005) {
+                                float dist = length(wp.xy - uPulseCenters[w].xy);
+                                float ringDiff = abs(dist - uPulseParams[w].x);
+                                float bandW = uPulseParams[w].y;
+                                if (ringDiff < bandW) {
+                                    float pp = 1.0 - ringDiff / bandW;
+                                    pulseBoost += pp * pp * wIntensity;
+                                }
+                            }
+                        }
+                    }
+                    vHoverMask = clamp(hm + pulseBoost * 0.75, 0.0, 1.0);
+                `;
+
+                const stencilCfg = (ref) => ({
+                    transparent: true,
+                    depthTest: false,
+                    depthWrite: false,
+                    stencilWrite: true,
+                    stencilRef: ref,
+                    stencilFunc: THREE.GreaterStencilFunc,
+                    stencilFail: THREE.KeepStencilOp,
+                    stencilZFail: THREE.KeepStencilOp,
+                    stencilZPass: THREE.ReplaceStencilOp
+                });
+
+                const core = new THREE.ShaderMaterial(Object.assign(stencilCfg(refCore), {
+                    uniforms: {
+                        uBoneTR: this.uniforms.uBoneTR,
+                        uBoneSV: this.uniforms.uBoneSV,
+                        uTime: this.uniforms.uTime,
+                        uEnergy: this.uniforms.uEnergy,
+                        uDrive: this.uniforms.uDrive,
+                        uBlackFill: this.uniforms.uBlackFill,
+                        uOverlayAlpha: this.uniforms.uOverlayAlpha,
+                        uCoreDeep: this.uniforms.uCoreDeep,
+                        uCorePlasma: this.uniforms.uCorePlasma,
+                        uCoreScan: this.uniforms.uCoreScan,
+                        uBaseAlpha: { value: baseAlpha }
+                    },
+                    vertexShader: `${skinHeader}
+                        uniform float uTime;
+                        varying float vWorldY;
+                        varying float vPulse;
+                        void main() {
+                            ${skinTransform}
+                            vWorldY = wp.y;
+                            vPulse = 0.5 + 0.5 * sin(wp.x * 1.8 + uTime * 3.2);
+                        }`,
+                    fragmentShader: `
+                        varying float vWorldY;
+                        varying float vPulse;
+                        uniform float uTime, uEnergy, uDrive, uBlackFill, uOverlayAlpha, uBaseAlpha;
+                        uniform vec3 uCoreDeep, uCorePlasma, uCoreScan;
+                        void main() {
+                            if (uOverlayAlpha <= 0.003) discard;
+                            if (uBlackFill > 0.999) { gl_FragColor = vec4(0.0, 0.0, 0.0, uOverlayAlpha); return; }
+                            float scan = 0.5 + 0.5 * sin(vWorldY * 52.0 - uTime * 9.0);
+                            vec3 holo = uCoreDeep
+                                + uCorePlasma * ((0.42 + 0.58 * vPulse) * (0.55 + 0.45 * uEnergy))
+                                + uCoreScan * (scan * (0.28 + 0.55 * uEnergy * uDrive));
+                            gl_FragColor = vec4(mix(holo, vec3(0.0), uBlackFill), mix(uBaseAlpha, 1.0, uBlackFill) * uOverlayAlpha);
+                        }`
+                }));
+
+                const rim = new THREE.ShaderMaterial(Object.assign(stencilCfg(refRim), {
+                    uniforms: {
+                        uBoneTR: this.uniforms.uBoneTR,
+                        uBoneSV: this.uniforms.uBoneSV,
+                        uRayOrigin: this.uniforms.uRayOrigin,
+                        uRayDir: this.uniforms.uRayDir,
+                        uStrokeRadius: this.uniforms.uStrokeRadius,
+                        uHasPulses: this.uniforms.uHasPulses,
+                        uPulseCenters: this.uniforms.uPulseCenters,
+                        uPulseParams: this.uniforms.uPulseParams,
+                        uOverlayAlpha: this.uniforms.uOverlayAlpha,
+                        uRimBaseIdle: this.uniforms.uRimBaseIdle,
+                        uRimHot: this.uniforms.uRimHot,
+                        uRimPeak: this.uniforms.uRimPeak,
+                        uRimBaseAlpha: this.uniforms.uRimBaseAlpha,
+                        uEnergy: this.uniforms.uEnergy,
+                        uDrive: this.uniforms.uDrive
+                    },
+                    vertexShader: `${skinHeader}
+                        uniform vec3 uRayOrigin, uRayDir;
+                        uniform float uStrokeRadius, uHasPulses;
+                        uniform vec3 uPulseCenters[4];
+                        uniform vec4 uPulseParams[4];
+                        varying float vHoverMask;
+                        varying float vFadeCoord;
+                        void main() {
+                            ${skinTransform}
+                            ${rayAndPulseProximity}
+                            // Heel fade strictly on Victorian socked feet (Bone 20); hands (21/22) stay 100% solid
+                            vFadeCoord = (b == 20) ? (position.y + 0.20) / 0.24 : 1.0;
+                        }`,
+                    fragmentShader: `
+                        varying float vHoverMask;
+                        varying float vFadeCoord;
+                        uniform float uOverlayAlpha, uRimBaseAlpha, uEnergy, uDrive;
+                        uniform vec3 uRimBaseIdle, uRimHot, uRimPeak;
+                        void main() {
+                            if (uOverlayAlpha <= 0.003) discard;
+                            float ef = smoothstep(0.0, 1.0, vFadeCoord);
+                            if (ef < 0.005) discard;
+                            float g = clamp(vHoverMask * (0.85 + 0.25 * uDrive) + uEnergy * 0.32, 0.0, 1.0);
+                            vec3 col = mix(uRimBaseIdle, uRimHot, smoothstep(0.0, 0.65, g));
+                            col = mix(col, uRimPeak, smoothstep(0.58, 1.0, vHoverMask * uDrive));
+                            float a = mix(uRimBaseAlpha, 1.0, clamp(vHoverMask * 0.92 + uEnergy * 0.35, 0.0, 1.0)) * ef * uOverlayAlpha;
+                            gl_FragColor = vec4(col, a);
+                        }`
+                }));
+
+                const halo = new THREE.ShaderMaterial(Object.assign(stencilCfg(refHalo), {
+                    uniforms: {
+                        uBoneTR: this.uniforms.uBoneTR,
+                        uBoneSV: this.uniforms.uBoneSV,
+                        uRayOrigin: this.uniforms.uRayOrigin,
+                        uRayDir: this.uniforms.uRayDir,
+                        uStrokeRadius: this.uniforms.uStrokeRadius,
+                        uHasPulses: this.uniforms.uHasPulses,
+                        uPulseCenters: this.uniforms.uPulseCenters,
+                        uPulseParams: this.uniforms.uPulseParams,
+                        uOverlayAlpha: this.uniforms.uOverlayAlpha,
+                        uHaloBase: this.uniforms.uHaloBase,
+                        uHaloHot: this.uniforms.uHaloHot,
+                        uHaloBaseAlpha: this.uniforms.uHaloBaseAlpha,
+                        uEnergy: this.uniforms.uEnergy,
+                        uDrive: this.uniforms.uDrive
+                    },
+                    vertexShader: `${skinHeader}
+                        uniform vec3 uRayOrigin, uRayDir;
+                        uniform float uStrokeRadius, uHasPulses;
+                        uniform vec3 uPulseCenters[4];
+                        uniform vec4 uPulseParams[4];
+                        varying float vHoverMask;
+                        varying float vFadeCoord;
+                        void main() {
+                            ${skinTransform}
+                            ${rayAndPulseProximity}
+                            vFadeCoord = (b == 20) ? (position.y + 0.20) / 0.24 : 1.0;
+                        }`,
+                    fragmentShader: `
+                        varying float vHoverMask;
+                        varying float vFadeCoord;
+                        uniform float uOverlayAlpha, uHaloBaseAlpha, uEnergy, uDrive;
+                        uniform vec3 uHaloBase, uHaloHot;
+                        void main() {
+                            if (uOverlayAlpha <= 0.003) discard;
+                            float ef = smoothstep(0.0, 1.0, vFadeCoord);
+                            if (ef < 0.005) discard;
+                            vec3 col = mix(uHaloBase, uHaloHot, vHoverMask);
+                            float a = (uHaloBaseAlpha + 0.44 * vHoverMask + 0.18 * uEnergy) * clamp(uDrive, 0.3, 1.8) * ef * uOverlayAlpha;
+                            gl_FragColor = vec4(col, clamp(a, 0.0, 0.72));
+                        }`
+                }));
+
+                this._disposables.push(core, rim, halo);
+                return { core, rim, halo };
+            }
+
+            _makeLockedArmPts(mirrorSign, L) {
+                const pts = [];
+                const capSteps = 6;
+                const r0 = 0.205;
+                for (let i = 0; i <= capSteps; i++) {
+                    const a = Math.PI + (i / capSteps) * Math.PI;
+                    pts.push([Math.cos(a) * r0, Math.sin(a) * (r0 * 0.52)]);
+                }
+                const top = [
+                    [0.238, L * 0.09], [0.226, L * 0.18], [0.186, L * 0.25], [0.214, L * 0.34],
+                    [0.224, L * 0.42], [0.168, L * 0.49], [0.144, L * 0.55], [0.180, L * 0.64],
+                    [0.172, L * 0.72], [0.130, L * 0.82], [0.092, L * 0.91], [0.084, L * 0.96]
+                ];
+                const bot = [
+                    [0.205, L * 0.08], [0.212, L * 0.20], [0.208, L * 0.31], [0.156, L * 0.42],
+                    [0.160, L * 0.52], [0.172, L * 0.63], [0.152, L * 0.73], [0.114, L * 0.83],
+                    [0.086, L * 0.92], [0.082, L * 0.96]
+                ];
+                for (let i = 0; i < top.length; i++) pts.push(top[i]);
+                const r1 = 0.082;
+                for (let i = 0; i <= capSteps; i++) {
+                    const a = (i / capSteps) * Math.PI;
+                    pts.push([Math.cos(a) * r1, L + Math.sin(a) * (r1 * 0.48)]);
+                }
+                for (let i = bot.length - 1; i >= 0; i--) pts.push([-bot[i][0], bot[i][1]]);
+                if (mirrorSign > 0) {
+                    for (let i = 0; i < pts.length; i++) pts[i] = [-pts[i][0], pts[i][1]];
+                    pts.reverse();
+                }
+                return pts;
+            }
+
+            _makeCirclePts(r, segs = 16) {
+                const pts = [];
+                for (let i = 0; i < segs; i++) {
+                    const a = (i / segs) * Math.PI * 2;
+                    pts.push([Math.cos(a) * r, Math.sin(a) * r]);
+                }
+                return pts;
+            }
+
+            _makeStrapPts(L) {
+                const left = [
+                    [-0.112, -0.02], [-0.086, 0.14], [-0.068, 0.34],
+                    [-0.066, 0.95],  [-0.065, 1.65], [-0.064, 2.40],
+                    [-0.063, 3.20],  [-0.062, 4.05], [-0.061, 4.95],
+                    [-0.060, 5.95],  [-0.059, L]
+                ];
+                const right = left.slice().reverse().map(p => [-p[0], p[1]]);
+                return left.concat(right);
+            }
+
+            _buildBatchedMeshes() {
+                const pushPoly = (bucket, rawPts, bone, sub = 1, rimW = 0.027, haloW = 0.055) => {
+                    const sm = sub > 0 ? this._smoothPoly(rawPts, sub) : rawPts.map(p => [p[0], p[1]]);
+                    bucket.core.push({ geo: this._shapeGeo(sm), bone });
+                    bucket.rim.push({ geo: this._shapeGeo(this._offsetPoly(sm, rimW)), bone });
+                    bucket.halo.push({ geo: this._shapeGeo(this._offsetPoly(sm, haloW)), bone });
+                };
+
+                const spawnTier = (bucket, mats, baseOrder) => {
+                    const specs = [
+                        [bucket.core, mats.core, baseOrder, false],
+                        [bucket.rim,  mats.rim,  baseOrder + 1, false],
+                        [bucket.halo, mats.halo, baseOrder + 2, true]
+                    ];
+                    return specs.map(([list, mat, order, isHalo]) => {
+                        const mesh = new THREE.Mesh(this._mergeSkinned(list), mat);
+                        mesh.renderOrder = order;
+                        mesh.frustumCulled = false;
+                        mesh.matrixAutoUpdate = false;
+                        if (isHalo) mesh.userData.isHaloPass = true;
+                        this.rootGroup.add(mesh);
+                        return mesh;
+                    });
+                };
+
+                // TIER 1: RINGS & STRAPS (RenderOrder 53..55 behind, 73..75 in front during Victorian)
+                const ringsB = { core: [], rim: [], halo: [] };
+                const strapPts = this._makeStrapPts(this.STRAP_BASE_LEN);
+                pushPoly(ringsB, strapPts, 0, 1, 0.024, 0.048);
+                pushPoly(ringsB, strapPts, 1, 1, 0.024, 0.048);
+                for (const bone of [2, 3]) {
+                    ringsB.core.push({ geo: this._annulusGeo(this.RING_OUTER_R, this.RING_INNER_R), bone });
+                    ringsB.rim.push({  geo: this._annulusGeo(this.RING_OUTER_R + 0.026, this.RING_INNER_R - 0.026), bone });
+                    ringsB.halo.push({ geo: this._annulusGeo(this.RING_OUTER_R + 0.052, this.RING_INNER_R - 0.052), bone });
+                }
+                this.ringsTierMeshes = spawnTier(ringsB, this._makeTierMaterials(6, 5, 4, 0.88), 53);
+
+                // TIER 2: ATHLETE BODY + ARMS + SHOULDERS + FISTS (RenderOrder 70..72, Stencil 10..8)
+                const bodyB = { core: [], rim: [], halo: [] };
+
+                pushPoly(bodyB, this._makeLockedArmPts(-1, this.ARM_BASE_LEN), 4, 1, 0.026, 0.052);
+                pushPoly(bodyB, this._makeLockedArmPts( 1, this.ARM_BASE_LEN), 5, 1, 0.026, 0.052);
+                const capPts = this._makeCirclePts(0.205, 16);
+                pushPoly(bodyB, capPts, 6, 0, 0.027, 0.055);
+                pushPoly(bodyB, capPts, 7, 0, 0.027, 0.055);
+
+                const fistPts = [
+                    [-0.19,-0.09], [-0.23,0.02,1], [-0.16,0.13], [-0.02,0.15],
+                    [0.14,0.12],   [0.21,0.02,1],  [0.16,-0.10], [0.02,-0.13], [-0.11,-0.12]
+                ];
+                pushPoly(bodyB, fistPts, 8, 1);
+                pushPoly(bodyB, fistPts.map(p => [-p[0], p[1], p[2] || 0]).reverse(), 9, 1);
+
+                // SKILL 0: IRON CROSS
+                pushPoly(bodyB, [
+                    [-0.58,-0.02], [-0.46,0.14], [-0.24,0.22], [-0.14,0.30], [0.16,0.30], [0.34,0.28],
+                    [0.54,0.20],   [0.62,0.04],  [0.54,-0.22], [0.44,-0.58], [0.36,-0.94],[0.46,-1.28],
+                    [-0.36,-1.28], [-0.34,-0.92],[-0.44,-0.56],[-0.52,-0.24]
+                ], 10, 2);
+                pushPoly(bodyB, [
+                    [-0.17,-0.09], [-0.18,0.06], [-0.23,0.20], [-0.25,0.36], [-0.24,0.52], [-0.20,0.69,1],
+                    [-0.08,0.74,1],[0.09,0.72],  [0.21,0.64,1],[0.27,0.49],  [0.25,0.30],  [0.19,0.15],
+                    [0.17,0.02],   [0.20,-0.10]
+                ], 11, 1);
+                pushPoly(bodyB, [
+                    [-0.42,0.06], [-0.43,-0.46], [-0.36,-1.00], [-0.26,-1.52], [-0.15,-2.02], [-0.03,-2.48],
+                    [0.04,-2.70], [0.12,-2.84,1],[0.25,-2.93,1],[0.40,-2.78],  [0.45,-2.54],  [0.51,-2.10],
+                    [0.53,-1.58], [0.54,-1.02],  [0.52,-0.44],  [0.46,0.08]
+                ], 12, 2);
+
+                // SKILL 1: MALTESE
+                pushPoly(bodyB, [
+                    [-0.50,-0.14], [-0.46,0.04], [-0.30,0.14], [0.30,0.14], [0.46,0.04], [0.50,-0.14],
+                    [0.48,-0.32],  [0.40,-0.46], [0.28,-0.56], [0.12,-0.60],[-0.12,-0.60],
+                    [-0.28,-0.56], [-0.40,-0.46],[-0.48,-0.32]
+                ], 13, 2);
+                pushPoly(bodyB, [
+                    [-0.35,0.04], [-0.36,0.12,1], [-0.29,0.17,1], [-0.31,0.25], [-0.24,0.35], [-0.16,0.43,1],
+                    [0.02,0.44],  [0.16,0.40,1],  [0.25,0.31],    [0.28,0.21],  [0.28,0.14,1],[0.36,0.08],
+                    [0.32,-0.06], [0.00,-0.14],   [-0.32,-0.06]
+                ], 13, 1);
+                pushPoly(bodyB, [
+                    [-0.28,0.18], [-0.26,0.62], [-0.20,1.12], [-0.14,1.56], [-0.06,1.82,1],
+                    [0.00,1.72,1],[0.06,1.82,1],[0.14,1.56],  [0.20,1.12],  [0.26,0.62], [0.28,0.18]
+                ], 14, 1);
+
+                // SKILL 2: INVERTED IRON CROSS
+                pushPoly(bodyB, [
+                    [-0.58,0.04], [-0.50,0.34], [-0.40,0.78], [-0.44,1.24], [0.44,1.24], [0.40,0.78],
+                    [0.50,0.34],  [0.58,0.04],  [0.44,-0.20], [0.18,-0.26], [-0.18,-0.26],[-0.44,-0.20]
+                ], 15, 2);
+                pushPoly(bodyB, [
+                    [-0.18,-0.20], [-0.23,-0.44], [-0.21,-0.68], [-0.08,-0.78],
+                    [0.08,-0.78],  [0.21,-0.68],  [0.23,-0.44],  [0.18,-0.20]
+                ], 16, 2);
+                const invLegsPts = [
+                    [-0.43,-0.06], [-0.44,0.56], [-0.36,1.18], [-0.34,1.72], [-0.24,2.26], [-0.16,2.66],
+                    [-0.09,2.86,1],[0.00,2.74,1],[0.09,2.86,1],[0.16,2.66],  [0.24,2.26],  [0.34,1.72],
+                    [0.36,1.18],   [0.44,0.56],  [0.43,-0.06]
+                ];
+                pushPoly(bodyB, invLegsPts, 17, 2);
+
+                // SKILL 3: VICTORIAN CROSS
+                pushPoly(bodyB, [
+                    [-0.50,-0.10], [-0.44,0.07], [-0.28,0.16], [0.28,0.16], [0.44,0.07], [0.50,-0.10],
+                    [0.47,-0.30],  [0.42,-0.46], [0.30,-0.60], [0.12,-0.66],[-0.12,-0.66],
+                    [-0.30,-0.60], [-0.42,-0.46],[-0.47,-0.30]
+                ], 18, 2);
+                pushPoly(bodyB, [
+                    [-0.22,0.08], [-0.25,0.24], [-0.23,0.44], [-0.16,0.58,1], [-0.04,0.64],
+                    [0.04,0.64],  [0.16,0.58,1],[0.23,0.44],  [0.25,0.24],    [0.22,0.08]
+                ], 18, 1);
+
+                this.athleteTierMeshes = spawnTier(bodyB, this._makeTierMaterials(10, 9, 8, 0.88), 70);
+
+                // TIER 3: FOREGROUND SWEEPING LEGS (19), SOCKED VICTORIAN FEET (20), & OVERHAND GRIPS (21, 22)
+                const fgB = { core: [], rim: [], halo: [] };
+                pushPoly(fgB, invLegsPts, 19, 2, 0.026, 0.052);
+
+                const lVicFoot = [
+                    [-0.22,-0.22], [-0.11,-0.23], [-0.05,-0.14], [-0.04,-0.01],
+                    [-0.04, 0.12], [-0.07, 0.21], [-0.12, 0.22], [-0.16, 0.18],
+                    [-0.21, 0.17], [-0.26, 0.12], [-0.31, 0.05],
+                    [-0.31,-0.07], [-0.27,-0.17]
+                ];
+                const rVicFoot = lVicFoot.map(p => [-p[0], p[1]]).reverse();
+                pushPoly(fgB, lVicFoot, 20, 1, 0.016, 0.032);
+                pushPoly(fgB, rVicFoot, 20, 1, 0.016, 0.032);
+
+                const lGripPts = [
+                    [-0.132,  0.045], [-0.122,  0.106], [-0.082,  0.144], [ 0.000,  0.154],
+                    [ 0.082,  0.144], [ 0.122,  0.106], [ 0.132,  0.045],
+                    [ 0.152,  0.002], [ 0.144, -0.056],
+                    [ 0.108, -0.082], [ 0.074, -0.066],
+                    [ 0.036, -0.088], [-0.002, -0.070],
+                    [-0.038, -0.086], [-0.074, -0.066],
+                    [-0.108, -0.076], [-0.144, -0.048], [-0.152,  0.002]
+                ];
+                const rGripPts = lGripPts.map(p => [-p[0], p[1]]).reverse();
+                pushPoly(fgB, lGripPts, 21, 1, 0.015, 0.030);
+                pushPoly(fgB, rGripPts, 22, 1, 0.015, 0.030);
+
+                this.fgTierMeshes = spawnTier(fgB, this._makeTierMaterials(18, 17, 16, 0.94), 76);
+
+                // MALTESE FACE DETAILS (Theme-adaptive outline + crisp white eyes, 1 Draw Call)
+                const lEye = [[-0.152,0.095], [-0.084,0.098], [-0.062,0.072], [-0.124,0.068]];
+                const rEye = lEye.map(p => [-p[0], p[1]]).reverse();
+                const lCheek = [
+                    [-0.242,0.115], [-0.218,-0.015], [-0.165,-0.135], [-0.100,-0.228],
+                    [-0.085,-0.215],[-0.148,-0.124], [-0.200,-0.009], [-0.224,0.115]
+                ];
+                const rCheek = lCheek.map(p => [-p[0], p[1]]).reverse();
+
+                const ACCENT = [1.0, 0.0, 0.0];
+                const WHT = [1.0, 1.0, 1.0];
+                const faceGeo = this._mergeSkinned([
+                    { geo: this._shapeGeo(this._offsetPoly(lEye, 0.009)), bone: 13, color: ACCENT },
+                    { geo: this._shapeGeo(this._offsetPoly(rEye, 0.009)), bone: 13, color: ACCENT },
+                    { geo: this._shapeGeo(lCheek), bone: 13, color: ACCENT },
+                    { geo: this._shapeGeo(rCheek), bone: 13, color: ACCENT },
+                    { geo: this._shapeGeo(lEye),   bone: 13, color: WHT },
+                    { geo: this._shapeGeo(rEye),   bone: 13, color: WHT }
+                ], true);
+
+                const faceMat = new THREE.ShaderMaterial({
+                    uniforms: {
+                        uBoneTR: this.uniforms.uBoneTR,
+                        uBoneSV: this.uniforms.uBoneSV,
+                        uFaceAlpha: this.uniforms.uFaceAlpha,
+                        uOverlayAlpha: this.uniforms.uOverlayAlpha,
+                        uFaceAccent: this.uniforms.uFaceAccent
+                    },
+                    vertexShader: `
+                        #define BONE_COUNT ${this.BONE_COUNT}
+                        attribute float aBoneIndex;
+                        attribute vec3 aColor;
+                        uniform vec4 uBoneTR[BONE_COUNT];
+                        uniform vec4 uBoneSV[BONE_COUNT];
+                        varying vec3 vColor;
+                        void main() {
+                            int b = int(aBoneIndex + 0.5);
+                            vec4 tr = uBoneTR[b];
+                            vec4 sv = uBoneSV[b];
+                            if (sv.z <= 0.001) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+                            vec2 p = position.xy * sv.xy;
+                            vec2 lp = vec2(p.x * tr.z - p.y * tr.w, p.x * tr.w + p.y * tr.z) + tr.xy;
+                            vColor = aColor;
+                            gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(lp, 0.0, 1.0);
+                        }`,
+                    fragmentShader: `
+                        varying vec3 vColor;
+                        uniform float uFaceAlpha, uOverlayAlpha;
+                        uniform vec3 uFaceAccent;
+                        void main() {
+                            float a = uFaceAlpha * uOverlayAlpha;
+                            if (a <= 0.003) discard;
+                            vec3 col = mix(uFaceAccent, vec3(1.0), vColor.b);
+                            gl_FragColor = vec4(col, a);
+                        }`,
+                    transparent: true,
+                    depthTest: false,
+                    depthWrite: false
+                });
+                this._disposables.push(faceMat);
+                this.malteseFaceMesh = new THREE.Mesh(faceGeo, faceMat);
+                this.malteseFaceMesh.renderOrder = 79;
+                this.malteseFaceMesh.frustumCulled = false;
+                this.malteseFaceMesh.matrixAutoUpdate = false;
+                this.rootGroup.add(this.malteseFaceMesh);
+
+                // SUBTLE THEME-TINTED AMBIENT AURA (Hidden in Silhouette / Low Quality)
+                const c = document.createElement('canvas');
+                c.width = c.height = 64;
+                const ctx = c.getContext('2d');
+                const g = ctx.createRadialGradient(32, 32, 1, 32, 32, 32);
+                g.addColorStop(0.0, 'rgba(255,255,255,0.48)');
+                g.addColorStop(0.45,'rgba(255,255,255,0.16)');
+                g.addColorStop(1.0, 'rgba(255,255,255,0.0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 64, 64);
+                const auraTex = new THREE.CanvasTexture(c);
+                const auraGeo = new THREE.PlaneGeometry(5.2, 4.2);
+                this.auraMat = new THREE.MeshBasicMaterial({
+                    map: auraTex,
+                    color: 0x4db8ff,
+                    transparent: true,
+                    opacity: 0.16,
+                    blending: THREE.AdditiveBlending,
+                    depthTest: false,
+                    depthWrite: false
+                });
+                this._disposables.push(auraTex, auraGeo, this.auraMat);
+                this.auraMesh = new THREE.Mesh(auraGeo, this.auraMat);
+                this.auraMesh.renderOrder = 52;
+                this.rootGroup.add(this.auraMesh);
+            }
+
+            _setRingsLayer(inFront) {
+                if (this._ringsInFront === inFront) return;
+                this._ringsInFront = inFront;
+                const baseRef = inFront ? 14 : 6;
+                const baseOrd = inFront ? 73 : 53;
+                for (let i = 0; i < 3; i++) {
+                    this.ringsTierMeshes[i].material.stencilRef = baseRef - i;
+                    this.ringsTierMeshes[i].renderOrder = baseOrd + i;
+                }
+            }
+
+            _setBone(i, x, y, rot = 0, sx = 1, sy = 1, vis = 1) {
+                this.boneTR[i].set(x, y, Math.cos(rot), Math.sin(rot));
+                this.boneSV[i].set(sx, sy, vis, 0);
+            }
+
+            _setChildBone(i, px, py, pRot, psx, psy, lx, ly, lRot = 0, lsx = 1, lsy = 1, vis = 1) {
+                const pc = Math.cos(pRot), ps = Math.sin(pRot);
+                const ox = lx * psx, oy = ly * psy;
+                this._setBone(i, px + ox * pc - oy * ps, py + ox * ps + oy * pc, pRot + lRot, psx * lsx, psy * lsy, vis);
+            }
+
+            _orientBone(i, x1, y1, x2, y2, baseLen) {
+                const dx = x2 - x1, dy = y2 - y1;
+                const len = Math.max(0.001, Math.hypot(dx, dy));
+                this._setBone(i, x1, y1, Math.atan2(dy, dx) - Math.PI * 0.5, 1.0, len / baseLen, 1);
+            }
+
+            _solveRingIntersection(ax, ay, strapLen, sx, sy, armLen, sideSign) {
+                const dx = ax - sx, dy = ay - sy;
+                const raw = Math.hypot(dx, dy) || 1e-5;
+                const dist = THREE.MathUtils.clamp(raw, Math.abs(strapLen - armLen) + 0.02, strapLen + armLen - 0.02);
+                const a = (armLen * armLen - strapLen * strapLen + dist * dist) / (2.0 * dist);
+                const h = Math.sqrt(Math.max(0.0, armLen * armLen - a * a));
+                const ux = dx / raw, uy = dy / raw;
+                return [sx + a * ux + h * uy * sideSign, sy + a * uy - h * ux * sideSign];
+            }
+
+            _applyKinematics(phase, lagPhase, energy, elapsed) {
+                const s = this.state;
+                const mMod = ((s.transitionMix % 4.0) + 4.0) % 4.0;
+                const seg = Math.floor(mMod) % 4;
+                const frac = mMod - Math.floor(mMod);
+                const isTrans = frac > 0.001 && frac < 0.999;
+                const u = frac * frac * (3.0 - 2.0 * frac);
+
+                const ss = (a, b, x) => {
+                    const t = THREE.MathUtils.clamp((x - a) / (b - a), 0.0, 1.0);
+                    return t * t * (3.0 - 2.0 * t);
+                };
+
+                let wCross = 0, wMaltese = 0, wInv = 0, wVic = 0;
+                if (seg === 0)      { wCross = 1 - u; wMaltese = u; }
+                else if (seg === 1) { wMaltese = 1 - u; wInv = u; }
+                else if (seg === 2) { wInv = 1 - u; wVic = u; }
+                else                { wVic = 1 - u; wCross = u; }
+
+                const breath = Math.sin(elapsed * 2.15) * 0.022 * (1.0 - energy * 0.6);
+                const swayX = Math.sin(elapsed * 1.15) * 0.018 * (1.0 - energy * 0.5);
+                const transStrain = isTrans ? Math.sin(u * Math.PI) : 0.0;
+                const catchDip = isTrans ? -Math.pow(Math.max(0, Math.sin((u - 0.62) * Math.PI / 0.38)), 2) * 0.14 : 0.0;
+                const trem = 0.006 * energy + 0.013 * Math.pow(transStrain, 1.5);
+                const tremX = Math.sin(elapsed * 47.0) * trem;
+                const tremY = Math.cos(elapsed * 53.0) * trem * 0.7;
+
+                const TWO_PI = Math.PI * 2.0;
+                const evalRep = (phi) => {
+                    const t = (((phi % TWO_PI) + TWO_PI) % TWO_PI) / TWO_PI;
+                    let dbl;
+                    if (t < 0.23) {
+                        const p = t / 0.23;
+                        dbl = -(p * p * (3.0 - 2.0 * p));
+                    } else if (t < 0.28) {
+                        dbl = -1.0;
+                    } else if (t < 0.71) {
+                        const p = (t - 0.28) / 0.43;
+                        const q = p * p * (3.0 - 2.0 * p);
+                        const m = 2.0 * q - 1.0;
+                        const k = 0.72;
+                        dbl = (1.0 - k) * m + k * m * m * m;
+                    } else if (t < 0.79) {
+                        dbl = 1.0;
+                    } else {
+                        const p = (t - 0.79) / 0.21;
+                        dbl = 1.0 - (p * p * (3.0 - 2.0 * p));
+                    }
+
+                    const wp = phi + 0.14 * Math.sin(phi * 2.0);
+                    const caruso = -0.5 * (1.0 - Math.cos(wp)) + Math.max(0, -Math.sin(wp)) * 0.16 * (1.0 - Math.cos(wp));
+                    return THREE.MathUtils.lerp(dbl, caruso, wVic);
+                };
+
+                const rep = evalRep(phase);
+                const velHint = rep - evalRep(lagPhase);
+                const repAbs = Math.min(1.0, Math.abs(rep));
+                const midGrind = (!isTrans && seg !== 3 && phase > 0.001) ? Math.max(0.0, 1.0 - repAbs * 2.2) * energy : 0.0;
+                const grindTremX = Math.sin(elapsed * 47.0) * (0.007 * midGrind);
+                const grindTremY = Math.cos(elapsed * 53.0) * (0.005 * midGrind);
+
+                const deadHangP = (!isTrans && seg === 0) ? Math.max(0.0, -rep) : 0.0;
+                const frontLeverP = (!isTrans && seg === 3) ? Math.max(0.0, -rep) : 0.0;
+
+                const upMax = 1.20 * wCross + 1.06 * wMaltese + 1.16 * wInv + 0.28 * wVic;
+                const downMax = 1.78 * wCross + 1.66 * wMaltese + 1.52 * wInv + 1.62 * wVic;
+                const repY = rep >= 0 ? rep * upMax : rep * downMax;
+
+                let tLiftY = 0, tSwingX = 0, tTilt = 0;
+                if (isTrans) {
+                    if (seg === 0) {
+                        if (u < 0.36) {
+                            const p = ss(0.0, 0.36, u);
+                            tLiftY = p * 1.12;
+                            tSwingX = Math.sin(p * Math.PI) * 0.05;
+                            tTilt = -Math.sin(p * Math.PI) * 0.04;
+                        } else if (u < 0.62) {
+                            const p = ss(0.36, 0.62, u);
+                            tLiftY = 1.12 - p * 0.14;
+                            tSwingX = Math.sin(p * Math.PI) * 0.03;
+                            tTilt = -0.02 * (1.0 - p);
+                        } else {
+                            const p = ss(0.62, 1.00, u);
+                            tLiftY = 0.98 * (1.0 - p);
+                            tSwingX = -Math.sin(p * Math.PI) * 0.025;
+                        }
+                    } else if (seg === 1) {
+                        tLiftY = Math.pow(Math.sin(Math.pow(u, 0.94) * Math.PI), 1.15) * 1.02 + catchDip * 0.85;
+                        tSwingX = Math.sin(u * Math.PI * 2.0) * 0.04;
+                        tTilt = Math.sin(u * Math.PI * 2.0) * 0.03;
+                    } else if (seg === 2) {
+                        tLiftY = Math.pow(Math.sin(Math.pow(u, 0.84) * Math.PI), 1.25) * 0.68 + catchDip;
+                        tSwingX = -Math.sin(u * Math.PI * 2.0) * 0.05;
+                        tTilt = Math.sin(u * Math.PI) * 0.04;
+                    } else {
+                        if (u < 0.22) {
+                            tLiftY = Math.sin((u / 0.22) * Math.PI * 0.5) * 0.18;
+                        } else {
+                            const p = (u - 0.22) / 0.78;
+                            const dropDip = -Math.sin(p * Math.PI) * 0.24;
+                            tLiftY = 0.18 * (1.0 - ss(0.0, 0.45, p)) + dropDip;
+                        }
+                        tSwingX = Math.sin(u * Math.PI * 2.0) * 0.05;
+                        tTilt = -Math.sin(u * Math.PI) * 0.03;
+                    }
+                }
+
+                const baseSY = 1.18 * wCross + 1.44 * wMaltese + 1.18 * wInv + 1.42 * wVic;
+                const bodyX = swayX + tSwingX + velHint * 0.14 + tremX + grindTremX;
+                const bodyY = baseSY + repY + tLiftY + breath + tremY + grindTremY;
+
+                const crossAsym = wCross * (1.0 - Math.min(1.0, repAbs * 1.35)) * (1.0 - transStrain * 0.92);
+                const vicHoldW = wVic * (1.0 - frontLeverP);
+                const anchorY = 5.05;
+
+                let anchorX = 1.42 * wCross + 1.22 * wMaltese + 1.42 * wInv + 0.80 * wVic;
+                anchorX = THREE.MathUtils.lerp(anchorX, 0.58, Math.pow(deadHangP, 0.85));
+                anchorX = THREE.MathUtils.lerp(anchorX, 0.56, Math.pow(frontLeverP, 0.85));
+                if (isTrans && seg === 0) {
+                    const dipPeak = Math.sin(Math.min(1.0, u / 0.72) * Math.PI);
+                    anchorX = THREE.MathUtils.lerp(anchorX, 1.02, dipPeak * 0.65);
+                }
+
+                const symStrap = 4.12 * wCross + 4.24 * wMaltese + 4.12 * wInv + THREE.MathUtils.lerp(4.18, 4.22, frontLeverP) * wVic;
+                const strapL = THREE.MathUtils.lerp(symStrap, 4.18, crossAsym) + 0.08 * deadHangP;
+                const strapR = THREE.MathUtils.lerp(symStrap, 3.44, crossAsym) + 0.08 * deadHangP;
+
+                const shDep = THREE.MathUtils.clamp(rep * 0.06 + tLiftY * 0.04, -0.08, 0.10);
+                let spreadX = 0.54 * wCross + 0.50 * wMaltese + 0.54 * wInv + 0.44 * wVic;
+                spreadX = THREE.MathUtils.lerp(spreadX, 0.45, Math.max(repAbs * 0.75, deadHangP));
+
+                const vicArmScale = THREE.MathUtils.lerp(0.72, 0.78, frontLeverP);
+                const armScale = 1.0 * wCross + 0.82 * wMaltese + 1.0 * wInv + vicArmScale * wVic;
+                const armLen = this.ARM_BASE_LEN * armScale;
+
+                const socketDrop = -0.16 * wMaltese - 0.10 * wVic;
+                const lShX = bodyX - spreadX, rShX = bodyX + spreadX;
+                const lShY = bodyY - 0.05 * crossAsym + socketDrop - shDep;
+                const rShY = bodyY + 0.08 * crossAsym + socketDrop - shDep;
+
+                const [lGX, lGY] = this._solveRingIntersection(-anchorX, anchorY, strapL, lShX, lShY, armLen, -1);
+                const [rGX, rGY] = this._solveRingIntersection( anchorX, anchorY, strapR, rShX, rShY, armLen,  1);
+
+                const ringsInFront = (!isTrans && seg === 3) || (isTrans && seg === 2 && u >= 0.48) || (isTrans && seg === 3 && u < 0.34);
+                this._setRingsLayer(ringsInFront);
+
+                const placeSide = (strapB, ringB, fistB, ax, gx, gy, sign) => {
+                    const sdx = ax - gx, sdy = anchorY - gy;
+                    const strapAng = Math.atan2(sdy, sdx) - Math.PI * 0.5;
+                    const ringAng = strapAng + sign * 0.26 * vicHoldW;
+                    const rux = -Math.sin(ringAng), ruy = Math.cos(ringAng);
+                    const rcx = gx + rux * (this.RING_OUTER_R * 0.80);
+                    const rcy = gy + ruy * (this.RING_OUTER_R * 0.80);
+
+                    let ovalX = sign > 0
+                        ? THREE.MathUtils.lerp(0.96, 0.58, crossAsym)
+                        : THREE.MathUtils.lerp(0.96, 1.02, crossAsym);
+                    ovalX = THREE.MathUtils.lerp(ovalX, 0.54, vicHoldW);
+
+                    this._setBone(ringB, rcx, rcy, ringAng, ovalX, 1.0, 1);
+
+                    // Collinearly extend strap above the pendulum pivot so it stays anchored past the top screen edge
+                    const sx1 = rcx + rux * (this.RING_OUTER_R * 0.92);
+                    const sy1 = rcy + ruy * (this.RING_OUTER_R * 0.92);
+                    const edx = ax - sx1;
+                    const edy = anchorY - sy1;
+                    const extT = edy > 0.05 ? Math.max(1.0, (this._ceilingExtendY - sy1) / edy) : 1.0;
+                    this._orientBone(
+                        strapB,
+                        sx1, sy1,
+                        sx1 + edx * extT, sy1 + edy * extT,
+                        this.STRAP_BASE_LEN
+                    );
+
+                    if (ringsInFront) {
+                        this.boneSV[fistB].z = 0;
+                    } else {
+                        this._setBone(fistB, gx, gy, ringAng * 0.65, 1, 1, 1);
+                    }
+                    return { ringAng, rux, ruy };
+                };
+
+                const lSide = placeSide(0, 2, 8, -anchorX, lGX, lGY, -1);
+                const rSide = placeSide(1, 3, 9,  anchorX, rGX, rGY,  1);
+
+                this._orientBone(4, lShX, lShY, lGX, lGY, this.ARM_BASE_LEN);
+                this._orientBone(5, rShX, rShY, rGX, rGY, this.ARM_BASE_LEN);
+                this._setBone(6, lShX, lShY, 0, 1, 1, 1);
+                this._setBone(7, rShX, rShY, 0, 1, 1, 1);
+
+                for (let i = 10; i < this.BONE_COUNT; i++) this.boneSV[i].z = 0;
+
+                const bRot = tTilt - 0.03 * crossAsym + velHint * 0.035;
+                let faceAlpha = 0.0;
+                let fgActive = false;
+
+                if (ringsInFront) {
+                    fgActive = true;
+                    const gripSX = THREE.MathUtils.lerp(1.0, 0.86, vicHoldW);
+                    this._setBone(21, lGX, lGY, lSide.ringAng, gripSX, 1.0, 1);
+                    this._setBone(22, rGX, rGY, rSide.ringAng, gripSX, 1.0, 1);
+                }
+
+                if (!isTrans) {
+                    if (seg === 0) {
+                        this._setBone(10, bodyX, bodyY, bRot, 1, 1, 1);
+                        this._setChildBone(11, bodyX, bodyY, bRot, 1, 1, -0.04, 0.26, -velHint * 0.08 + crossAsym * 0.04);
+                        this._setChildBone(12, bodyX, bodyY, bRot, 1, 1,  0.06,-1.24, -velHint * 0.14);
+                    } else if (seg === 1) {
+                        this._setChildBone(13, bodyX, bodyY, bRot, 1, 1, 0, rep * 0.04, 0, 1.0 - repAbs * 0.08, 1.0);
+                        faceAlpha = 0.94 + 0.06 * energy;
+                    } else if (seg === 2) {
+                        this._setBone(15, bodyX, bodyY, bRot, 1, 1, 1);
+                        this._setChildBone(16, bodyX, bodyY, bRot, 1, 1, 0, 0, 0);
+                        this._setChildBone(17, bodyX, bodyY, bRot, 1, 1, 0, 1.20, velHint * 0.12);
+                    } else {
+                        const sx = 1.0 - repAbs * 0.05;
+                        const fy = -0.35 + rep * 0.10;
+                        const fs = 1.0 + rep * 0.08;
+                        this._setChildBone(18, bodyX, bodyY, bRot, 1, 1, 0, rep * 0.04, 0, sx, 1.0);
+                        this._setChildBone(20, bodyX, bodyY, bRot, sx, 1, 0, rep * 0.04 + fy, 0, fs, fs);
+                        fgActive = true;
+                    }
+                } else if (seg === 0) {
+                    const dipP = ss(0.0, 0.34, u);
+                    const leanP = ss(0.30, 0.74, u);
+                    const torsoSY = THREE.MathUtils.lerp(1.0, 0.44, leanP);
+                    const torsoSX = THREE.MathUtils.lerp(1.0 - 0.04 * dipP, 0.80, leanP);
+                    const legSY = Math.pow(1.0 - leanP, 1.25);
+                    const hipY = -1.24 * torsoSY;
+
+                    if (u < 0.76) {
+                        this._setBone(10, bodyX, bodyY, bRot, torsoSX, torsoSY, 1);
+                    }
+                    if (u < 0.66) {
+                        const hp = ss(0.30, 0.66, u);
+                        this._setChildBone(11, bodyX, bodyY, bRot, 1, 1,
+                            -0.04 * (1.0 - dipP),
+                            THREE.MathUtils.lerp(0.26, -0.02, hp),
+                            0, 1.0, THREE.MathUtils.lerp(1.0, 0.68, hp));
+                    }
+                    if (legSY > 0.025) {
+                        this._setChildBone(12, bodyX, bodyY, bRot, 1, 1,
+                            0.06 * (1.0 - dipP),
+                            hipY,
+                            0.04 * dipP * (1.0 - leanP),
+                            THREE.MathUtils.lerp(1.0 - 0.06 * dipP, 0.76, leanP),
+                            legSY);
+                    }
+                    if (u > 0.46) {
+                        const mp = ss(0.46, 0.80, u);
+                        const dp = ss(0.62, 1.00, u);
+                        const mSX = THREE.MathUtils.lerp(0.86, 0.96, mp) + 0.04 * dp;
+                        const mSY = THREE.MathUtils.lerp(0.84, 0.96, mp) + 0.04 * dp;
+                        this._setChildBone(13, bodyX, bodyY, bRot, 1, 1, 0, 0.05 * (1.0 - mp), 0, mSX, mSY);
+                        faceAlpha = ss(0.50, 0.88, u) * 0.94;
+                    }
+                } else if (seg === 1) {
+                    if (u < 0.62) {
+                        const mp = ss(0.0, 0.62, u);
+                        this._setChildBone(13, bodyX, bodyY, bRot, 1, 1, 0, -0.10 * mp, 0,
+                            THREE.MathUtils.lerp(1.0, 0.45, mp * mp),
+                            THREE.MathUtils.lerp(1.0, 0.55, mp));
+                    }
+                    faceAlpha = (1.0 - ss(0.0, 0.34, u)) * 0.94;
+
+                    if (u > 0.14) {
+                        const tp = ss(0.14, 0.82, u);
+                        const invTorsoSY = THREE.MathUtils.lerp(0.22, 1.0, tp);
+                        const invTorsoSX = THREE.MathUtils.lerp(0.72, 1.0, ss(0.14, 0.68, u));
+                        this._setChildBone(15, bodyX, bodyY, bRot, 1, 1, 0, 0, 0, invTorsoSX, invTorsoSY);
+
+                        if (u > 0.16) {
+                            const lp = ss(0.16, 0.90, u);
+                            this._setChildBone(17, bodyX, bodyY, bRot, 1, 1, 0, 1.20 * invTorsoSY, 0,
+                                THREE.MathUtils.lerp(0.78, 1.0, lp),
+                                THREE.MathUtils.lerp(0.08, 1.0, lp));
+                        }
+                    }
+                    if (u > 0.18) {
+                        const hp = ss(0.18, 0.84, u);
+                        this._setChildBone(16, bodyX, bodyY, bRot, 1, 1, 0,
+                            THREE.MathUtils.lerp(0.28, 0.0, hp), 0,
+                            THREE.MathUtils.lerp(0.84, 1.0, hp),
+                            THREE.MathUtils.lerp(0.45, 1.0, hp));
+                    }
+                } else if (seg === 2) {
+                    if (u < 0.56) {
+                        const p = ss(0.0, 0.56, u);
+                        this._setChildBone(15, bodyX, bodyY, bRot, 1, 1, 0, -0.14 * p, 0, 1.0 - 0.12 * p, 1.0 - 0.56 * p);
+                        this._setChildBone(16, bodyX, bodyY, bRot, 1, 1, 0, 0.46 * p, 0, 1.0 - 0.10 * p, 1.0 - 0.45 * p);
+
+                        fgActive = true;
+                        const sweepSY = THREE.MathUtils.lerp(1.00, 0.18, Math.pow(p, 0.88));
+                        const sweepY = THREE.MathUtils.lerp(1.20, -0.18, Math.pow(p, 1.05));
+                        this._setChildBone(19, bodyX, bodyY, bRot, 1, 1, 0, sweepY, 0, 1.0 - 0.08 * p, sweepSY);
+                    }
+                    if (u > 0.42) {
+                        const vp = ss(0.42, 1.0, u);
+                        this._setChildBone(18, bodyX, bodyY, bRot, 1, 1, 0, 0.04 * (1 - vp), 0, 0.84 + 0.16 * vp, 0.82 + 0.18 * vp);
+                    }
+                    if (u > 0.48) {
+                        fgActive = true;
+                        const fp = ss(0.48, 1.0, u);
+                        const fs = 0.68 + 0.32 * fp;
+                        this._setChildBone(20, bodyX, bodyY, bRot, 1, 1, 0, THREE.MathUtils.lerp(0.04, -0.35, fp), 0, fs, fs);
+                    }
+                } else {
+                    if (u < 0.52) {
+                        const vP = ss(0.0, 0.52, u);
+                        this._setChildBone(18, bodyX, bodyY, bRot, 1, 1, 0, 0.05 * vP, 0,
+                            THREE.MathUtils.lerp(1.0, 0.72, vP * vP),
+                            THREE.MathUtils.lerp(1.0, 0.80, vP));
+                    }
+
+                    const torsoP = ss(0.0, 0.74, u);
+                    const torsoSX = THREE.MathUtils.lerp(0.84, 1.00, ss(0.0, 0.52, u));
+                    const torsoSY = THREE.MathUtils.lerp(0.46, 1.00, torsoP);
+                    this._setChildBone(10, bodyX, bodyY, bRot, 1, 1, 0, 0, 0, torsoSX, torsoSY);
+
+                    if (u > 0.06) {
+                        const hP = ss(0.06, 0.76, u);
+                        this._setChildBone(11, bodyX, bodyY, bRot, 1, 1,
+                            THREE.MathUtils.lerp(0.0, -0.04, hP),
+                            THREE.MathUtils.lerp(-0.08, 0.26, hP),
+                            0,
+                            THREE.MathUtils.lerp(0.86, 1.0, hP),
+                            THREE.MathUtils.lerp(0.82, 1.0, hP));
+                    }
+
+                    const dropP = ss(0.02, 0.88, u);
+                    const gDrop = Math.pow(dropP, 1.15);
+                    const legWidthP = ss(0.05, 0.65, u);
+                    const legSY = THREE.MathUtils.lerp(0.08, 1.00, gDrop);
+                    const legSX = THREE.MathUtils.lerp(0.74, 1.00, legWidthP);
+                    const hipY = THREE.MathUtils.lerp(-1.05, -1.24, legWidthP) * torsoSY;
+                    const legLX = 0.06 * ss(0.10, 0.72, u);
+                    const pendulum = u < 0.55
+                        ? -0.08 * Math.sin((u / 0.55) * Math.PI)
+                        : -0.11 * (1.0 - (u - 0.55) / 0.45) * Math.cos(((u - 0.55) / 0.45) * Math.PI * 1.35);
+                    if (u > 0.02) {
+                        this._setChildBone(12, bodyX, bodyY, bRot, 1, 1, legLX, hipY, pendulum, legSX, legSY);
+                    }
+
+                    if (u < 0.46) {
+                        fgActive = true;
+                        const fp = ss(0.0, 0.46, u);
+                        const legTipY = hipY - 2.55 * legSY;
+                        const fy = THREE.MathUtils.lerp(-0.35, legTipY, Math.pow(fp, 0.75));
+                        const fs = THREE.MathUtils.lerp(1.00, 0.26, fp);
+                        this._setChildBone(20, bodyX, bodyY, bRot, 1, 1, legLX * 0.6, fy, pendulum * 0.6, fs, fs * (1.0 - 0.35 * fp));
+                    }
+                }
+
+                this.malteseFaceMesh.visible = faceAlpha > 0.005;
+                this.uniforms.uFaceAlpha.value = faceAlpha;
+                const showHalo = this.qualityLevel === 'high';
+                for (let i = 0; i < 3; i++) {
+                    this.fgTierMeshes[i].visible = fgActive && (i < 2 || showHalo);
+                }
+
+                this.auraMesh.position.set(bodyX, bodyY - 0.15, 0);
+            }
+
+            update(dt, elapsed, currentMouseNDC, sharedRay = null) {
+                if (this.visibilityAlpha <= 0.003) {
+                    this.rootGroup.visible = false;
+                    return;
+                }
+                if (!this.isBuilt) {
+                    this.ensureBuilt();
+                }
+                this.rootGroup.visible = true;
+                this.uniforms.uOverlayAlpha.value = this.visibilityAlpha;
+
+                const themeMix = this.sharedUniforms.uColorTheme.value;
+                this._activeThemeColor.copy(this._redThemeColor).lerp(this._blueThemeColor, themeMix);
+
+                if (currentMouseNDC.distanceToSquared(this._lastPointerNDC) > 0.00001) {
+                    this._lastPointerNDC.copy(currentMouseNDC);
+                    this.onPointerMove(currentMouseNDC.x, currentMouseNDC.y, sharedRay);
+                }
+
+                const targetBlack = this.config.useBlackFill ? 1.0 : 0.0;
+                this.uniforms.uBlackFill.value += (targetBlack - this.uniforms.uBlackFill.value) * Math.min(1.0, dt * 14.0);
+                this._syncPaletteUniforms(themeMix, this.uniforms.uBlackFill.value);
+
+                const TWO_PI = Math.PI * 2.0;
+                const s = this.state;
+                s.smoothedProximity += (s.proximity - s.smoothedProximity) * Math.min(1.0, dt * 10.0);
+
+                const activeIdx = ((Math.round(s.transitionMix) % 4) + 4) % 4;
+                const maxFreq = this.config.maxFrequencies[activeIdx];
+                const transDiff = s.altSkillTarget - s.transitionMix;
+                const isTrans = Math.abs(transDiff) > 0.0005;
+
+                if (this.config.manualMode) {
+                    s.mode = 'SCRUB';
+                    s.cyclePhase = s.lagPhase = this.config.manualProgress * TWO_PI;
+                    s.currentFrequency = 0.0;
+                    if (isTrans) s.transitionMix = s.altSkillTarget;
+                } else if (isTrans) {
+                    s.mode = 'TRANS';
+                    s.cyclePhase = s.lagPhase = 0.0;
+                    s.currentFrequency *= Math.max(0, 1.0 - dt * 10.0);
+
+                    const mMod = ((s.transitionMix % 4.0) + 4.0) % 4.0;
+                    const curSeg = Math.floor(mMod) % 4;
+                    const curFrac = mMod - Math.floor(mMod);
+                    let transRate = 0.44;
+                    if (curSeg === 0 && transDiff > 0) {
+                        if (curFrac < 0.30) {
+                            transRate = 0.44;
+                        } else if (curFrac < 0.68) {
+                            transRate = THREE.MathUtils.lerp(0.42, 0.24, (curFrac - 0.30) / 0.38);
+                        } else {
+                            transRate = THREE.MathUtils.lerp(0.24, 0.19, (curFrac - 0.68) / 0.32);
+                        }
+                    }
+
+                    s.transitionMix += Math.sign(transDiff) * Math.min(Math.abs(transDiff), dt * transRate);
+                    if (Math.abs(s.altSkillTarget - s.transitionMix) <= 0.0005) {
+                        s.transitionMix = s.altSkillTarget;
+                        s.mode = 'IDLE';
+                    }
+                } else if (s.pendingSkillTarget !== null) {
+                    s.mode = 'QUEUE';
+                    s.currentFrequency += (Math.max(0.32, s.currentFrequency * 0.94) - s.currentFrequency) * Math.min(1.0, dt * 8.0);
+                    s.cyclePhase += TWO_PI * s.currentFrequency * dt;
+                    if (s.cyclePhase >= TWO_PI) {
+                        s.cyclePhase = s.lagPhase = s.currentFrequency = 0.0;
+                        s.altSkillTarget = s.pendingSkillTarget;
+                        s.pendingSkillTarget = null;
+                        s.mode = 'TRANS';
+                    }
+                } else if (s.isHovering) {
+                    s.mode = 'ACTIVE';
+                    const targetFreq = this.config.minFrequency + (maxFreq - this.config.minFrequency) * s.smoothedProximity;
+                    s.currentFrequency += (targetFreq - s.currentFrequency) * Math.min(1.0, dt * 9.0);
+                    s.cyclePhase = (s.cyclePhase + TWO_PI * s.currentFrequency * dt) % TWO_PI;
+                } else if (s.cyclePhase > 0.0005) {
+                    s.mode = 'FINISH';
+                    s.currentFrequency += (Math.max(0.28, s.currentFrequency * 0.92) - s.currentFrequency) * Math.min(1.0, dt * 8.0);
+                    s.cyclePhase += TWO_PI * s.currentFrequency * dt;
+                    if (s.cyclePhase >= TWO_PI) {
+                        s.cyclePhase = s.lagPhase = s.currentFrequency = 0.0;
+                        s.mode = 'IDLE';
+                    }
+                } else {
+                    s.mode = 'IDLE';
+                    s.cyclePhase = s.lagPhase = 0.0;
+                    s.currentFrequency *= Math.max(0, 1.0 - dt * 10.0);
+                }
+
+                let dPhi = s.cyclePhase - s.lagPhase;
+                if (dPhi < -Math.PI) dPhi += TWO_PI;
+                if (dPhi >  Math.PI) dPhi -= TWO_PI;
+                s.lagPhase = (s.lagPhase + dPhi * Math.min(1.0, dt * 14.0) + TWO_PI) % TWO_PI;
+
+                const tgtEnergy = (s.mode === 'ACTIVE' || s.mode === 'FINISH' || s.mode === 'QUEUE')
+                    ? Math.min(1.0, (s.currentFrequency / Math.max(0.1, maxFreq)) * 0.85 + 0.15)
+                    : (s.mode === 'TRANS' ? 0.65 : 0.0);
+                s.energy += (tgtEnergy - s.energy) * Math.min(1.0, dt * 7.0);
+
+                this.uniforms.uTime.value = elapsed;
+                this.uniforms.uEnergy.value = s.energy;
+                this.uniforms.uDrive.value = this.config.glitchDrive;
+
+                if (this.auraMesh && this.auraMesh.visible) {
+                    this.auraMat.color.copy(this._activeThemeColor);
+                    this.auraMat.opacity = (0.14 + s.energy * 0.24) * this.config.glitchDrive * this.visibilityAlpha;
+                }
+
+                this._idleKinematicsAccum += dt;
+                const allowIdleTick = this._idleKinematicsAccum >= 0.05;
+                if (allowIdleTick) {
+                    this._idleKinematicsAccum = 0.0;
+                }
+
+                const busy = s.mode !== 'IDLE' || s.energy > 0.01;
+                if (busy || allowIdleTick) {
+                    this._applyKinematics(s.cyclePhase, s.lagPhase, s.energy, elapsed);
+                }
+            }
+        }
+
+        window.CalisthenicsRingsOverlay = CalisthenicsRingsOverlay;
+
+        // ============================================================================
         // 2. MAIN WALLPAPER APPLICATION & UNIFIED SCENE SETUP
         // ============================================================================
         function initSceneApp() {
@@ -6333,12 +7741,15 @@
             const backdropGridSlider = document.getElementById('backdrop-grid-slider');
             const backdropGridReadout = document.getElementById('backdrop-grid-readout');
 
-            // Calisthenics Dual Overlay DOM elements
+            // Calisthenics Skill Overlay DOM elements
             const toggleCalisthenicsBtn = document.getElementById('toggle-calisthenics-btn');
+            const calisthenicsRingsWrap = document.getElementById('calisthenics-rings-wrap');
+            const toggleCalisthenicsRingsBtn = document.getElementById('toggle-calisthenics-rings-btn');
             const calisthenicsStyleWrap = document.getElementById('calisthenics-style-wrap');
             const toggleCalisthenicsStyleBtn = document.getElementById('toggle-calisthenics-style-btn');
             const calisthenicsSkillsWrap = document.getElementById('calisthenics-skills-wrap');
             const calisthenicsLeftSkillBtn = document.getElementById('calisthenics-left-skill-btn');
+            const calisthenicsRingsSkillBtn = document.getElementById('calisthenics-rings-skill-btn');
             const calisthenicsRightSkillBtn = document.getElementById('calisthenics-right-skill-btn');
             const calisthenicsDriveWrap = document.getElementById('calisthenics-drive-wrap');
             const calisthenicsDriveSlider = document.getElementById('calisthenics-drive-slider');
@@ -6519,7 +7930,7 @@
             scene.add(blenderGridGroup);
 
             // ============================================================================
-            // 3. SHARED SHADER UNIFORMS & AMBIENT BACKGROUND GLOW SHADER QUAD
+            // 3. SHARED UNIFORMS & AMBIENT RADIAL BACKGROUND SHADER
             // ============================================================================
             const logoPulseCenters = [
                 new THREE.Vector3(),
@@ -6537,7 +7948,13 @@
             const sharedUniforms = {
                 uRayOrigin: { value: new THREE.Vector3(0, 0, BASE_CAM_Z) },
                 uRayDir: { value: new THREE.Vector3(0, 0, -1) },
-                uRadius: { value: WALLPAPER_DEFAULTS.hoverWireframeRadius },
+                uRadius: {
+                    value: THREE.MathUtils.clamp(
+                        WALLPAPER_DEFAULTS.hoverWireframeRadius !== undefined ? WALLPAPER_DEFAULTS.hoverWireframeRadius : 2.35,
+                        0.30,
+                        5.50
+                    )
+                },
                 uSquishGlow: { value: 0.0 },
                 uColorTheme: { value: isInitialBlue ? 1.0 : 0.0 },
                 uHasPulses: { value: 0.0 },
@@ -6547,139 +7964,111 @@
 
             const bgUniforms = {
                 uAspect: { value: window.innerWidth / window.innerHeight },
-                uColorTheme: sharedUniforms.uColorTheme,
-                uSquishGlow: sharedUniforms.uSquishGlow,
                 uPointerOffset: { value: new THREE.Vector2(0, 0) },
+                uColorTheme: sharedUniforms.uColorTheme,
                 uBlenderMode: { value: 0.0 },
-                uSnowAmount: { value: 1.0 },
-                uBgGlowIntensity: { value: WALLPAPER_DEFAULTS.bgGlowIntensity },
+                uSnowAmount: { value: WALLPAPER_DEFAULTS.snowEnabled ? 1.0 : 0.0 },
+                uBgGlowIntensity: {
+                    value: THREE.MathUtils.clamp(
+                        WALLPAPER_DEFAULTS.bgGlowIntensity !== undefined ? WALLPAPER_DEFAULTS.bgGlowIntensity : 1.0,
+                        0.0,
+                        2.0
+                    )
+                },
                 uTime: { value: 0.0 }
             };
 
-            const bgMaterial = new THREE.ShaderMaterial({
-                uniforms: bgUniforms,
-                depthTest: true,
-                depthFunc: THREE.LessEqualDepth,
-                depthWrite: false,
-                vertexShader: `
-                    uniform float uColorTheme;
-
-                    varying vec2 vUv;
-                    varying vec3 vColEdge;
-                    varying vec3 vColMid;
-                    varying vec3 vColCore;
-                    varying vec3 vColRim;
-                    varying vec3 vColFrost;
-
-                    void main() {
-                        vUv = uv;
-
-                        // Hoist theme color blending to the 4 quad vertices instead of 8.3M 4K fragments
-                        vColEdge  = mix(vec3(0.010, 0.004, 0.006), vec3(0.006, 0.012, 0.024), uColorTheme);
-                        vColMid   = mix(vec3(0.052, 0.010, 0.014), vec3(0.024, 0.055, 0.110), uColorTheme);
-                        vColCore  = mix(vec3(0.165, 0.024, 0.026), vec3(0.075, 0.165, 0.310), uColorTheme);
-                        vColRim   = mix(vec3(0.260, 0.035, 0.030), vec3(0.140, 0.320, 0.520), uColorTheme);
-                        vColFrost = mix(vec3(0.055, 0.085, 0.135), vec3(0.055, 0.125, 0.220), uColorTheme);
-
-                        gl_Position = vec4(position.xy, 0.9999, 1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform float uAspect;
-                    uniform float uSquishGlow;
-                    uniform vec2 uPointerOffset;
-                    uniform float uBlenderMode;
-                    uniform float uSnowAmount;
-                    uniform float uBgGlowIntensity;
-
-                    varying vec2 vUv;
-                    varying vec3 vColEdge;
-                    varying vec3 vColMid;
-                    varying vec3 vColCore;
-                    varying vec3 vColRim;
-                    varying vec3 vColFrost;
-
-                    float ignDither(vec2 fragCoord) {
-                        vec3 magic = vec3(0.06711056, 0.00583715, 52.9829189);
-                        return fract(magic.z * fract(dot(fragCoord, magic.xy))) - 0.5;
-                    }
-
-                    void main() {
-                        vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
-                        vec2 center = uPointerOffset * vec2(-0.08, -0.06);
-                        vec2 pc = p - center;
-                        float distSq = dot(pc, pc);
-                        float radial = length(vUv - 0.5);
-
-                        float coreHalo = exp(-distSq * 1.85);
-                        float wideNebula = exp(-distSq * 0.42);
-
-                        // Defer sqrt() strictly inside the ring radius (dist < 1.01) & branch-gate 4K background terms
-                        float hexRimGlow = 0.0;
-                        if (distSq < 1.0201) {
-                            float dRim = sqrt(distSq) - 0.36;
-                            hexRimGlow = exp(-dRim * dRim * 14.0) * 0.25;
+            const bgMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(2, 2),
+                new THREE.ShaderMaterial({
+                    uniforms: bgUniforms,
+                    depthTest: true,
+                    depthWrite: false,
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = vec4(position.xy, 0.9999, 1.0);
                         }
+                    `,
+                    fragmentShader: `
+                        uniform float uAspect;
+                        uniform vec2 uPointerOffset;
+                        uniform float uColorTheme;
+                        uniform float uBlenderMode;
+                        uniform float uSnowAmount;
+                        uniform float uBgGlowIntensity;
+                        uniform float uTime;
+                        varying vec2 vUv;
 
-                        float bottomFrost = 0.0;
-                        if (vUv.y < 0.32 && uSnowAmount > 0.001) {
-                            bottomFrost = smoothstep(0.32, 0.0, vUv.y) * (0.45 + 0.55 * exp(-p.x * p.x * 0.65)) * uSnowAmount;
+                        void main() {
+                            vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
+                            vec2 center = uPointerOffset * vec2(0.10 * uAspect, 0.10);
+                            float d = length(p - center);
+
+                            vec3 redBase = vec3(0.014, 0.004, 0.006);
+                            vec3 redGlow = vec3(0.18, 0.016, 0.022);
+                            vec3 blueBase = vec3(0.005, 0.011, 0.022);
+                            vec3 blueGlow = vec3(0.025, 0.095, 0.205);
+
+                            vec3 baseCol = mix(redBase, blueBase, uColorTheme);
+                            vec3 glowCol = mix(redGlow, blueGlow, uColorTheme);
+
+                            float radial = exp(-d * d * 2.45);
+                            float breathe = 0.92 + 0.08 * sin(uTime * 0.75);
+                            float bottomFrost = smoothstep(0.42, 0.0, vUv.y) * uSnowAmount * 0.045;
+                            vec3 frostCol = mix(vec3(0.30, 0.10, 0.14), vec3(0.14, 0.34, 0.58), uColorTheme);
+
+                            vec3 col = baseCol + glowCol * radial * breathe * uBgGlowIntensity + frostCol * bottomFrost;
+                            vec3 blenderCol = mix(vec3(0.12, 0.12, 0.13), vec3(0.20, 0.20, 0.22), vUv.y);
+                            col = mix(col, blenderCol, uBlenderMode);
+
+                            gl_FragColor = vec4(col, 1.0);
                         }
-
-                        vec3 col = mix(vColEdge, vColMid, wideNebula);
-                        col = mix(col, vColCore, coreHalo * (0.72 + 0.28 * uSquishGlow));
-                        col += vColRim * (hexRimGlow + coreHalo * uSquishGlow * 0.35);
-                        col += vColFrost * bottomFrost * 0.65;
-
-                        float vignette = smoothstep(0.95, 0.22, radial);
-                        col *= (0.65 + 0.35 * vignette) * uBgGlowIntensity;
-
-                        if (uBlenderMode > 0.001) {
-                            vec3 blenderBg = mix(vec3(0.12, 0.12, 0.13), vec3(0.20, 0.20, 0.22), wideNebula);
-                            col = mix(col, blenderBg, uBlenderMode);
-                        }
-
-                        col += ignDither(gl_FragCoord.xy) / 255.0;
-                        gl_FragColor = vec4(max(col, vec3(0.0)), 1.0);
-                    }
-                `
-            });
-
-            const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), bgMaterial);
+                    `
+                })
+            );
             bgMesh.frustumCulled = false;
             bgMesh.matrixAutoUpdate = false;
-            // Render after opaque 3D T-blocks (renderOrder -100) so Hardware Early-Z skips occluded background pixels
-            bgMesh.renderOrder = 10;
+            bgMesh.renderOrder = -50;
             scene.add(bgMesh);
 
             // ============================================================================
-            // 4. INSTANTIATE 3D MATH MATRIX BACKDROP LAYER (In-Scene Composition)
+            // 4. INSTANTIATE 3D MATH MATRIX BACKDROP LAYER
             // ============================================================================
             let isBackdropEnabled = Boolean(WALLPAPER_DEFAULTS.backdropEnabled);
             let isBackdropPulseOnClick = WALLPAPER_DEFAULTS.backdropPulseOnClick !== false;
             const mathLayer = new MathWallpaperLayer({
                 scene,
                 camera,
-                enabled: isBackdropEnabled,
                 theme: isInitialBlue ? 'nixos' : 'crimson',
-                pulseSpeed: WALLPAPER_DEFAULTS.backdropPulseSpeed,
-                flightSpeed: WALLPAPER_DEFAULTS.backdropFlightSpeed,
-                gridSpacing: WALLPAPER_DEFAULTS.backdropGridSpacing,
-                boreSightLock: WALLPAPER_DEFAULTS.backdropBoreSightLock,
-                gridIntensity: WALLPAPER_DEFAULTS.backdropGridIntensity,
-                wireframeRadius: WALLPAPER_DEFAULTS.hoverWireframeRadius
+                enabled: isBackdropEnabled,
+                pulseSpeed: WALLPAPER_DEFAULTS.backdropPulseSpeed !== undefined ? WALLPAPER_DEFAULTS.backdropPulseSpeed : 15.0,
+                flightSpeed: WALLPAPER_DEFAULTS.backdropFlightSpeed !== undefined ? WALLPAPER_DEFAULTS.backdropFlightSpeed : 0.020,
+                gridSpacing: WALLPAPER_DEFAULTS.backdropGridSpacing !== undefined ? WALLPAPER_DEFAULTS.backdropGridSpacing : 1.00,
+                boreSightLock: WALLPAPER_DEFAULTS.backdropBoreSightLock !== undefined ? WALLPAPER_DEFAULTS.backdropBoreSightLock : 0.76,
+                gridIntensity: WALLPAPER_DEFAULTS.backdropGridIntensity !== undefined ? WALLPAPER_DEFAULTS.backdropGridIntensity : 0.50,
+                wireframeRadius: sharedUniforms.uRadius.value
             });
 
             // ============================================================================
-            // 4B. INSTANTIATE 3D CALISTHENICS DUAL SKILL OVERLAY
+            // 4B. INSTANTIATE 3D CALISTHENICS SKILL OVERLAYS (CORNERS + CEILING RINGS)
             // ============================================================================
             let isCalisthenicsEnabled = WALLPAPER_DEFAULTS.calisthenicsEnabled !== false;
+            let isCalisthenicsRingsEnabled = WALLPAPER_DEFAULTS.calisthenicsRingsEnabled !== false;
             let currentCalisthenicsVisibility = isCalisthenicsEnabled ? 1.0 : 0.0;
+            let currentRingsVisibility = (isCalisthenicsEnabled && isCalisthenicsRingsEnabled) ? 1.0 : 0.0;
             const calisthenicsOverlay = new CalisthenicsDualOverlay(scene, camera, sharedUniforms, {
                 enabled: isCalisthenicsEnabled,
                 useBlackFill: WALLPAPER_DEFAULTS.calisthenicsUseBlackFill !== false,
                 glitchDrive: WALLPAPER_DEFAULTS.calisthenicsGlitchDrive !== undefined ? WALLPAPER_DEFAULTS.calisthenicsGlitchDrive : 1.00,
                 stationSpacing: WALLPAPER_DEFAULTS.calisthenicsSpacing !== undefined ? WALLPAPER_DEFAULTS.calisthenicsSpacing : 6.85,
+                globalScale: WALLPAPER_DEFAULTS.calisthenicsScale !== undefined ? WALLPAPER_DEFAULTS.calisthenicsScale : 0.34
+            });
+            const ringsOverlay = new CalisthenicsRingsOverlay(scene, camera, sharedUniforms, {
+                enabled: isCalisthenicsEnabled && isCalisthenicsRingsEnabled,
+                useBlackFill: WALLPAPER_DEFAULTS.calisthenicsUseBlackFill !== false,
+                glitchDrive: WALLPAPER_DEFAULTS.calisthenicsGlitchDrive !== undefined ? WALLPAPER_DEFAULTS.calisthenicsGlitchDrive : 1.00,
                 globalScale: WALLPAPER_DEFAULTS.calisthenicsScale !== undefined ? WALLPAPER_DEFAULTS.calisthenicsScale : 0.34
             });
 
@@ -9249,6 +10638,7 @@
                 renderer.setPixelRatio(getOptimalPixelRatio());
                 mathLayer.applyQualityPreset(level);
                 calisthenicsOverlay.applyQualityPreset(level);
+                ringsOverlay.applyQualityPreset(level);
                 syncAllHudState();
             }
 
@@ -9991,16 +11381,31 @@
                 isCalisthenicsEnabled = !isCalisthenicsEnabled;
                 if (isCalisthenicsEnabled) {
                     calisthenicsOverlay.ensureBuilt();
+                    if (isCalisthenicsRingsEnabled) {
+                        ringsOverlay.ensureBuilt();
+                    }
                 }
                 refreshStationSnowCaps(isCalisthenicsEnabled && !snowIgnoreAthletes);
                 snowbankDirtyCounter = 99;
                 syncAllHudState();
             }
 
+            function triggerToggleCalisthenicsRings() {
+                wakeFromIdle();
+                isCalisthenicsRingsEnabled = !isCalisthenicsRingsEnabled;
+                if (isCalisthenicsEnabled && isCalisthenicsRingsEnabled) {
+                    ringsOverlay.ensureBuilt();
+                }
+                syncAllHudState();
+            }
+
             function triggerToggleCalisthenicsStyle() {
                 wakeFromIdle();
-                calisthenicsOverlay.config.useBlackFill = !calisthenicsOverlay.config.useBlackFill;
+                const nextBlack = !calisthenicsOverlay.config.useBlackFill;
+                calisthenicsOverlay.config.useBlackFill = nextBlack;
+                ringsOverlay.config.useBlackFill = nextBlack;
                 calisthenicsOverlay.applyQualityPreset(currentGraphicsQuality);
+                ringsOverlay.applyQualityPreset(currentGraphicsQuality);
                 syncAllHudState();
             }
 
@@ -10009,6 +11414,15 @@
                 if (!isCalisthenicsEnabled) isCalisthenicsEnabled = true;
                 calisthenicsOverlay.ensureBuilt();
                 calisthenicsOverlay.toggleStationSkill('planche');
+                syncAllHudState();
+            }
+
+            function triggerToggleCalisthenicsRingsSkill() {
+                wakeFromIdle();
+                if (!isCalisthenicsEnabled) isCalisthenicsEnabled = true;
+                if (!isCalisthenicsRingsEnabled) isCalisthenicsRingsEnabled = true;
+                ringsOverlay.ensureBuilt();
+                ringsOverlay.cycleSkill();
                 syncAllHudState();
             }
 
@@ -10022,7 +11436,9 @@
 
             function triggerSetCalisthenicsDrive(val) {
                 wakeFromIdle();
-                calisthenicsOverlay.config.glitchDrive = THREE.MathUtils.clamp(parseFloat(val), 0.20, 1.80);
+                const nextDrive = THREE.MathUtils.clamp(parseFloat(val), 0.20, 1.80);
+                calisthenicsOverlay.config.glitchDrive = nextDrive;
+                ringsOverlay.config.glitchDrive = nextDrive;
                 syncAllHudState();
             }
 
@@ -10037,8 +11453,11 @@
 
             function triggerSetCalisthenicsScale(val) {
                 wakeFromIdle();
-                calisthenicsOverlay.config.globalScale = THREE.MathUtils.clamp(parseFloat(val), 0.18, 0.85);
+                const nextScale = THREE.MathUtils.clamp(parseFloat(val), 0.18, 0.85);
+                calisthenicsOverlay.config.globalScale = nextScale;
                 calisthenicsOverlay._updateStationLayout();
+                ringsOverlay.config.globalScale = nextScale;
+                ringsOverlay._updateLayout();
                 refreshStationSnowCaps(true);
                 snowbankDirtyCounter = 99;
                 syncAllHudState();
@@ -10060,8 +11479,10 @@
             backdropGridSlider.addEventListener('input', (e) => triggerSetBackdropGrid(e.target.value));
 
             toggleCalisthenicsBtn.addEventListener('click', triggerToggleCalisthenics);
+            toggleCalisthenicsRingsBtn.addEventListener('click', triggerToggleCalisthenicsRings);
             toggleCalisthenicsStyleBtn.addEventListener('click', triggerToggleCalisthenicsStyle);
             calisthenicsLeftSkillBtn.addEventListener('click', triggerToggleCalisthenicsLeftSkill);
+            calisthenicsRingsSkillBtn.addEventListener('click', triggerToggleCalisthenicsRingsSkill);
             calisthenicsRightSkillBtn.addEventListener('click', triggerToggleCalisthenicsRightSkill);
             calisthenicsDriveSlider.addEventListener('input', (e) => triggerSetCalisthenicsDrive(e.target.value));
             calisthenicsSpacingSlider.addEventListener('input', (e) => triggerSetCalisthenicsSpacing(e.target.value));
@@ -10278,6 +11699,13 @@
                         btn.addEventListener('click', triggerToggleCalisthenics);
                         pinnedWidgets.calisthenicsToggle = btn;
                         wrap.appendChild(btn);
+                    } else if (pinId === 'calisthenicsRingsToggle') {
+                        const btn = document.createElement('button');
+                        btn.dataset.pinnedWidget = 'calisthenicsRingsToggle';
+                        btn.className = 'hover:text-white transition cursor-pointer font-medium px-1';
+                        btn.addEventListener('click', triggerToggleCalisthenicsRings);
+                        pinnedWidgets.calisthenicsRingsToggle = btn;
+                        wrap.appendChild(btn);
                     } else if (pinId === 'calisthenicsStyle') {
                         const btn = document.createElement('button');
                         btn.dataset.pinnedWidget = 'calisthenicsStyle';
@@ -10290,13 +11718,18 @@
                         bL.dataset.pinnedWidget = 'calisthenicsLeftSkill';
                         bL.className = 'mode-btn';
                         bL.addEventListener('click', triggerToggleCalisthenicsLeftSkill);
+                        const bT = document.createElement('button');
+                        bT.dataset.pinnedWidget = 'calisthenicsRingsSkill';
+                        bT.className = 'mode-btn';
+                        bT.addEventListener('click', triggerToggleCalisthenicsRingsSkill);
                         const bR = document.createElement('button');
                         bR.dataset.pinnedWidget = 'calisthenicsRightSkill';
                         bR.className = 'mode-btn';
                         bR.addEventListener('click', triggerToggleCalisthenicsRightSkill);
                         pinnedWidgets.calisthenicsLeftSkill = bL;
+                        pinnedWidgets.calisthenicsRingsSkill = bT;
                         pinnedWidgets.calisthenicsRightSkill = bR;
-                        wrap.append(bL, bR);
+                        wrap.append(bL, bT, bR);
                     } else if (pinId === 'calisthenicsDrive') {
                         const lbl = document.createElement('span');
                         lbl.textContent = 'Rim';
@@ -10691,6 +12124,7 @@
                         : calisthenicsOverlay.frontLever.state.altSkillTarget)
                     : 0.0;
                 const leftSkillLabel = plGoal > 0.5 ? 'L: Handstand' : 'L: Planche';
+                const ringsSkillLabel = ringsOverlay.getSkillLabel();
                 const rightSkillLabel = flGoal > 0.5 ? 'R: Back Lever' : 'R: Front Lever';
 
                 const snowColLabel =
@@ -10803,18 +12237,28 @@
                         : 'mode-btn text-neutral-500';
 
                     const caliRowOpacity = isCalisthenicsEnabled ? '1' : '0.45';
+                    calisthenicsRingsWrap.style.opacity = caliRowOpacity;
                     calisthenicsStyleWrap.style.opacity = caliRowOpacity;
                     calisthenicsSkillsWrap.style.opacity = caliRowOpacity;
                     calisthenicsDriveWrap.style.opacity = caliRowOpacity;
                     calisthenicsSpacingWrap.style.opacity = caliRowOpacity;
                     calisthenicsScaleWrap.style.opacity = caliRowOpacity;
 
+                    toggleCalisthenicsRingsBtn.textContent = isCalisthenicsRingsEnabled ? '◎ Rings: ON' : '◎ Rings: OFF';
+                    toggleCalisthenicsRingsBtn.className = (isCalisthenicsEnabled && isCalisthenicsRingsEnabled)
+                        ? `mode-btn ${softAccentClass} font-medium`
+                        : 'mode-btn text-neutral-500';
+
                     toggleCalisthenicsStyleBtn.textContent = caliStyleLabel;
                     toggleCalisthenicsStyleBtn.className = `mode-btn ${softAccentClass} font-medium`;
 
                     calisthenicsLeftSkillBtn.textContent = leftSkillLabel;
+                    calisthenicsRingsSkillBtn.textContent = ringsSkillLabel;
                     calisthenicsRightSkillBtn.textContent = rightSkillLabel;
                     calisthenicsLeftSkillBtn.className = `mode-btn ${softAccentClass} font-medium`;
+                    calisthenicsRingsSkillBtn.className = isCalisthenicsRingsEnabled
+                        ? `mode-btn ${softAccentClass} font-medium`
+                        : 'mode-btn text-neutral-500';
                     calisthenicsRightSkillBtn.className = `mode-btn ${softAccentClass} font-medium`;
 
                     calisthenicsDriveSlider.value = calisthenicsOverlay.config.glitchDrive;
@@ -11000,11 +12444,18 @@
                         ? `hover:text-white transition cursor-pointer ${accentClass} font-medium px-1`
                         : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
                 }
+                if (pw.calisthenicsRingsToggle) {
+                    setBtnText(pw.calisthenicsRingsToggle, isCalisthenicsRingsEnabled ? '◎ Rings: ON' : '◎ Rings: OFF');
+                    pw.calisthenicsRingsToggle.className = (isCalisthenicsEnabled && isCalisthenicsRingsEnabled)
+                        ? `hover:text-white transition cursor-pointer ${softAccentClass} font-medium px-1`
+                        : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
+                }
                 if (pw.calisthenicsStyle) {
                     setBtnText(pw.calisthenicsStyle, caliStyleLabel);
                     pw.calisthenicsStyle.className = `hover:text-white transition cursor-pointer ${softAccentClass} font-medium px-1`;
                 }
                 if (pw.calisthenicsLeftSkill) setBtnText(pw.calisthenicsLeftSkill, leftSkillLabel);
+                if (pw.calisthenicsRingsSkill) setBtnText(pw.calisthenicsRingsSkill, ringsSkillLabel);
                 if (pw.calisthenicsRightSkill) setBtnText(pw.calisthenicsRightSkill, rightSkillLabel);
                 if (pw.calisthenicsDriveSlider) pw.calisthenicsDriveSlider.value = calisthenicsOverlay.config.glitchDrive;
                 if (pw.calisthenicsSpacingSlider) pw.calisthenicsSpacingSlider.value = calisthenicsOverlay.config.stationSpacing;
@@ -11141,7 +12592,7 @@
             syncAllHudState(true);
             mathLayer.applyQualityPreset(currentGraphicsQuality);
             calisthenicsOverlay.applyQualityPreset(currentGraphicsQuality);
-
+            ringsOverlay.applyQualityPreset(currentGraphicsQuality);
             function updatePointerNDC(clientX, clientY) {
                 lastMouseClientX = clientX;
                 lastMouseClientY = clientY;
@@ -11198,9 +12649,10 @@
                 isDraggingOrbit = true;
 
                 if (currentViewMode !== 'blender') {
-                    // 1. Check if clicking a Calisthenics athlete station to transition skills
+                    // 1. Check if clicking a Calisthenics athlete station (corners or ceiling rings) to transition skills
                     const clickedAthlete = isCalisthenicsEnabled
-                        ? calisthenicsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y)
+                        ? (calisthenicsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y) ||
+                           (isCalisthenicsRingsEnabled ? ringsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y) : null))
                         : null;
 
                     // 2. Check if clicking inside the central NixOS hexagon (Tux squish/glitch)
@@ -11250,7 +12702,8 @@
 
                     if (currentViewMode !== 'blender') {
                         const clickedAthlete = isCalisthenicsEnabled
-                            ? calisthenicsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y)
+                            ? (calisthenicsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y) ||
+                               (isCalisthenicsRingsEnabled ? ringsOverlay.onPointerClick(mouseNDC.x, mouseNDC.y) : null))
                             : null;
 
                         if (!clickedAthlete && isCursorInsideHexagon()) {
@@ -11419,11 +12872,13 @@
                     snowMicroMaxCount = Math.round(THREE.MathUtils.clamp(snowMicroMaxCount + dir * 16, 0, PERSISTENT_SHARD_CAP));
                 }
                 if (wheelControlledSliders.has('calisthenicsDrive')) {
-                    calisthenicsOverlay.config.glitchDrive = THREE.MathUtils.clamp(
+                    const nextDrive = THREE.MathUtils.clamp(
                         calisthenicsOverlay.config.glitchDrive + dir * 0.08,
                         0.20,
                         1.80
                     );
+                    calisthenicsOverlay.config.glitchDrive = nextDrive;
+                    ringsOverlay.config.glitchDrive = nextDrive;
                 }
                 if (wheelControlledSliders.has('calisthenicsSpacing')) {
                     calisthenicsOverlay.config.stationSpacing = THREE.MathUtils.clamp(
@@ -11436,12 +12891,15 @@
                     snowbankDirtyCounter = 99;
                 }
                 if (wheelControlledSliders.has('calisthenicsScale')) {
-                    calisthenicsOverlay.config.globalScale = THREE.MathUtils.clamp(
+                    const nextScale = THREE.MathUtils.clamp(
                         calisthenicsOverlay.config.globalScale + dir * 0.025,
                         0.18,
                         0.85
                     );
+                    calisthenicsOverlay.config.globalScale = nextScale;
                     calisthenicsOverlay._updateStationLayout();
+                    ringsOverlay.config.globalScale = nextScale;
+                    ringsOverlay._updateLayout();
                     refreshStationSnowCaps(true);
                     snowbankDirtyCounter = 99;
                 }
@@ -11457,6 +12915,7 @@
                 renderer.setPixelRatio(getOptimalPixelRatio());
                 bgUniforms.uAspect.value = window.innerWidth / window.innerHeight;
                 calisthenicsOverlay._updateStationLayout();
+                ringsOverlay._updateLayout();
                 refreshStationSnowCaps(isCalisthenicsEnabled && !snowIgnoreAthletes);
                 snowbankDirtyCounter = 99;
                 hudBarRectDirty = true;
@@ -11646,7 +13105,10 @@
                 vsyncFrameCounter++;
                 const hasActivePulses = mathLayer.pulseWaves.length > 0;
                 const isBackdropDrifting = isBackdropEnabled && mathLayer.flightSpeed > 0.001;
-                const isCalisthenicsBusy = isCalisthenicsEnabled && calisthenicsOverlay.isActiveOrTransitioning();
+                const isCalisthenicsBusy = isCalisthenicsEnabled && (
+                    calisthenicsOverlay.isActiveOrTransitioning() ||
+                    (isCalisthenicsRingsEnabled && ringsOverlay.isActiveOrTransitioning())
+                );
                 const hasAnySceneMotion = isSnowEnabled || isBackdropDrifting || hasActivePulses || isCalisthenicsBusy || isDraggingOrbit;
 
                 let vsyncDivisor = 1;
@@ -11717,6 +13179,7 @@
                     camera.fov = currentCamFov;
                     camera.updateProjectionMatrix();
                     calisthenicsOverlay._updateStationLayout();
+                    ringsOverlay._updateLayout();
                     refreshStationSnowCaps();
                 }
 
@@ -11724,33 +13187,38 @@
 
                 if (currentViewMode === 'nuanced') {
                     const camBaseZ = 20.4;
-                    camera.position.x = smoothedMouse.x * 4.45;
-                    camera.position.y = smoothedMouse.y * 4.45;
-                    camera.position.z = camBaseZ - mouseRadialDist * 0.85 - currentSquish * 0.55;
-                    lookAtTarget.set(smoothedMouse.x * 0.30, smoothedMouse.y * 0.30, 0);
+                    const targetCamX = smoothedMouse.x * 2.15;
+                    const targetCamY = smoothedMouse.y * 1.55;
+                    const targetCamZ = camBaseZ - mouseRadialDist * 0.45;
+                    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetCamX, damp);
+                    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY, damp);
+                    camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetCamZ, damp);
                     camera.lookAt(lookAtTarget);
                 } else if (currentViewMode === 'optical') {
-                    const opticalCamZ = 25.2;
-                    camera.position.x = smoothedMouse.x * 2.85;
-                    camera.position.y = smoothedMouse.y * 2.85;
-                    camera.position.z = opticalCamZ - mouseRadialDist * 0.65 - currentSquish * 0.45;
-                    lookAtTarget.set(smoothedMouse.x * 0.14, smoothedMouse.y * 0.14, 0);
+                    const camBaseZ = 25.2;
+                    const targetCamX = smoothedMouse.x * 1.10;
+                    const targetCamY = smoothedMouse.y * 0.85;
+                    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetCamX, damp);
+                    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY, damp);
+                    camera.position.z = THREE.MathUtils.lerp(camera.position.z, camBaseZ, damp);
                     camera.lookAt(lookAtTarget);
                 } else if (currentViewMode === 'legacy') {
-                    const legacyCamZ = 16.5;
-                    camera.position.x = smoothedMouse.x * 2.65;
-                    camera.position.y = smoothedMouse.y * 2.65;
-                    camera.position.z = legacyCamZ - mouseRadialDist * 0.55;
-                    lookAtTarget.set(smoothedMouse.x * 0.18, smoothedMouse.y * 0.18, 0);
+                    const camBaseZ = 16.5;
+                    const targetCamX = smoothedMouse.x * 2.85;
+                    const targetCamY = smoothedMouse.y * 2.05;
+                    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetCamX, damp);
+                    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY, damp);
+                    camera.position.z = THREE.MathUtils.lerp(camera.position.z, camBaseZ, damp);
                     camera.lookAt(lookAtTarget);
                 } else {
                     const sinPhi = Math.sin(orbitSpherical.phi);
-                    camera.position.set(
-                        orbitSpherical.radius * sinPhi * Math.sin(orbitSpherical.theta),
-                        orbitSpherical.radius * Math.cos(orbitSpherical.phi),
-                        orbitSpherical.radius * sinPhi * Math.cos(orbitSpherical.theta)
-                    );
-                    camera.lookAt(0, 0, 0);
+                    const targetCamX = orbitSpherical.radius * sinPhi * Math.sin(orbitSpherical.theta);
+                    const targetCamY = orbitSpherical.radius * Math.cos(orbitSpherical.phi);
+                    const targetCamZ = orbitSpherical.radius * sinPhi * Math.cos(orbitSpherical.theta);
+                    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetCamX, damp * 1.6);
+                    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY, damp * 1.6);
+                    camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetCamZ, damp * 1.6);
+                    camera.lookAt(lookAtTarget);
                 }
                 camera.updateMatrixWorld();
 
@@ -11785,7 +13253,7 @@
                     mathLayer.rootGroup.visible = false;
                 }
 
-                // --- 1B. Update 3D Calisthenics Dual Skill Overlay (if enabled or fading out) ---
+                // --- 1B. Update 3D Calisthenics Skill Overlays (Corners + Ceiling Rings) ---
                 const targetCalisthenicsVis = (isCalisthenicsEnabled && currentViewMode !== 'blender') ? 1.0 : 0.0;
                 currentCalisthenicsVisibility = THREE.MathUtils.lerp(
                     currentCalisthenicsVisibility,
@@ -11798,6 +13266,20 @@
                     calisthenicsOverlay.update(dt, elapsed, mouseNDC, raycaster.ray);
                 } else if (calisthenicsOverlay.rootGroup.visible) {
                     calisthenicsOverlay.rootGroup.visible = false;
+                }
+
+                const targetRingsVis = (isCalisthenicsEnabled && isCalisthenicsRingsEnabled && currentViewMode !== 'blender') ? 1.0 : 0.0;
+                currentRingsVisibility = THREE.MathUtils.lerp(
+                    currentRingsVisibility,
+                    targetRingsVis,
+                    Math.min(1.0, dt * 6.0)
+                );
+                ringsOverlay.visibilityAlpha = currentRingsVisibility;
+
+                if (currentRingsVisibility > 0.002) {
+                    ringsOverlay.update(dt, elapsed, mouseNDC, raycaster.ray);
+                } else if (ringsOverlay.rootGroup.visible) {
+                    ringsOverlay.rootGroup.visible = false;
                 }
 
                 // --- 2. Update Main 3D NixOS Logo + Tux Centerpiece (Skipped completely when OFF) ---
