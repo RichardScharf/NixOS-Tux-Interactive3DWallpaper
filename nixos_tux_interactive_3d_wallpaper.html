@@ -392,6 +392,101 @@
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
+
+        /* Interactive 2D XY Hang Position Pad */
+        .xy-pad {
+            position: relative;
+            width: 100%;
+            height: 82px;
+            border-radius: 0.5rem;
+            background: radial-gradient(circle at 50% 62%, rgba(239, 68, 68, 0.10), rgba(8, 8, 12, 0.86) 72%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            cursor: crosshair;
+            overflow: hidden;
+            touch-action: none;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .xy-pad:hover,
+        .xy-pad.dragging {
+            border-color: rgba(239, 68, 68, 0.55);
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.22);
+        }
+
+        body.theme-blue .xy-pad {
+            background: radial-gradient(circle at 50% 62%, rgba(82, 119, 195, 0.14), rgba(6, 10, 18, 0.88) 72%);
+        }
+
+        body.theme-blue .xy-pad:hover,
+        body.theme-blue .xy-pad.dragging {
+            border-color: rgba(126, 186, 228, 0.60);
+            box-shadow: 0 0 12px rgba(82, 119, 195, 0.28);
+        }
+
+        .xy-pad-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .xy-pad-strap {
+            stroke: rgba(248, 113, 113, 0.72);
+            stroke-width: 1.2;
+            vector-effect: non-scaling-stroke;
+        }
+
+        body.theme-blue .xy-pad-strap {
+            stroke: rgba(126, 186, 228, 0.78);
+        }
+
+        .xy-pad-cross {
+            stroke: rgba(248, 113, 113, 0.28);
+            stroke-width: 1;
+            vector-effect: non-scaling-stroke;
+        }
+
+        body.theme-blue .xy-pad-cross {
+            stroke: rgba(126, 186, 228, 0.30);
+        }
+
+        .xy-pad-knob {
+            position: absolute;
+            width: 11px;
+            height: 11px;
+            border-radius: 9999px;
+            background: #f87171;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.90);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            will-change: left, top;
+        }
+
+        body.theme-blue .xy-pad-knob {
+            background: #7ebae4;
+            box-shadow: 0 0 8px rgba(126, 186, 228, 0.92);
+        }
+
+        .xy-pad-mini {
+            position: relative;
+            width: 44px;
+            height: 18px;
+            border-radius: 4px;
+            background: rgba(12, 12, 18, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            cursor: crosshair;
+            overflow: hidden;
+            touch-action: none;
+            flex-shrink: 0;
+        }
+
+        .xy-pad-mini .xy-pad-knob {
+            width: 6px;
+            height: 6px;
+            border-width: 1px;
+        }
     </style>
 </head>
 <body>
@@ -908,12 +1003,64 @@
                     </div>
                 </div>
 
-                <!-- Ceiling Rings Athlete Toggle -->
-                <div id="calisthenics-rings-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
-                    <span class="text-neutral-300">Ceiling Rings Athlete</span>
-                    <div class="flex items-center gap-1.5">
-                        <button id="toggle-calisthenics-rings-btn" class="mode-btn text-sky-300 font-medium">◎ Rings: ON</button>
-                        <button data-pin="calisthenicsRingsToggle" class="pin-btn" title="Pin/Unpin Ceiling Rings Toggle">📌</button>
+                <!-- Ceiling Rings Athlete Toggle & Collapsible Submenu -->
+                <div id="calisthenics-rings-card" class="flex flex-col gap-1.5 bg-white/[0.03] rounded-lg px-2.5 py-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-neutral-300">Ceiling Rings Athlete</span>
+                        <div class="flex items-center gap-1.5">
+                            <button id="toggle-calisthenics-rings-btn" class="mode-btn text-sky-300 font-medium">◎ Rings: ON</button>
+                            <button data-pin="calisthenicsRingsToggle" class="pin-btn" title="Pin/Unpin Ceiling Rings Toggle">📌</button>
+                        </div>
+                    </div>
+
+                    <!-- Automatic Submenu: Ceiling Rings Hang Position & Independent Scale -->
+                    <div id="calisthenics-rings-submenu" class="hud-submenu flex flex-col gap-1.5">
+                        <div class="text-[10px] font-semibold uppercase tracking-wider text-emerald-300">↳ Ceiling Rings Setup</div>
+
+                        <div id="calisthenics-rings-pos-wrap" class="flex flex-col gap-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-neutral-300">Hang Position</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span id="calisthenics-rings-pos-readout" class="mono text-sky-300 font-medium text-[10px]">0.00, 0.00</span>
+                                    <button id="rings-xy-reset-btn" class="pin-btn" title="Center & Reset Hang Position (0.00, 0.00)">↺</button>
+                                    <label class="wheel-check-label" title="Control Hang Drop (Y) with Mouse Wheel (Shift+Wheel for X)">
+                                        <input type="checkbox" data-wheel-slider="calisthenicsRingsDrop" class="wheel-checkbox" />
+                                        <span>🖱️</span>
+                                    </label>
+                                    <button data-pin="calisthenicsRingsPos" class="pin-btn" title="Pin/Unpin 2D Hang Position Pad">📌</button>
+                                </div>
+                            </div>
+
+                            <div id="rings-xy-pad" class="xy-pad" title="Click or drag to position the Ceiling Rings athlete in X & Y (Double-click to reset)">
+                                <svg class="xy-pad-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <!-- Top Ceiling Reference Line (Y = 0.00) & Center Axis (X = 0.00) -->
+                                    <line x1="0" y1="18.18" x2="100" y2="18.18" stroke="rgba(255,255,255,0.16)" stroke-dasharray="2.5 2.5" stroke-width="1" vector-effect="non-scaling-stroke" />
+                                    <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.12)" stroke-dasharray="2.5 2.5" stroke-width="1" vector-effect="non-scaling-stroke" />
+                                    <!-- Faint Center NixOS Logo Spatial Guide -->
+                                    <polygon points="50,43 56,50 56,64 50,71 44,64 44,50" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" vector-effect="non-scaling-stroke" />
+                                    <!-- Live Crosshairs -->
+                                    <line id="rings-xy-cross-h" class="xy-pad-cross" x1="0" y1="18.18" x2="100" y2="18.18" />
+                                    <line id="rings-xy-cross-v" class="xy-pad-cross" x1="50" y1="0" x2="50" y2="100" />
+                                    <!-- Live Ceiling Straps Preview -->
+                                    <line id="rings-xy-strap-l" class="xy-pad-strap" x1="48" y1="0" x2="48.5" y2="18.18" />
+                                    <line id="rings-xy-strap-r" class="xy-pad-strap" x1="52" y1="0" x2="51.5" y2="18.18" />
+                                </svg>
+                                <div id="rings-xy-knob" class="xy-pad-knob" style="left: 50%; top: 18.18%;"></div>
+                            </div>
+                        </div>
+
+                        <div id="calisthenics-rings-scale-wrap" class="flex items-center justify-between gap-2">
+                            <span class="text-neutral-300">Rings Scale</span>
+                            <div class="flex items-center gap-1.5">
+                                <input id="calisthenics-rings-scale-slider" type="range" min="0.15" max="0.85" step="0.01" value="0.34" class="hud-slider w-16 cursor-pointer" />
+                                <span id="calisthenics-rings-scale-readout" class="mono text-sky-300 font-medium w-10 text-right">0.34</span>
+                                <label class="wheel-check-label" title="Control Ceiling Rings Scale with Mouse Wheel">
+                                    <input type="checkbox" data-wheel-slider="calisthenicsRingsScale" class="wheel-checkbox" />
+                                    <span>🖱️</span>
+                                </label>
+                                <button data-pin="calisthenicsRingsScale" class="pin-btn" title="Pin/Unpin Rings Scale">📌</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -934,7 +1081,7 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-1 pt-0.5">
                         <button id="calisthenics-left-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Left Athlete: Full Planche Push-Ups ⟷ Deep Handstand Push-Ups">L: Planche</button>
-                        <button id="calisthenics-rings-skill-btn" class="mode-btn text-sky-300 font-medium" title="Cycle Top Rings Athlete: Iron Cross → Maltese → Inverted Cross → Victorian">T: Iron Cross</button>
+                        <button id="calisthenics-rings-skill-btn" class="mode-btn text-sky-300 font-medium" title="Cycle Top Rings Athlete: Iron Cross → Maltese → Inverted Cross → Victorian">T: Maltese</button>
                         <button id="calisthenics-right-skill-btn" class="mode-btn text-sky-300 font-medium" title="Transition Right Athlete: Front Lever Pull-Ups ⟷ Back Lever">R: Front Lever</button>
                     </div>
                 </div>
@@ -967,17 +1114,17 @@
                     </div>
                 </div>
 
-                <!-- Overlay Scale -->
+                <!-- Corner Athletes Scale -->
                 <div id="calisthenics-scale-wrap" class="flex items-center justify-between gap-2 bg-white/[0.03] rounded-lg px-2.5 py-1.5">
-                    <span class="text-neutral-300">Overlay Scale</span>
+                    <span class="text-neutral-300">Corner Scale</span>
                     <div class="flex items-center gap-1.5">
                         <input id="calisthenics-scale-slider" type="range" min="0.18" max="0.85" step="0.01" value="0.34" class="hud-slider w-16 cursor-pointer" />
                         <span id="calisthenics-scale-readout" class="mono text-sky-300 font-medium w-8 text-right">0.34</span>
-                        <label class="wheel-check-label" title="Control Calisthenics Scale with Mouse Wheel">
+                        <label class="wheel-check-label" title="Control Corner Athletes Scale with Mouse Wheel">
                             <input type="checkbox" data-wheel-slider="calisthenicsScale" class="wheel-checkbox" />
                             <span>🖱️</span>
                         </label>
-                        <button data-pin="calisthenicsScale" class="pin-btn" title="Pin/Unpin Calisthenics Scale">📌</button>
+                        <button data-pin="calisthenicsScale" class="pin-btn" title="Pin/Unpin Corner Athletes Scale">📌</button>
                     </div>
                 </div>
             </div>
@@ -1074,6 +1221,10 @@
             calisthenicsGlitchDrive: 1.00,  // 0.20 .. 1.80 (Rim & glitch shard intensity)
             calisthenicsSpacing: 6.85,      // 3.00 .. 9.00 (Horizontal corner offset for lower-left & lower-right stations)
             calisthenicsScale: 0.34,        // 0.18 .. 0.85 (Compact corner scale resting on the snowbank)
+            calisthenicsRingsDefaultSkill: 1, // 0 = Iron Cross, 1 = Maltese (default), 2 = Inv. Cross, 3 = Victorian
+            calisthenicsRingsHangDrop: 0.00,  // -1.00 .. 4.50 (Vertical hang drop from ceiling)
+            calisthenicsRingsHangX: 0.00,     // -7.50 .. 7.50 (Horizontal hang offset along ceiling)
+            calisthenicsRingsScale: 0.34,     // 0.15 .. 0.85 (Independent scale for Ceiling Rings athlete)
 
             hudVisibilityMode: 'always',    // 'always' | 'hover' | 'proximity' | 'click' | 'gear'
             hudMenuOpenByDefault: false,    // true | false (Start with the Settings dropdown open)
@@ -1083,7 +1234,8 @@
             //  'backdropBoresight', 'backdropGrid', 'snowIntensity', 'snowForcefield', 'snow3DDepth',
             //  'snowPileContribution', 'snowDecayTime', 'snowMaxLambdas', 'snowLambdasPerFlake',
             //  'snowMicroShrinkTime', 'snowMicroDecayTime', 'snowMicroMaxCount',
-            //  'calisthenicsDrive', 'calisthenicsSpacing', 'calisthenicsScale')
+            //  'calisthenicsDrive', 'calisthenicsSpacing', 'calisthenicsScale',
+            //  'calisthenicsRingsDrop', 'calisthenicsRingsX', 'calisthenicsRingsScale')
             wheelControlledSliders: [
                 'radius',
                 'snowForcefield'
@@ -1094,7 +1246,8 @@
             // 'graphicsQuality', 'perfMonitor', 'hudVisibility',
             // 'mainLogoToggle', 'backdropToggle', 'backdropPulse', 'backdropPulseSpeed', 'backdropSpeed',
             // 'backdropSpacing', 'backdropBoresight', 'backdropGrid',
-            // 'calisthenicsToggle', 'calisthenicsRingsToggle', 'calisthenicsStyle', 'calisthenicsSkills',
+            // 'calisthenicsToggle', 'calisthenicsRingsToggle', 'calisthenicsRingsPos',
+            // 'calisthenicsRingsScale', 'calisthenicsStyle', 'calisthenicsSkills',
             // 'calisthenicsDrive', 'calisthenicsSpacing', 'calisthenicsScale',
             // 'theme', 'tightness', 'radius', 'bgGlow', 'viewMode',
             // 'snowToggle', 'snowIntensity', 'snowForcefield', 'snowColor', 'snowRotation', 'snow3DDepth',
@@ -1219,10 +1372,21 @@
                         const s = size * (node.scale || 1);
                         this.setFont(ctx, s, Boolean(node.italic), node.weight || '400');
                         const m = ctx.measureText(node.text);
+                        const padW = (node.pad || 0) * s;
+                        // Authentic TeX italic correction: measure rightward ascender overhang (e.g. italic 'f')
+                        let italicCorr = 0;
+                        if (node.italic) {
+                            const measuredOverhang = (m.actualBoundingBoxRight !== undefined)
+                                ? Math.max(0, m.actualBoundingBoxRight - m.width)
+                                : 0;
+                            const minOverhang = /[f]$/.test(node.text) ? s * 0.18 : 0;
+                            italicCorr = Math.min(s * 0.42, Math.max(measuredOverhang, minOverhang));
+                        }
                         return {
-                            width: m.width + (node.pad || 0) * s,
+                            width: m.width + padW,
                             ascent: s * 0.74,
-                            descent: s * 0.24
+                            descent: s * 0.24,
+                            italicCorr
                         };
                     }
                     case 'vec': {
@@ -1250,10 +1414,15 @@
                         const scriptSize = size * 0.62;
                         const sub = node.sub ? this.measure(node.sub, ctx, scriptSize) : { width: 0, ascent: 0, descent: 0 };
                         const sup = node.sup ? this.measure(node.sup, ctx, scriptSize) : { width: 0, ascent: 0, descent: 0 };
-                        const scriptW = Math.max(sub.width, sup.width) + size * 0.05;
+                        const ic = base.italicCorr || 0;
+                        const supOffset = ic + size * 0.04;
+                        const subOffset = size * 0.02;
+                        const supRight = node.sup ? (supOffset + sup.width) : 0;
+                        const subRight = node.sub ? (subOffset + sub.width) : 0;
+                        const scriptW = Math.max(subRight, supRight) + size * 0.03;
                         return {
                             width: base.width + scriptW,
-                            ascent: Math.max(base.ascent, base.ascent * 0.65 + sup.ascent + sup.descent * 0.5),
+                            ascent: Math.max(base.ascent, base.ascent * 0.66 + sup.ascent + sup.descent * 0.4),
                             descent: Math.max(base.descent, base.descent * 0.55 + sub.ascent * 0.6 + sub.descent)
                         };
                     }
@@ -1458,15 +1627,17 @@
                         const base = this.measure(node.base, ctx, size);
                         this.draw(ctx, node.base, x, y, size);
                         const scriptSize = size * 0.62;
-                        const sx = x + base.width + size * 0.02;
+                        const ic = base.italicCorr || 0;
 
                         if (node.sup) {
-                            const supY = y - base.ascent * 0.58;
-                            this.draw(ctx, node.sup, sx, supY, scriptSize);
+                            const supX = x + base.width + ic + size * 0.04;
+                            const supY = y - base.ascent * 0.64;
+                            this.draw(ctx, node.sup, supX, supY, scriptSize);
                         }
                         if (node.sub) {
+                            const subX = x + base.width + size * 0.02;
                             const subY = y + base.descent * 0.85 + scriptSize * 0.26;
-                            this.draw(ctx, node.sub, sx, subY, scriptSize);
+                            this.draw(ctx, node.sub, subX, subY, scriptSize);
                         }
                         const dim = this.measure(node, ctx, size);
                         return dim.width;
@@ -6316,6 +6487,9 @@
                 this.config = Object.assign({
                     position: new THREE.Vector3(0, 3.25, 0),
                     globalScale: 0.34,
+                    hangDrop: 0.00,
+                    hangX: 0.00,
+                    initialSkill: 1, // 0: Iron Cross, 1: Maltese (default), 2: Inv. Cross, 3: Victorian
                     minFrequency: 0.10,
                     maxFrequencies: [0.46, 0.38, 0.42, 0.50], // Iron Cross, Maltese, Inv. Cross, Victorian
                     hoverRadiusWorld: 3.95,
@@ -6359,6 +6533,7 @@
                     uEnergy:       { value: 0.0 },
                     uDrive:        { value: this.config.glitchDrive },
                     uFaceAlpha:    { value: 0.0 },
+                    uEyeOpen:      { value: 1.0 },
                     // Frame-constant palette uniforms (matching CalisthenicsDualOverlay)
                     uCoreDeep:     { value: new THREE.Color() },
                     uCorePlasma:   { value: new THREE.Color() },
@@ -6370,8 +6545,11 @@
                     uHaloBase:     { value: new THREE.Color() },
                     uHaloHot:      { value: new THREE.Color() },
                     uHaloBaseAlpha:{ value: 0.08 },
-                    uFaceAccent:   { value: new THREE.Color(1.0, 0.13, 0.10) }
+                    uFaceAccent:   { value: new THREE.Color(0.94, 0.11, 0.08) }
                 };
+
+                this._blinkTimer = 3.5 + Math.random() * 4.5;
+                this._blinkPhase = -1.0;
 
                 this._paletteTmpA = new THREE.Color();
                 this._paletteTmpB = new THREE.Color();
@@ -6400,8 +6578,10 @@
                 this.RING_OUTER_R = 0.36;
                 this.RING_INNER_R = 0.255;
                 this._ringsInFront = false;
-                this._ceilingExtendY = 8.40;
+                this.FIXED_ANCHOR_X = 0.96;
+                this._anchorY = 6.67;
 
+                const startSkill = ((Math.round(this.config.initialSkill) % 4) + 4) % 4;
                 this.state = {
                     mode: 'IDLE',
                     isHovering: false,
@@ -6411,8 +6591,8 @@
                     cyclePhase: 0.0,
                     lagPhase: 0.0,
                     energy: 0.0,
-                    transitionMix: 0.0,
-                    altSkillTarget: 0.0,
+                    transitionMix: startSkill,
+                    altSkillTarget: startSkill,
                     pendingSkillTarget: null
                 };
 
@@ -6472,7 +6652,7 @@
                 u.uHaloBaseAlpha.value = 0.16 + (0.08 - 0.16) * blackFill;
 
                 // Maltese Face Accent Outline (Crimson Red -> NixOS Cyan)
-                lerpRGB(u.uFaceAccent.value, 1.00, 0.13, 0.10,  0.45, 0.82, 1.00, themeMix);
+                lerpRGB(u.uFaceAccent.value, 0.94, 0.11, 0.08,  0.45, 0.82, 1.00, themeMix);
             }
 
             applyQualityPreset(level) {
@@ -6501,7 +6681,7 @@
 
             isActiveOrTransitioning() {
                 if (!this.isBuilt || !this.rootGroup.visible || this.visibilityAlpha <= 0.01) return false;
-                return this.state.mode !== 'IDLE';
+                return this.state.mode !== 'IDLE' || this._blinkPhase >= 0.0;
             }
 
             onPointerMove(ndcX, ndcY, sharedRay = null) {
@@ -6542,18 +6722,31 @@
             cycleSkill(explicitIdx = null) {
                 this.ensureBuilt();
                 const s = this.state;
-                const cur = ((Math.round(s.altSkillTarget) % 4) + 4) % 4;
+                const transRem = s.altSkillTarget - s.transitionMix;
+                const isTrans = Math.abs(transRem) > 0.001;
+
+                // Limit to at most ONE queued transition (ignores rapid extra clicks)
+                if (!this.config.manualMode && (s.pendingSkillTarget !== null || transRem > 1.001)) return;
+
+                const baseTarget = Math.round(s.altSkillTarget);
+                const cur = ((baseTarget % 4) + 4) % 4;
                 let next;
                 if (explicitIdx !== null && explicitIdx >= 0 && explicitIdx < 4) {
-                    if (explicitIdx === cur && s.pendingSkillTarget === null) return;
+                    if (explicitIdx === cur) return;
                     const delta = (explicitIdx - cur + 4) % 4 || 4;
-                    next = Math.round(s.altSkillTarget) + delta;
+                    next = baseTarget + delta;
                 } else {
-                    const base = s.pendingSkillTarget !== null ? s.pendingSkillTarget : Math.round(s.altSkillTarget);
-                    next = base + 1;
+                    next = baseTarget + 1;
                 }
 
-                if (s.cyclePhase > 0.001 && !this.config.manualMode) {
+                if (this.config.manualMode) {
+                    s.altSkillTarget = next;
+                    s.pendingSkillTarget = null;
+                } else if (isTrans) {
+                    // Queue at most 1 follow-up transition behind the active one
+                    s.pendingSkillTarget = next;
+                } else if (s.cyclePhase > 0.001) {
+                    // Mid-rep: finish current rep cleanly back to phase 0, then transition once
                     s.pendingSkillTarget = next;
                     s.mode = 'QUEUE';
                 } else {
@@ -6565,20 +6758,26 @@
 
             /**
              * Anchors the Rings athlete to hang from the top edge (ceiling) of the viewport
-             * directly centered over the floating NixOS main logo across all FOV modes and scales.
+             * with independent horizontal offset (hangX), vertical drop (hangDrop), and scale.
              */
             _updateLayout() {
                 if (!this.isBuilt) return;
                 const s = Math.max(0.15, this.config.globalScale);
+                const aspect = (this.camera && this.camera.aspect) ? this.camera.aspect : (window.innerWidth / window.innerHeight);
                 const fovDeg = (this.camera && this.camera.fov) ? this.camera.fov : 28;
                 const refCamZ = fovDeg <= 24 ? 25.2 : (fovDeg >= 32 ? 16.5 : 20.4);
                 const halfH = Math.tan(THREE.MathUtils.degToRad(fovDeg) * 0.5) * refCamZ;
+                const aspectScale = THREE.MathUtils.clamp(aspect / (16 / 9), 0.55, 1.35);
 
-                // Anchor so local y ≈ 5.35 sits flush with the ceiling:
-                // Inverted Cross feet (5.24) remain cleanly inside the screen, while Iron Cross hangs over the NixOS logo.
-                this.config.position.set(0.0, halfH - 5.35 * s, 0.0);
-                // Extend visual straps far past the top edge so vertical mouse parallax never exposes strap ends
-                this._ceilingExtendY = Math.max(8.2, 5.35 + (1.8 / s));
+                const worldHangX = this.config.hangX * aspectScale;
+                const hangDrop = this.config.hangDrop;
+
+                // Anchor so local y ≈ 5.35 sits flush with the ceiling when hangDrop = 0
+                this.config.position.set(worldHangX, halfH - 5.35 * s - hangDrop, 0.0);
+                // Place the true pendulum ceiling anchors just above the top screen edge (0.45 world units above halfH)
+                // so lowering hangDrop physically lengthens the straps from fixed ceiling points without crossing/flaring
+                this._anchorY = Math.max(5.05, 5.35 + (hangDrop + 0.45) / s);
+                this._idleKinematicsAccum = 99.0;
 
                 this.rootGroup.position.copy(this.config.position);
                 this.rootGroup.scale.set(s, s, 1);
@@ -6657,7 +6856,7 @@
                 return new THREE.ShapeGeometry(s, segs);
             }
 
-            _mergeSkinned(items, withColor = false) {
+            _mergeSkinned(items, withFace = false) {
                 const nonIdx = [];
                 let totalVerts = 0;
                 for (let i = 0; i < items.length; i++) {
@@ -6666,24 +6865,26 @@
                     if (g !== src) src.dispose();
                     const count = g.attributes.position.count;
                     totalVerts += count;
-                    nonIdx.push({ g, count, bone: items[i].bone, color: items[i].color });
+                    nonIdx.push({ g, count, bone: items[i].bone, color: items[i].color, part: items[i].part || 0 });
                 }
 
                 const pos = new Float32Array(totalVerts * 3);
                 const boneIdx = new Float32Array(totalVerts);
-                const colors = withColor ? new Float32Array(totalVerts * 3) : null;
+                const colors = withFace ? new Float32Array(totalVerts * 3) : null;
+                const facePart = withFace ? new Float32Array(totalVerts) : null;
 
                 let offset = 0;
                 for (let i = 0; i < nonIdx.length; i++) {
-                    const { g, count, bone, color } = nonIdx[i];
+                    const { g, count, bone, color, part } = nonIdx[i];
                     pos.set(g.attributes.position.array, offset * 3);
                     boneIdx.fill(bone, offset, offset + count);
-                    if (withColor) {
+                    if (withFace) {
                         const r = color[0], gr = color[1], b = color[2];
                         for (let k = 0; k < count; k++) {
                             const j = (offset + k) * 3;
                             colors[j] = r; colors[j + 1] = gr; colors[j + 2] = b;
                         }
+                        facePart.fill(part, offset, offset + count);
                     }
                     offset += count;
                     g.dispose();
@@ -6692,7 +6893,10 @@
                 const merged = new THREE.BufferGeometry();
                 merged.setAttribute('position', new THREE.BufferAttribute(pos, 3));
                 merged.setAttribute('aBoneIndex', new THREE.BufferAttribute(boneIdx, 1));
-                if (withColor) merged.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+                if (withFace) {
+                    merged.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+                    merged.setAttribute('aFacePart', new THREE.BufferAttribute(facePart, 1));
+                }
                 this._disposables.push(merged);
                 return merged;
             }
@@ -6926,12 +7130,16 @@
             }
 
             _makeStrapPts(L) {
+                const segs = 18;
                 const left = [
-                    [-0.112, -0.02], [-0.086, 0.14], [-0.068, 0.34],
-                    [-0.066, 0.95],  [-0.065, 1.65], [-0.064, 2.40],
-                    [-0.063, 3.20],  [-0.062, 4.05], [-0.061, 4.95],
-                    [-0.060, 5.95],  [-0.059, L]
+                    [-0.104, -0.02], [-0.080, 0.08], [-0.064, 0.22]
                 ];
+                for (let i = 1; i <= segs; i++) {
+                    const t = i / segs;
+                    const y = 0.22 + (L - 0.22) * t;
+                    const w = 0.063 - 0.004 * t;
+                    left.push([-w, y]);
+                }
                 const right = left.slice().reverse().map(p => [-p[0], p[1]]);
                 return left.concat(right);
             }
@@ -7051,7 +7259,8 @@
 
                 this.athleteTierMeshes = spawnTier(bodyB, this._makeTierMaterials(10, 9, 8, 0.88), 70);
 
-                // TIER 3: FOREGROUND SWEEPING LEGS (19), SOCKED VICTORIAN FEET (20), & OVERHAND GRIPS (21, 22)
+                // TIER 3: FOREGROUND SWEEPING LEGS (19), SOCKED VICTORIAN FEET (20),
+                //         & UNIFIED OVERHAND RING GRIPS (21, 22) — Stencil 18..16, RenderOrder 76..78
                 const fgB = { core: [], rim: [], halo: [] };
                 pushPoly(fgB, invLegsPts, 19, 2, 0.026, 0.052);
 
@@ -7078,26 +7287,32 @@
                 pushPoly(fgB, lGripPts, 21, 1, 0.015, 0.030);
                 pushPoly(fgB, rGripPts, 22, 1, 0.015, 0.030);
 
-                this.fgTierMeshes = spawnTier(fgB, this._makeTierMaterials(18, 17, 16, 0.94), 76);
+                this.fgTierMeshes = spawnTier(fgB, this._makeTierMaterials(18, 17, 16, 0.96), 76);
 
-                // MALTESE FACE DETAILS (Theme-adaptive outline + crisp white eyes, 1 Draw Call)
-                const lEye = [[-0.152,0.095], [-0.084,0.098], [-0.062,0.072], [-0.124,0.068]];
+                // MALTESE FACE DETAILS (Refined almond eyes with rare blink + faded cheekbone-to-jawline contours)
+                const lEye = [
+                    [-0.140, 0.087], [-0.116, 0.096], [-0.084, 0.091],
+                    [-0.068, 0.077], [-0.096, 0.072], [-0.124, 0.075]
+                ];
                 const rEye = lEye.map(p => [-p[0], p[1]]).reverse();
+
+                // Anatomically tapered temple -> cheekbone -> jaw angle -> chin contour
                 const lCheek = [
-                    [-0.242,0.115], [-0.218,-0.015], [-0.165,-0.135], [-0.100,-0.228],
-                    [-0.085,-0.215],[-0.148,-0.124], [-0.200,-0.009], [-0.224,0.115]
+                    [-0.232,  0.130], [-0.224,  0.045], [-0.196, -0.048], [-0.156, -0.132], [-0.098, -0.210],
+                    [-0.094, -0.206], [-0.148, -0.128], [-0.184, -0.045], [-0.213,  0.045], [-0.228,  0.130]
                 ];
                 const rCheek = lCheek.map(p => [-p[0], p[1]]).reverse();
 
-                const ACCENT = [1.0, 0.0, 0.0];
-                const WHT = [1.0, 1.0, 1.0];
+                const ACCENT = [0.94, 0.11, 0.08];
+                const WHT = [0.96, 0.96, 0.98];
+                // part: 0 = cheek/jaw contour (faded both ends), 1 = eye rim, 2 = eye core
                 const faceGeo = this._mergeSkinned([
-                    { geo: this._shapeGeo(this._offsetPoly(lEye, 0.009)), bone: 13, color: ACCENT },
-                    { geo: this._shapeGeo(this._offsetPoly(rEye, 0.009)), bone: 13, color: ACCENT },
-                    { geo: this._shapeGeo(lCheek), bone: 13, color: ACCENT },
-                    { geo: this._shapeGeo(rCheek), bone: 13, color: ACCENT },
-                    { geo: this._shapeGeo(lEye),   bone: 13, color: WHT },
-                    { geo: this._shapeGeo(rEye),   bone: 13, color: WHT }
+                    { geo: this._shapeGeo(this._offsetPoly(lEye, 0.0055)), bone: 13, color: ACCENT, part: 1 },
+                    { geo: this._shapeGeo(this._offsetPoly(rEye, 0.0055)), bone: 13, color: ACCENT, part: 1 },
+                    { geo: this._shapeGeo(lCheek), bone: 13, color: ACCENT, part: 0 },
+                    { geo: this._shapeGeo(rCheek), bone: 13, color: ACCENT, part: 0 },
+                    { geo: this._shapeGeo(lEye),   bone: 13, color: WHT, part: 2 },
+                    { geo: this._shapeGeo(rEye),   bone: 13, color: WHT, part: 2 }
                 ], true);
 
                 const faceMat = new THREE.ShaderMaterial({
@@ -7106,33 +7321,58 @@
                         uBoneSV: this.uniforms.uBoneSV,
                         uFaceAlpha: this.uniforms.uFaceAlpha,
                         uOverlayAlpha: this.uniforms.uOverlayAlpha,
+                        uEyeOpen: this.uniforms.uEyeOpen,
+                        uEnergy: this.uniforms.uEnergy,
                         uFaceAccent: this.uniforms.uFaceAccent
                     },
                     vertexShader: `
                         #define BONE_COUNT ${this.BONE_COUNT}
                         attribute float aBoneIndex;
                         attribute vec3 aColor;
+                        attribute float aFacePart;
                         uniform vec4 uBoneTR[BONE_COUNT];
                         uniform vec4 uBoneSV[BONE_COUNT];
+                        uniform float uEyeOpen;
                         varying vec3 vColor;
+                        varying float vLocalY;
+                        varying float vFacePart;
                         void main() {
                             int b = int(aBoneIndex + 0.5);
                             vec4 tr = uBoneTR[b];
                             vec4 sv = uBoneSV[b];
                             if (sv.z <= 0.001) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
-                            vec2 p = position.xy * sv.xy;
+                            vec2 pos = position.xy;
+                            if (aFacePart > 0.5) {
+                                pos.y = 0.084 + (pos.y - 0.084) * uEyeOpen;
+                            }
+                            vec2 p = pos * sv.xy;
                             vec2 lp = vec2(p.x * tr.z - p.y * tr.w, p.x * tr.w + p.y * tr.z) + tr.xy;
                             vColor = aColor;
+                            vLocalY = position.y;
+                            vFacePart = aFacePart;
                             gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(lp, 0.0, 1.0);
                         }`,
                     fragmentShader: `
                         varying vec3 vColor;
-                        uniform float uFaceAlpha, uOverlayAlpha;
+                        varying float vLocalY;
+                        varying float vFacePart;
+                        uniform float uFaceAlpha, uOverlayAlpha, uEyeOpen, uEnergy;
                         uniform vec3 uFaceAccent;
                         void main() {
                             float a = uFaceAlpha * uOverlayAlpha;
                             if (a <= 0.003) discard;
-                            vec3 col = mix(uFaceAccent, vec3(1.0), vColor.b);
+                            if (vFacePart < 0.5) {
+                                // Smooth heel-style fade at both temple top and chin tip
+                                float topFade = smoothstep(0.130, 0.015, vLocalY);
+                                float botFade = smoothstep(-0.210, -0.105, vLocalY);
+                                a *= topFade * botFade * (0.72 + 0.16 * uEnergy);
+                                if (a < 0.005) discard;
+                            } else {
+                                float blinkAlpha = smoothstep(0.06, 0.28, uEyeOpen);
+                                a *= blinkAlpha * (vFacePart > 1.5 ? 0.90 : 0.72);
+                                if (a < 0.005) discard;
+                            }
+                            vec3 col = mix(uFaceAccent, vec3(0.96, 0.96, 0.98), step(1.5, vFacePart));
                             gl_FragColor = vec4(col, a);
                         }`,
                     transparent: true,
@@ -7214,10 +7454,13 @@
             _applyKinematics(phase, lagPhase, energy, elapsed) {
                 const s = this.state;
                 const mMod = ((s.transitionMix % 4.0) + 4.0) % 4.0;
-                const seg = Math.floor(mMod) % 4;
+                const rawSeg = Math.floor(mMod) % 4;
                 const frac = mMod - Math.floor(mMod);
                 const isTrans = frac > 0.001 && frac < 0.999;
-                const u = frac * frac * (3.0 - 2.0 * frac);
+                // Round to nearest integer skill when outside (0.001..0.999) so frac >= 0.999
+                // resolves to the destination skill instead of flashing the previous skill for 1 frame
+                const seg = isTrans ? rawSeg : (Math.round(mMod) % 4);
+                const u = isTrans ? frac * frac * (3.0 - 2.0 * frac) : 0.0;
 
                 const ss = (a, b, x) => {
                     const t = THREE.MathUtils.clamp((x - a) / (b - a), 0.0, 1.0);
@@ -7324,19 +7567,17 @@
 
                 const crossAsym = wCross * (1.0 - Math.min(1.0, repAbs * 1.35)) * (1.0 - transStrain * 0.92);
                 const vicHoldW = wVic * (1.0 - frontLeverP);
-                const anchorY = 5.05;
 
-                let anchorX = 1.42 * wCross + 1.22 * wMaltese + 1.42 * wInv + 0.80 * wVic;
-                anchorX = THREE.MathUtils.lerp(anchorX, 0.58, Math.pow(deadHangP, 0.85));
-                anchorX = THREE.MathUtils.lerp(anchorX, 0.56, Math.pow(frontLeverP, 0.85));
-                if (isTrans && seg === 0) {
-                    const dipPeak = Math.sin(Math.min(1.0, u / 0.72) * Math.PI);
-                    anchorX = THREE.MathUtils.lerp(anchorX, 1.02, dipPeak * 0.65);
-                }
+                // Fixed ceiling anchor points (never shift across skills, reps, transitions, or hang drops)
+                const anchorX = this.FIXED_ANCHOR_X;
+                const anchorY = this._anchorY;
 
-                const symStrap = 4.12 * wCross + 4.24 * wMaltese + 4.12 * wInv + THREE.MathUtils.lerp(4.18, 4.22, frontLeverP) * wVic;
-                const strapL = THREE.MathUtils.lerp(symStrap, 4.18, crossAsym) + 0.08 * deadHangP;
-                const strapR = THREE.MathUtils.lerp(symStrap, 3.44, crossAsym) + 0.08 * deadHangP;
+                // Physical strap lengths from the fixed ceiling down to each pose's ring rest height
+                const symRingRestY = 0.93 * wCross + 0.81 * wMaltese + 0.93 * wInv + THREE.MathUtils.lerp(0.87, 0.83, frontLeverP) * wVic;
+                const restYL = THREE.MathUtils.lerp(symRingRestY, 0.87, crossAsym) - 0.08 * deadHangP;
+                const restYR = THREE.MathUtils.lerp(symRingRestY, 1.61, crossAsym) - 0.08 * deadHangP;
+                const strapL = Math.max(1.85, anchorY - restYL);
+                const strapR = Math.max(1.85, anchorY - restYR);
 
                 const shDep = THREE.MathUtils.clamp(rep * 0.06 + tLiftY * 0.04, -0.08, 0.10);
                 let spreadX = 0.54 * wCross + 0.50 * wMaltese + 0.54 * wInv + 0.44 * wVic;
@@ -7372,16 +7613,13 @@
 
                     this._setBone(ringB, rcx, rcy, ringAng, ovalX, 1.0, 1);
 
-                    // Collinearly extend strap above the pendulum pivot so it stays anchored past the top screen edge
+                    // Orient each strap directly from the top of the ring to the true fixed ceiling anchor
                     const sx1 = rcx + rux * (this.RING_OUTER_R * 0.92);
                     const sy1 = rcy + ruy * (this.RING_OUTER_R * 0.92);
-                    const edx = ax - sx1;
-                    const edy = anchorY - sy1;
-                    const extT = edy > 0.05 ? Math.max(1.0, (this._ceilingExtendY - sy1) / edy) : 1.0;
                     this._orientBone(
                         strapB,
                         sx1, sy1,
-                        sx1 + edx * extT, sy1 + edy * extT,
+                        ax, anchorY,
                         this.STRAP_BASE_LEN
                     );
 
@@ -7605,7 +7843,7 @@
                 const activeIdx = ((Math.round(s.transitionMix) % 4) + 4) % 4;
                 const maxFreq = this.config.maxFrequencies[activeIdx];
                 const transDiff = s.altSkillTarget - s.transitionMix;
-                const isTrans = Math.abs(transDiff) > 0.0005;
+                const isTrans = Math.abs(transDiff) > 0.001;
 
                 if (this.config.manualMode) {
                     s.mode = 'SCRUB';
@@ -7632,9 +7870,15 @@
                     }
 
                     s.transitionMix += Math.sign(transDiff) * Math.min(Math.abs(transDiff), dt * transRate);
-                    if (Math.abs(s.altSkillTarget - s.transitionMix) <= 0.0005) {
+                    if (Math.abs(s.altSkillTarget - s.transitionMix) <= 0.001) {
                         s.transitionMix = s.altSkillTarget;
-                        s.mode = 'IDLE';
+                        if (s.pendingSkillTarget !== null) {
+                            s.altSkillTarget = s.pendingSkillTarget;
+                            s.pendingSkillTarget = null;
+                            s.mode = 'TRANS';
+                        } else {
+                            s.mode = 'IDLE';
+                        }
                     }
                 } else if (s.pendingSkillTarget !== null) {
                     s.mode = 'QUEUE';
@@ -7682,6 +7926,26 @@
                 if (this.auraMesh && this.auraMesh.visible) {
                     this.auraMat.color.copy(this._activeThemeColor);
                     this.auraMat.opacity = (0.14 + s.energy * 0.24) * this.config.glitchDrive * this.visibilityAlpha;
+                }
+
+                // Rare, natural eye blink for the Maltese face (every ~5-10.5s, ~0.16s duration)
+                if (this._blinkPhase >= 0.0) {
+                    this._blinkPhase += dt / 0.16;
+                    if (this._blinkPhase >= 1.0) {
+                        this._blinkPhase = -1.0;
+                        this._blinkTimer = 5.0 + Math.random() * 5.5;
+                        this.uniforms.uEyeOpen.value = 1.0;
+                    } else {
+                        const b = this._blinkPhase;
+                        const closeP = b < 0.42
+                            ? Math.sin((b / 0.42) * Math.PI * 0.5)
+                            : Math.cos(((b - 0.42) / 0.58) * Math.PI * 0.5);
+                        this.uniforms.uEyeOpen.value = Math.max(0.04, 1.0 - closeP);
+                    }
+                } else {
+                    this._blinkTimer -= dt;
+                    if (this._blinkTimer <= 0.0) this._blinkPhase = 0.0;
+                    this.uniforms.uEyeOpen.value = 1.0;
                 }
 
                 this._idleKinematicsAccum += dt;
@@ -7743,8 +8007,19 @@
 
             // Calisthenics Skill Overlay DOM elements
             const toggleCalisthenicsBtn = document.getElementById('toggle-calisthenics-btn');
-            const calisthenicsRingsWrap = document.getElementById('calisthenics-rings-wrap');
+            const calisthenicsRingsCard = document.getElementById('calisthenics-rings-card');
             const toggleCalisthenicsRingsBtn = document.getElementById('toggle-calisthenics-rings-btn');
+            const calisthenicsRingsSubmenu = document.getElementById('calisthenics-rings-submenu');
+            const calisthenicsRingsPosReadout = document.getElementById('calisthenics-rings-pos-readout');
+            const ringsXyResetBtn = document.getElementById('rings-xy-reset-btn');
+            const ringsXyPad = document.getElementById('rings-xy-pad');
+            const ringsXyKnob = document.getElementById('rings-xy-knob');
+            const ringsXyCrossH = document.getElementById('rings-xy-cross-h');
+            const ringsXyCrossV = document.getElementById('rings-xy-cross-v');
+            const ringsXyStrapL = document.getElementById('rings-xy-strap-l');
+            const ringsXyStrapR = document.getElementById('rings-xy-strap-r');
+            const calisthenicsRingsScaleSlider = document.getElementById('calisthenics-rings-scale-slider');
+            const calisthenicsRingsScaleReadout = document.getElementById('calisthenics-rings-scale-readout');
             const calisthenicsStyleWrap = document.getElementById('calisthenics-style-wrap');
             const toggleCalisthenicsStyleBtn = document.getElementById('toggle-calisthenics-style-btn');
             const calisthenicsSkillsWrap = document.getElementById('calisthenics-skills-wrap');
@@ -8069,7 +8344,10 @@
                 enabled: isCalisthenicsEnabled && isCalisthenicsRingsEnabled,
                 useBlackFill: WALLPAPER_DEFAULTS.calisthenicsUseBlackFill !== false,
                 glitchDrive: WALLPAPER_DEFAULTS.calisthenicsGlitchDrive !== undefined ? WALLPAPER_DEFAULTS.calisthenicsGlitchDrive : 1.00,
-                globalScale: WALLPAPER_DEFAULTS.calisthenicsScale !== undefined ? WALLPAPER_DEFAULTS.calisthenicsScale : 0.34
+                initialSkill: WALLPAPER_DEFAULTS.calisthenicsRingsDefaultSkill !== undefined ? WALLPAPER_DEFAULTS.calisthenicsRingsDefaultSkill : 1,
+                hangDrop: WALLPAPER_DEFAULTS.calisthenicsRingsHangDrop !== undefined ? WALLPAPER_DEFAULTS.calisthenicsRingsHangDrop : 0.00,
+                hangX: WALLPAPER_DEFAULTS.calisthenicsRingsHangX !== undefined ? WALLPAPER_DEFAULTS.calisthenicsRingsHangX : 0.00,
+                globalScale: WALLPAPER_DEFAULTS.calisthenicsRingsScale !== undefined ? WALLPAPER_DEFAULTS.calisthenicsRingsScale : 0.34
             });
 
             // ============================================================================
@@ -8418,14 +8696,28 @@
             }
 
             // Official Linux Tux Logo (Offline cached SVG + Embedded Fallback)
+            // Uses CPU-backed RGBA DataTexture to prevent Chromium/ANGLE/Vulkan BGRA<->RGBA blue-Tux channel swap
             function createOfficialLinuxTuxTexture() {
+                const size = 1024;
                 const canvas = document.createElement('canvas');
-                canvas.width = 1024;
-                canvas.height = 1024;
-                const ctx = canvas.getContext('2d');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-                const tex = new THREE.CanvasTexture(canvas);
+                const tex = new THREE.DataTexture(
+                    new Uint8Array(size * size * 4),
+                    size,
+                    size,
+                    THREE.RGBAFormat,
+                    THREE.UnsignedByteType
+                );
+                tex.flipY = true;
+                tex.generateMipmaps = true;
+                tex.minFilter = THREE.LinearMipmapLinearFilter;
+                tex.magFilter = THREE.LinearFilter;
                 tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+                let fallbackCanvasTex = null;
 
                 function drawCenteredToCanvas(imgElement) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -8440,7 +8732,24 @@
                     const offsetX = (canvas.width - drawW) * 0.5;
                     const offsetY = (canvas.height - drawH) * 0.5;
                     ctx.drawImage(imgElement, offsetX, offsetY, drawW, drawH);
-                    tex.needsUpdate = true;
+
+                    try {
+                        // Spec-guaranteed RGBA byte order bypasses GPU Canvas2D BGRA mailbox swizzle bugs
+                        const imgData = ctx.getImageData(0, 0, size, size);
+                        tex.image.data.set(imgData.data);
+                        tex.needsUpdate = true;
+                        if (tuxUniforms.uMap.value !== tex) {
+                            tuxUniforms.uMap.value = tex;
+                        }
+                    } catch (e) {
+                        // Safe fallback if a strict file:// origin taints getImageData()
+                        if (!fallbackCanvasTex) {
+                            fallbackCanvasTex = new THREE.CanvasTexture(canvas);
+                            fallbackCanvasTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                        }
+                        fallbackCanvasTex.needsUpdate = true;
+                        tuxUniforms.uMap.value = fallbackCanvasTex;
+                    }
                 }
 
                 const fallbackTuxSvg = `
@@ -11456,10 +11765,93 @@
                 const nextScale = THREE.MathUtils.clamp(parseFloat(val), 0.18, 0.85);
                 calisthenicsOverlay.config.globalScale = nextScale;
                 calisthenicsOverlay._updateStationLayout();
-                ringsOverlay.config.globalScale = nextScale;
-                ringsOverlay._updateLayout();
                 refreshStationSnowCaps(true);
                 snowbankDirtyCounter = 99;
+                syncAllHudState();
+            }
+
+            const RINGS_X_MIN = -7.50, RINGS_X_MAX = 7.50;
+            const RINGS_Y_MIN = -1.00, RINGS_Y_MAX = 4.50;
+
+            function triggerSetCalisthenicsRingsPos(hangX, hangDrop) {
+                wakeFromIdle();
+                ringsOverlay.config.hangX = THREE.MathUtils.clamp(parseFloat(hangX), RINGS_X_MIN, RINGS_X_MAX);
+                ringsOverlay.config.hangDrop = THREE.MathUtils.clamp(parseFloat(hangDrop), RINGS_Y_MIN, RINGS_Y_MAX);
+                ringsOverlay._updateLayout();
+                syncAllHudState();
+            }
+
+            function bindRingsXYPad(padEl) {
+                if (!padEl) return;
+                let draggingPad = false;
+
+                const applyClientPoint = (clientX, clientY) => {
+                    const rect = padEl.getBoundingClientRect();
+                    if (rect.width <= 0 || rect.height <= 0) return;
+                    const u = THREE.MathUtils.clamp((clientX - rect.left) / rect.width, 0.0, 1.0);
+                    const v = THREE.MathUtils.clamp((clientY - rect.top) / rect.height, 0.0, 1.0);
+
+                    let nextX = RINGS_X_MIN + u * (RINGS_X_MAX - RINGS_X_MIN);
+                    let nextY = RINGS_Y_MIN + v * (RINGS_Y_MAX - RINGS_Y_MIN);
+
+                    // Subtle magnetic snap to exact center X=0 and ceiling Y=0 lines
+                    if (Math.abs(nextX) < 0.18) nextX = 0.0;
+                    if (Math.abs(nextY) < 0.09) nextY = 0.0;
+
+                    nextX = Math.round(nextX * 20) / 20;
+                    nextY = Math.round(nextY * 20) / 20;
+                    triggerSetCalisthenicsRingsPos(nextX, nextY);
+                };
+
+                padEl.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    draggingPad = true;
+                    padEl.classList.add('dragging');
+                    applyClientPoint(e.clientX, e.clientY);
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!draggingPad) return;
+                    applyClientPoint(e.clientX, e.clientY);
+                }, { passive: true });
+
+                window.addEventListener('mouseup', () => {
+                    if (!draggingPad) return;
+                    draggingPad = false;
+                    padEl.classList.remove('dragging');
+                });
+
+                padEl.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    if (e.touches.length > 0) {
+                        draggingPad = true;
+                        padEl.classList.add('dragging');
+                        applyClientPoint(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: true });
+
+                window.addEventListener('touchmove', (e) => {
+                    if (!draggingPad || e.touches.length === 0) return;
+                    applyClientPoint(e.touches[0].clientX, e.touches[0].clientY);
+                }, { passive: true });
+
+                window.addEventListener('touchend', () => {
+                    if (!draggingPad) return;
+                    draggingPad = false;
+                    padEl.classList.remove('dragging');
+                });
+
+                padEl.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    triggerSetCalisthenicsRingsPos(0.0, 0.0);
+                });
+            }
+
+            function triggerSetCalisthenicsRingsScale(val) {
+                wakeFromIdle();
+                ringsOverlay.config.globalScale = THREE.MathUtils.clamp(parseFloat(val), 0.15, 0.85);
+                ringsOverlay._updateLayout();
                 syncAllHudState();
             }
 
@@ -11480,6 +11872,14 @@
 
             toggleCalisthenicsBtn.addEventListener('click', triggerToggleCalisthenics);
             toggleCalisthenicsRingsBtn.addEventListener('click', triggerToggleCalisthenicsRings);
+            bindRingsXYPad(ringsXyPad);
+            if (ringsXyResetBtn) {
+                ringsXyResetBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    triggerSetCalisthenicsRingsPos(0.0, 0.0);
+                });
+            }
+            calisthenicsRingsScaleSlider.addEventListener('input', (e) => triggerSetCalisthenicsRingsScale(e.target.value));
             toggleCalisthenicsStyleBtn.addEventListener('click', triggerToggleCalisthenicsStyle);
             calisthenicsLeftSkillBtn.addEventListener('click', triggerToggleCalisthenicsLeftSkill);
             calisthenicsRingsSkillBtn.addEventListener('click', triggerToggleCalisthenicsRingsSkill);
@@ -11706,6 +12106,32 @@
                         btn.addEventListener('click', triggerToggleCalisthenicsRings);
                         pinnedWidgets.calisthenicsRingsToggle = btn;
                         wrap.appendChild(btn);
+                    } else if (pinId === 'calisthenicsRingsPos') {
+                        const lbl = document.createElement('span');
+                        lbl.textContent = 'Hang';
+                        const miniPad = document.createElement('div');
+                        miniPad.className = 'xy-pad-mini';
+                        miniPad.title = 'Drag to position Ceiling Rings in X & Y (Double-click to center)';
+                        const knob = document.createElement('div');
+                        knob.className = 'xy-pad-knob';
+                        miniPad.appendChild(knob);
+                        bindRingsXYPad(miniPad);
+                        pinnedWidgets.calisthenicsRingsMiniKnob = knob;
+                        wrap.append(lbl, miniPad);
+                    } else if (pinId === 'calisthenicsRingsScale') {
+                        const lbl = document.createElement('span');
+                        lbl.textContent = 'RingSz';
+                        const input = document.createElement('input');
+                        input.type = 'range';
+                        input.min = '0.15';
+                        input.max = '0.85';
+                        input.step = '0.01';
+                        input.value = ringsOverlay.config.globalScale;
+                        input.dataset.pinnedWidget = 'calisthenics-rings-scale-slider';
+                        input.className = 'hud-slider w-12 cursor-pointer';
+                        input.addEventListener('input', (e) => triggerSetCalisthenicsRingsScale(e.target.value));
+                        pinnedWidgets.calisthenicsRingsScaleSlider = input;
+                        wrap.append(lbl, input);
                     } else if (pinId === 'calisthenicsStyle') {
                         const btn = document.createElement('button');
                         btn.dataset.pinnedWidget = 'calisthenicsStyle';
@@ -12237,7 +12663,7 @@
                         : 'mode-btn text-neutral-500';
 
                     const caliRowOpacity = isCalisthenicsEnabled ? '1' : '0.45';
-                    calisthenicsRingsWrap.style.opacity = caliRowOpacity;
+                    calisthenicsRingsCard.style.opacity = caliRowOpacity;
                     calisthenicsStyleWrap.style.opacity = caliRowOpacity;
                     calisthenicsSkillsWrap.style.opacity = caliRowOpacity;
                     calisthenicsDriveWrap.style.opacity = caliRowOpacity;
@@ -12248,6 +12674,44 @@
                     toggleCalisthenicsRingsBtn.className = (isCalisthenicsEnabled && isCalisthenicsRingsEnabled)
                         ? `mode-btn ${softAccentClass} font-medium`
                         : 'mode-btn text-neutral-500';
+
+                    if (calisthenicsRingsSubmenu) {
+                        const showRingsSub = isCalisthenicsRingsEnabled;
+                        calisthenicsRingsSubmenu.classList.toggle('hidden', !showRingsSub);
+                        calisthenicsRingsSubmenu.classList.toggle('flex', showRingsSub);
+                    }
+                    const ringsU = THREE.MathUtils.clamp((ringsOverlay.config.hangX - RINGS_X_MIN) / (RINGS_X_MAX - RINGS_X_MIN), 0.0, 1.0) * 100;
+                    const ringsV = THREE.MathUtils.clamp((ringsOverlay.config.hangDrop - RINGS_Y_MIN) / (RINGS_Y_MAX - RINGS_Y_MIN), 0.0, 1.0) * 100;
+                    if (calisthenicsRingsPosReadout) {
+                        calisthenicsRingsPosReadout.textContent = `${ringsOverlay.config.hangX.toFixed(2)}, ${ringsOverlay.config.hangDrop.toFixed(2)}`;
+                        calisthenicsRingsPosReadout.className = `mono font-medium text-[10px] ${softAccentClass}`;
+                    }
+                    if (ringsXyKnob) {
+                        ringsXyKnob.style.left = `${ringsU.toFixed(2)}%`;
+                        ringsXyKnob.style.top = `${ringsV.toFixed(2)}%`;
+                    }
+                    if (ringsXyCrossH) {
+                        ringsXyCrossH.setAttribute('y1', ringsV.toFixed(2));
+                        ringsXyCrossH.setAttribute('y2', ringsV.toFixed(2));
+                    }
+                    if (ringsXyCrossV) {
+                        ringsXyCrossV.setAttribute('x1', ringsU.toFixed(2));
+                        ringsXyCrossV.setAttribute('x2', ringsU.toFixed(2));
+                    }
+                    if (ringsXyStrapL && ringsXyStrapR) {
+                        const sOffTop = 2.4;
+                        const sOffBot = 1.8;
+                        ringsXyStrapL.setAttribute('x1', (ringsU - sOffTop).toFixed(2));
+                        ringsXyStrapL.setAttribute('x2', (ringsU - sOffBot).toFixed(2));
+                        ringsXyStrapL.setAttribute('y2', ringsV.toFixed(2));
+                        ringsXyStrapR.setAttribute('x1', (ringsU + sOffTop).toFixed(2));
+                        ringsXyStrapR.setAttribute('x2', (ringsU + sOffBot).toFixed(2));
+                        ringsXyStrapR.setAttribute('y2', ringsV.toFixed(2));
+                    }
+
+                    calisthenicsRingsScaleSlider.value = ringsOverlay.config.globalScale;
+                    calisthenicsRingsScaleReadout.textContent = ringsOverlay.config.globalScale.toFixed(2);
+                    calisthenicsRingsScaleReadout.className = `mono font-medium w-10 text-right ${softAccentClass}`;
 
                     toggleCalisthenicsStyleBtn.textContent = caliStyleLabel;
                     toggleCalisthenicsStyleBtn.className = `mode-btn ${softAccentClass} font-medium`;
@@ -12450,6 +12914,13 @@
                         ? `hover:text-white transition cursor-pointer ${softAccentClass} font-medium px-1`
                         : 'hover:text-white transition cursor-pointer text-neutral-500 px-1';
                 }
+                if (pw.calisthenicsRingsMiniKnob) {
+                    const miniU = THREE.MathUtils.clamp((ringsOverlay.config.hangX - RINGS_X_MIN) / (RINGS_X_MAX - RINGS_X_MIN), 0.0, 1.0) * 100;
+                    const miniV = THREE.MathUtils.clamp((ringsOverlay.config.hangDrop - RINGS_Y_MIN) / (RINGS_Y_MAX - RINGS_Y_MIN), 0.0, 1.0) * 100;
+                    pw.calisthenicsRingsMiniKnob.style.left = `${miniU.toFixed(2)}%`;
+                    pw.calisthenicsRingsMiniKnob.style.top = `${miniV.toFixed(2)}%`;
+                }
+                if (pw.calisthenicsRingsScaleSlider) pw.calisthenicsRingsScaleSlider.value = ringsOverlay.config.globalScale;
                 if (pw.calisthenicsStyle) {
                     setBtnText(pw.calisthenicsStyle, caliStyleLabel);
                     pw.calisthenicsStyle.className = `hover:text-white transition cursor-pointer ${softAccentClass} font-medium px-1`;
@@ -12898,10 +13369,40 @@
                     );
                     calisthenicsOverlay.config.globalScale = nextScale;
                     calisthenicsOverlay._updateStationLayout();
-                    ringsOverlay.config.globalScale = nextScale;
-                    ringsOverlay._updateLayout();
                     refreshStationSnowCaps(true);
                     snowbankDirtyCounter = 99;
+                }
+                if (wheelControlledSliders.has('calisthenicsRingsDrop')) {
+                    if (e.shiftKey) {
+                        ringsOverlay.config.hangX = THREE.MathUtils.clamp(
+                            ringsOverlay.config.hangX + dir * 0.25,
+                            RINGS_X_MIN,
+                            RINGS_X_MAX
+                        );
+                    } else {
+                        ringsOverlay.config.hangDrop = THREE.MathUtils.clamp(
+                            ringsOverlay.config.hangDrop + dir * 0.15,
+                            RINGS_Y_MIN,
+                            RINGS_Y_MAX
+                        );
+                    }
+                    ringsOverlay._updateLayout();
+                }
+                if (wheelControlledSliders.has('calisthenicsRingsX')) {
+                    ringsOverlay.config.hangX = THREE.MathUtils.clamp(
+                        ringsOverlay.config.hangX + dir * 0.25,
+                        RINGS_X_MIN,
+                        RINGS_X_MAX
+                    );
+                    ringsOverlay._updateLayout();
+                }
+                if (wheelControlledSliders.has('calisthenicsRingsScale')) {
+                    ringsOverlay.config.globalScale = THREE.MathUtils.clamp(
+                        ringsOverlay.config.globalScale + dir * 0.025,
+                        0.15,
+                        0.85
+                    );
+                    ringsOverlay._updateLayout();
                 }
                 syncAllHudState();
                 hudVisDirty = true;
