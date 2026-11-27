@@ -11,7 +11,7 @@ let
 
   declarativeWebWallpaperPlugin = pkgs.stdenv.mkDerivation {
     pname = "plasma6-webwallpaper-declarative";
-    version = "2.8.0";
+    version = "2.8.2";
 
     dontUnpack = true;
     dontConfigure = true;
@@ -84,11 +84,6 @@ let
       #include <qqml.h>
       #include <thread>
 
-      // Singleton hub managing:
-      // 1. Ref-counted KWin Wayland cursor script
-      // 2. System Power-Save state (UPower / power-profiles-daemon)
-      // 3. Session Lock state (org.freedesktop.ScreenSaver)
-      // 4. System Hibernate / Suspend state (org.freedesktop.login1.Manager PrepareForSleep)
       class KWinCursorReceiver : public QObject {
           Q_OBJECT
           Q_CLASSINFO("D-Bus Interface", "org.nixos.WallpaperInput")
@@ -503,8 +498,6 @@ let
               Q_EMIT watchFileChangesChanged();
           }
 
-          // Appends a cache-busting revision query (?v=N) so QtQuick Image ALWAYS reloads
-          // the freshly saved freeze-frame from disk instead of showing a stale cached frame!
           QString snapshotUrl() const {
               if (!m_snapshotFilePath.isEmpty() && QFileInfo::exists(m_snapshotFilePath) && QFileInfo(m_snapshotFilePath).size() > 0) {
                   return QStringLiteral("file://%1?v=%2").arg(m_snapshotFilePath).arg(m_snapshotVersion);
@@ -541,8 +534,6 @@ let
                   return;
               }
 
-              // If a save is already running on the worker thread, queue this latest frame
-              // so a pause frame is NEVER dropped!
               if (m_savingSnapshot) {
                   m_queuedSnapshot = img;
                   m_hasQueuedSnapshot = true;
@@ -669,7 +660,6 @@ let
 
       private:
           void startSnapshotWorker(const QImage &img) {
-              // 16x16 grid check to ensure we never overwrite cache with an empty black frame
               bool hasVisibleContent = false;
               const int w = img.width();
               const int h = img.height();
@@ -703,13 +693,11 @@ let
                       QFile::rename(tmpPath, targetPath);
                   }
 
-                  // Auto-clean stale cache files (>7 days old or >8 total files)
                   pruneStaleCacheFiles(dir);
 
                   QMetaObject::invokeMethod(this, [this]() {
                       m_savingSnapshot = false;
                       m_snapshotVersion++;
-                      // Always emit snapshotUrlChanged so QtQuick Image reloads the updated file!
                       Q_EMIT snapshotUrlChanged();
                       Q_EMIT snapshotSaved();
 
@@ -724,7 +712,6 @@ let
           }
 
           static void pruneStaleCacheFiles(const QDir &dir) {
-              // Remove any leftover .tmp.jpg files and cap snap_*.jpg count at 8
               const QFileInfoList tmpFiles = dir.entryInfoList(QStringList() << QStringLiteral("*.tmp.jpg"), QDir::Files);
               for (const QFileInfo &t : tmpFiles) {
                   QFile::remove(t.absoluteFilePath());
@@ -733,7 +720,7 @@ let
               const QFileInfoList snaps = dir.entryInfoList(
                   QStringList() << QStringLiteral("snap_*.jpg"),
                   QDir::Files,
-                  QDir::Time // Sorted newest first
+                  QDir::Time
               );
               const QDateTime cutoff = QDateTime::currentDateTimeUtc().addDays(-7);
               for (int i = 0; i < snaps.size(); ++i) {
@@ -999,7 +986,7 @@ let
             }
           ],
           "Category": "Wallpaper",
-          "Description": "Hardware-accelerated HTML5/WebGL Wallpaper with Seamless Freeze-Frame Continuity & Smart Pause",
+          "Description": "Hardware-accelerated HTML5/WebGL Wallpaper with Seamless Freeze-Frame Continuity, Virtual Clock & Smart Pause",
           "Icon": "preferences-desktop-wallpaper",
           "Id": "org.nixos.webglwallpaper",
           "License": "GPL-3.0-or-later",
@@ -1007,7 +994,7 @@ let
           "ServiceTypes": [
             "Plasma/Wallpaper"
           ],
-          "Version": "2.8.0"
+          "Version": "2.8.2"
         },
         "X-KDE-ParentApp": "org.kde.plasmashell",
         "X-Plasma-API-Minimum-Version": "6.0",
@@ -1064,7 +1051,11 @@ let
             <default>false</default>
           </entry>
           <entry name="UseSnapshotCache" type="Bool">
-            <label>Show cached static screenshot during boot, lock screen, hibernate, and reload</label>
+            <label>Show cached static screenshot during boot, pause, lock screen, hibernate, and reload</label>
+            <default>true</default>
+          </entry>
+          <entry name="VirtualTimeContinuity" type="Bool">
+            <label>Freeze virtual animation clock while paused (seamless physics/shader resume)</label>
             <default>true</default>
           </entry>
           <entry name="AutoReloadOnModify" type="Bool">
@@ -1096,6 +1087,7 @@ let
           property bool cfg_ResetMouseOnLeave
           property bool cfg_FreezeInactiveMonitor
           property bool cfg_UseSnapshotCache
+          property bool cfg_VirtualTimeContinuity
           property bool cfg_AutoReloadOnModify
 
           RowLayout {
@@ -1181,9 +1173,15 @@ let
 
           QQC2.CheckBox {
               Kirigami.FormData.label: "Continuity Cache & Live Dev:"
-              text: "Use static screenshot shield for boot, screen lock, hibernate & reload (zero black screen)"
+              text: "Use static screenshot shield during boot, pause, lock screen, hibernate & reload (zero black screen)"
               checked: configRoot.cfg_UseSnapshotCache
               onToggled: configRoot.cfg_UseSnapshotCache = checked
+          }
+
+          QQC2.CheckBox {
+              text: "Freeze virtual animation clock while paused (seamless physics/shader resume; disable for real-time clocks)"
+              checked: configRoot.cfg_VirtualTimeContinuity
+              onToggled: configRoot.cfg_VirtualTimeContinuity = checked
           }
 
           QQC2.CheckBox {
@@ -1226,11 +1224,10 @@ let
           readonly property bool resetMouseOnLeave: root.configuration.ResetMouseOnLeave !== undefined ? root.configuration.ResetMouseOnLeave : true
           readonly property bool freezeInactiveMonitor: root.configuration.FreezeInactiveMonitor !== undefined ? root.configuration.FreezeInactiveMonitor : false
           readonly property bool useSnapshotCache: root.configuration.UseSnapshotCache !== undefined ? root.configuration.UseSnapshotCache : true
+          readonly property bool virtualTimeContinuity: root.configuration.VirtualTimeContinuity !== undefined ? root.configuration.VirtualTimeContinuity : true
           readonly property bool autoReloadOnModify: root.configuration.AutoReloadOnModify !== undefined ? root.configuration.AutoReloadOnModify : true
 
           property bool isPaused: false
-          // True ONLY when the GPU surface is at risk of being purged (Boot, Reload, Screen Lock, Hibernate, Crash)
-          // Normal pauses (Power Save, Maximized window) keep showing the exact live WebGL buffer with zero jump!
           property bool surfacePurgeShieldActive: false
           property bool inactiveMonitorSettled: false
           property bool pageReady: false
@@ -1242,6 +1239,7 @@ let
               inputBridge.resetNativeHoverState();
           }
 
+          onVirtualTimeContinuityChanged: root.syncVirtualTimeMode()
           onPauseOnPowerSaveChanged: pauseEvalTimer.restart()
           onSmartPauseEnabledChanged: pauseEvalTimer.restart()
           onPauseOnMaximizedChanged: pauseEvalTimer.restart()
@@ -1256,6 +1254,14 @@ let
               pauseEvalTimer.restart();
           }
 
+          function syncVirtualTimeMode() {
+              if (!root.pageReady) return;
+              webview.runJavaScript(
+                  "if (window.__setVirtualTimeContinuity) window.__setVirtualTimeContinuity(" +
+                  (root.virtualTimeContinuity ? "true" : "false") + ");"
+              );
+          }
+
           function captureDiskSnapshot() {
               if (!root.useSnapshotCache || !root.pageReady || !root.webviewPainted) return;
               webview.grabToImage(function(result) {
@@ -1265,17 +1271,17 @@ let
               });
           }
 
-          // Verifies that WebGL context is alive and has rendered 2 fresh frames before hiding the shield
           function verifyLiveRenderAndReveal() {
               if (!root.pageReady || root.isPaused || inputBridge.systemSleeping || inputBridge.screenLocked) {
                   return;
               }
               webview.lifecycleState = WebEngineView.LifecycleState.Active;
               webview.runJavaScript(
-                  "window.__wallpaperResumeAndVerify ? window.__wallpaperResumeAndVerify() : 'ready'",
+                  "window.__wallpaperResumeAndVerify ? window.__wallpaperResumeAndVerify() : \"ready\"",
                   function(status) {
                       if (status === "reload") {
                           root.webviewPainted = false;
+                          root.surfacePurgeShieldActive = true;
                           webview.reload();
                       } else {
                           resumeFramePollTimer.attempts = 0;
@@ -1288,7 +1294,7 @@ let
           Timer {
               id: resumeFramePollTimer
               property int attempts: 0
-              interval: 55
+              interval: 50
               repeat: true
               onTriggered: {
                   if (root.isPaused || inputBridge.systemSleeping || inputBridge.screenLocked || !root.pageReady) {
@@ -1332,10 +1338,21 @@ let
               }
           }
 
+          function effectiveTasksScreenGeometry() {
+              const g = inputBridge.windowScreenGeometry;
+              if (g && g.width > 0 && g.height > 0) {
+                  return g;
+              }
+              if (root.width > 0 && root.height > 0) {
+                  return Qt.rect(0, 0, root.width, root.height);
+              }
+              return Qt.rect(0, 0, 1920, 1080);
+          }
+
           TaskManager.TasksModel {
               id: tasksModel
               filterByScreen: true
-              screenGeometry: inputBridge.windowScreenGeometry
+              screenGeometry: root.effectiveTasksScreenGeometry()
               filterByActivity: true
               filterByVirtualDesktop: true
 
@@ -1345,12 +1362,14 @@ let
                       roles.indexOf(TaskManager.AbstractTasksModel.IsMaximized) !== -1 ||
                       roles.indexOf(TaskManager.AbstractTasksModel.IsMinimized) !== -1 ||
                       roles.indexOf(TaskManager.AbstractTasksModel.IsHidden) !== -1 ||
+                      roles.indexOf(TaskManager.AbstractTasksModel.IsGroupParent) !== -1 ||
                       roles.indexOf(TaskManager.AbstractTasksModel.Geometry) !== -1) {
                       pauseEvalTimer.restart();
                   }
               }
               onRowsInserted: pauseEvalTimer.restart()
               onRowsRemoved: pauseEvalTimer.restart()
+              onModelReset: pauseEvalTimer.restart()
           }
 
           TaskManager.VirtualDesktopInfo {
@@ -1365,7 +1384,7 @@ let
 
           Timer {
               id: pauseEvalTimer
-              interval: 90
+              interval: 80
               repeat: false
               onTriggered: root.evaluateSmartPause()
           }
@@ -1397,6 +1416,39 @@ let
               return (coveredCells / totalCells) >= 0.90;
           }
 
+          // Inspects a single QModelIndex and any grouped child windows (e.g. multiple terminal windows)
+          function inspectTaskIndex(modelIndex, visibleRects, stateOut) {
+              if (!modelIndex || !modelIndex.valid) return;
+
+              const isMinimized = Boolean(tasksModel.data(modelIndex, TaskManager.AbstractTasksModel.IsMinimized));
+              const isHidden = Boolean(tasksModel.data(modelIndex, TaskManager.AbstractTasksModel.IsHidden));
+
+              if (!isMinimized && !isHidden) {
+                  const isFullScreen = Boolean(tasksModel.data(modelIndex, TaskManager.AbstractTasksModel.IsFullScreen));
+                  const isMaximized = Boolean(tasksModel.data(modelIndex, TaskManager.AbstractTasksModel.IsMaximized));
+
+                  if (isFullScreen || (root.pauseOnMaximized && isMaximized)) {
+                      stateOut.paused = true;
+                  }
+
+                  if (root.pauseOnTiledCoverage) {
+                      const geom = tasksModel.data(modelIndex, TaskManager.AbstractTasksModel.Geometry);
+                      if (geom && geom.width > 0 && geom.height > 0) {
+                          visibleRects.push(geom);
+                      }
+                  }
+              }
+
+              const childCount = tasksModel.rowCount(modelIndex);
+              for (let c = 0; c < childCount; c++) {
+                  const childIdx = tasksModel.index(c, 0, modelIndex);
+                  root.inspectTaskIndex(childIdx, visibleRects, stateOut);
+                  if (stateOut.paused) {
+                      break;
+                  }
+              }
+          }
+
           function evaluateSmartPause() {
               if (inputBridge.systemSleeping || inputBridge.screenLocked || (root.pauseOnPowerSave && inputBridge.powerSaverActive)) {
                   root.setWallpaperPaused(true);
@@ -1413,34 +1465,21 @@ let
                   return;
               }
 
-              let shouldPause = false;
               const count = tasksModel.count;
               const visibleRects = [];
+              const stateOut = { paused: false };
 
               for (let i = 0; i < count; i++) {
                   const idx = tasksModel.index(i, 0);
-                  const isMinimized = tasksModel.data(idx, TaskManager.AbstractTasksModel.IsMinimized);
-                  const isHidden = tasksModel.data(idx, TaskManager.AbstractTasksModel.IsHidden);
-                  if (isMinimized || isHidden) continue;
-
-                  const isFullScreen = tasksModel.data(idx, TaskManager.AbstractTasksModel.IsFullScreen);
-                  const isMaximized = tasksModel.data(idx, TaskManager.AbstractTasksModel.IsMaximized);
-
-                  if (isFullScreen || (root.pauseOnMaximized && isMaximized)) {
-                      shouldPause = true;
+                  root.inspectTaskIndex(idx, visibleRects, stateOut);
+                  if (stateOut.paused) {
                       break;
-                  }
-
-                  if (root.pauseOnTiledCoverage) {
-                      const geom = tasksModel.data(idx, TaskManager.AbstractTasksModel.Geometry);
-                      if (geom && geom.width > 0 && geom.height > 0) {
-                          visibleRects.push(geom);
-                      }
                   }
               }
 
+              let shouldPause = stateOut.paused;
               if (!shouldPause && root.pauseOnTiledCoverage && visibleRects.length >= 2) {
-                  shouldPause = root.isScreenCoveredByTiledWindows(visibleRects, inputBridge.windowScreenGeometry);
+                  shouldPause = root.isScreenCoveredByTiledWindows(visibleRects, root.effectiveTasksScreenGeometry());
               }
 
               root.setWallpaperPaused(shouldPause);
@@ -1452,45 +1491,37 @@ let
 
               if (pauseState) {
                   resumeFramePollTimer.stop();
-                  // 1. Stop the JS requestAnimationFrame loop on the exact current frame
                   webview.runJavaScript("if (window.__wallpaperSetPaused) window.__wallpaperSetPaused(true);");
 
-                  // 2. Always capture this exact freeze-frame into the background disk cache
-                  // (with no 15s throttle!) so if the user locks or hibernates later while paused,
-                  // the screenshot shield matches this exact frame 1:1.
                   if (root.useSnapshotCache && root.pageReady && root.webviewPainted) {
                       webview.grabToImage(function(result) {
                           if (result && result.image) {
                               inputBridge.saveSnapshotAsync(result.image);
-                          }
-                          if (root.isPaused) {
+                          } else if (root.isPaused) {
+                              root.surfacePurgeShieldActive = true;
                               freezeDelayTimer.restart();
                           }
                       });
                       pauseFallbackTimer.restart();
                   } else {
+                      root.surfacePurgeShieldActive = true;
                       freezeDelayTimer.restart();
                   }
               } else {
                   pauseFallbackTimer.stop();
                   freezeDelayTimer.stop();
                   webview.lifecycleState = WebEngineView.LifecycleState.Active;
-                  if (root.surfacePurgeShieldActive || !root.webviewPainted) {
-                      // Returning from Screen Lock, Hibernate, or Boot: verify 2 frames before hiding shield
-                      root.verifyLiveRenderAndReveal();
-                  } else {
-                      // Returning from a normal pause (Power Save / Maximized window): instant resume!
-                      webview.runJavaScript("if (window.__wallpaperSetPaused) window.__wallpaperSetPaused(false);");
-                  }
+                  root.verifyLiveRenderAndReveal();
               }
           }
 
           Timer {
               id: pauseFallbackTimer
-              interval: 100
+              interval: 120
               repeat: false
               onTriggered: {
                   if (root.isPaused) {
+                      root.surfacePurgeShieldActive = true;
                       freezeDelayTimer.restart();
                   }
               }
@@ -1536,21 +1567,68 @@ let
                   if (loadRequest.status === WebEngineView.LoadStartedStatus) {
                       root.webviewPainted = false;
                       inputBridge.resetNativeHoverState();
+                      webview.runJavaScript(`
+                          (function() {
+                              if (typeof window.THREE === "undefined" && !window.__threeInjecting) {
+                                  window.__threeInjecting = true;
+                                  const s = document.createElement("script");
+                                  s.src = "file://${threeJsLib}";
+                                  document.head.appendChild(s);
+                              }
+                          })();
+                      `);
                   } else if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
                       webview.runJavaScript(`
                           (function() {
                               if (window.__nixosWallpaperBridgeInstalled) return;
                               window.__nixosWallpaperBridgeInstalled = true;
 
-                              if (typeof window.THREE === "undefined") {
+                              // Offline Three.js r128 fallback & script re-runner if booted without internet
+                              if (typeof window.THREE === "undefined" && !window.__threeFallbackStarted) {
+                                  window.__threeFallbackStarted = true;
                                   const s = document.createElement("script");
                                   s.src = "file://${threeJsLib}";
                                   s.onload = function() {
-                                      const scripts = document.body.querySelectorAll("script:not([src])");
-                                      scripts.forEach(sc => { try { eval(sc.textContent); } catch (e) {} });
+                                      const scripts = Array.from(document.querySelectorAll("script:not([src])"));
+                                      for (const sc of scripts) {
+                                          if (sc.textContent && sc.textContent.indexOf("THREE") !== -1 && sc.textContent.indexOf("__nixosWallpaperBridgeInstalled") === -1) {
+                                              try {
+                                                  (0, eval)(sc.textContent);
+                                                  break;
+                                              } catch (e) {}
+                                          }
+                                      }
                                   };
                                   document.head.appendChild(s);
                               }
+
+                              // Offline fallback SVG for Tux if an external Tux/Linux image URL fails offline
+                              const offlineTuxDataUri = "data:image/svg+xml;utf8," + encodeURIComponent(
+                                  "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 256 256\\">" +
+                                  "<ellipse cx=\\"128\\" cy=\\"144\\" rx=\\"68\\" ry=\\"82\\" fill=\\"#111318\\"/>" +
+                                  "<ellipse cx=\\"128\\" cy=\\"154\\" rx=\\"46\\" ry=\\"62\\" fill=\\"#f4f5f7\\"/>" +
+                                  "<circle cx=\\"128\\" cy=\\"66\\" r=\\"42\\" fill=\\"#111318\\"/>" +
+                                  "<ellipse cx=\\"113\\" cy=\\"60\\" rx=\\"8\\" ry=\\"11\\" fill=\\"#ffffff\\"/>" +
+                                  "<ellipse cx=\\"143\\" cy=\\"60\\" rx=\\"9\\" ry=\\"12\\" fill=\\"#ffffff\\"/>" +
+                                  "<circle cx=\\"115\\" cy=\\"62\\" r=\\"4\\" fill=\\"#090a0d\\"/>" +
+                                  "<circle cx=\\"141\\" cy=\\"62\\" r=\\"4.5\\" fill=\\"#090a0d\\"/>" +
+                                  "<polygon points=\\"112,76 144,76 128,94\\" fill=\\"#f59e0b\\"/>" +
+                                  "<ellipse cx=\\"92\\" cy=\\"224\\" rx=\\"24\\" ry=\\"10\\" fill=\\"#f59e0b\\"/>" +
+                                  "<ellipse cx=\\"164\\" cy=\\"224\\" rx=\\"24\\" ry=\\"10\\" fill=\\"#f59e0b\\"/>" +
+                                  "</svg>"
+                              );
+
+                              window.addEventListener("error", function(ev) {
+                                  const target = ev.target;
+                                  if (target && target.tagName === "IMG" && !target.dataset.offlineFallbackApplied) {
+                                      const srcLower = (target.getAttribute("src") || "").toLowerCase();
+                                      const altLower = (target.getAttribute("alt") || "").toLowerCase();
+                                      if (srcLower.indexOf("tux") !== -1 || srcLower.indexOf("linux") !== -1 || altLower.indexOf("tux") !== -1 || altLower.indexOf("linux") !== -1) {
+                                          target.dataset.offlineFallbackApplied = "1";
+                                          target.src = offlineTuxDataUri;
+                                      }
+                                  }
+                              }, true);
 
                               window.__webglContextLost = false;
                               window.addEventListener("webglcontextlost", function() {
@@ -1563,9 +1641,36 @@ let
                               window.__lastTrustedMove = 0;
                               window.addEventListener("mousemove", function(e) {
                                   if (e.isTrusted) {
-                                      window.__lastTrustedMove = performance.now();
+                                      window.__lastTrustedMove = window.__rawPerfNow ? window.__rawPerfNow() : performance.now();
                                   }
                               }, { capture: true, passive: true });
+
+                              window.__rawPerfNow = performance.now.bind(performance);
+                              window.__totalPausedDurationMs = 0;
+                              window.__pauseStartRawMs = null;
+                              window.__virtualTimeContinuity = true;
+
+                              performance.now = function() {
+                                  const raw = window.__rawPerfNow();
+                                  if (!window.__virtualTimeContinuity) {
+                                      return raw;
+                                  }
+                                  const activePause = (window.__pauseStartRawMs !== null)
+                                      ? (raw - window.__pauseStartRawMs)
+                                      : 0;
+                                  return raw - window.__totalPausedDurationMs - activePause;
+                              };
+
+                              window.__setVirtualTimeContinuity = function(enabled) {
+                                  const nextState = Boolean(enabled);
+                                  if (window.__virtualTimeContinuity === nextState) return;
+                                  if (!nextState) {
+                                      window.__pauseStartRawMs = null;
+                                  } else if (window.__universalPaused) {
+                                      window.__pauseStartRawMs = window.__rawPerfNow();
+                                  }
+                                  window.__virtualTimeContinuity = nextState;
+                              };
 
                               window.__rawRAF = window.requestAnimationFrame.bind(window);
                               window.__pausedCallbacks = [];
@@ -1573,20 +1678,38 @@ let
                               window.__resumeFramesPainted = false;
 
                               window.requestAnimationFrame = function(cb) {
+                                  const wrappedCb = function(rawTimestamp) {
+                                      const effectiveTime = window.__virtualTimeContinuity
+                                          ? performance.now()
+                                          : rawTimestamp;
+                                      cb(effectiveTime);
+                                  };
                                   if (window.__universalPaused) {
-                                      window.__pausedCallbacks.push(cb);
+                                      window.__pausedCallbacks.push(wrappedCb);
                                       return -1;
                                   }
-                                  return window.__rawRAF(cb);
+                                  return window.__rawRAF(wrappedCb);
                               };
 
                               window.__wallpaperSetPaused = function(paused) {
+                                  if (window.__universalPaused === paused) return;
                                   window.__universalPaused = paused;
                                   if (paused) {
                                       window.__resumeFramesPainted = false;
-                                  } else if (window.__pausedCallbacks.length > 0) {
-                                      const queue = window.__pausedCallbacks.splice(0);
-                                      queue.forEach(fn => window.__rawRAF(fn));
+                                      if (window.__pauseStartRawMs === null) {
+                                          window.__pauseStartRawMs = window.__rawPerfNow();
+                                      }
+                                  } else {
+                                      if (window.__pauseStartRawMs !== null) {
+                                          if (window.__virtualTimeContinuity) {
+                                              window.__totalPausedDurationMs += (window.__rawPerfNow() - window.__pauseStartRawMs);
+                                          }
+                                          window.__pauseStartRawMs = null;
+                                      }
+                                      if (window.__pausedCallbacks.length > 0) {
+                                          const queue = window.__pausedCallbacks.splice(0);
+                                          queue.forEach(fn => window.__rawRAF(fn));
+                                      }
                                   }
                               };
 
@@ -1637,7 +1760,8 @@ let
                                   if (window.__activeRangeSlider) {
                                       updateSliderAt(window.__activeRangeSlider, x);
                                   }
-                                  if (performance.now() - window.__lastTrustedMove < 24) return;
+                                  const nowRaw = window.__rawPerfNow ? window.__rawPerfNow() : performance.now();
+                                  if (nowRaw - window.__lastTrustedMove < 24) return;
                                   window.dispatchEvent(new MouseEvent("mousemove", {
                                       clientX: x,
                                       clientY: y,
@@ -1700,6 +1824,7 @@ let
                           })();
                       `);
                       root.pageReady = true;
+                      root.syncVirtualTimeMode();
                       root.evaluateSmartPause();
                       if (!root.isPaused && !inputBridge.systemSleeping && !inputBridge.screenLocked) {
                           root.verifyLiveRenderAndReveal();
@@ -1710,9 +1835,6 @@ let
               }
           }
 
-          // Continuity Static Screenshot Shield:
-          // ONLY activates when the GPU surface is uninitialized or at risk of purge (Boot, Hot-Reload, Screen Lock, Hibernate).
-          // During normal pauses (Power Save, Maximized window), opacity stays 0.0 so the live frozen WebGL canvas is shown directly!
           Image {
               id: snapshotPlaceholder
               anchors.fill: parent
@@ -1726,7 +1848,7 @@ let
 
               Behavior on opacity {
                   NumberAnimation {
-                      duration: 180
+                      duration: 160
                       easing.type: Easing.OutCubic
                   }
               }
@@ -1749,7 +1871,6 @@ let
 
               onScreenLockedChanged: {
                   if (inputBridge.screenLocked) {
-                      // Activate the static screenshot shield whenever the screen locks (DPMS / surface unmap protection)
                       root.surfacePurgeShieldActive = true;
                       root.evaluateSmartPause();
                   } else {
@@ -1780,6 +1901,7 @@ let
               onSnapshotSaved: {
                   if (root.isPaused) {
                       pauseFallbackTimer.stop();
+                      root.surfacePurgeShieldActive = true;
                       freezeDelayTimer.restart();
                   }
               }
